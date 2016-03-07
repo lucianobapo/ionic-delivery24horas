@@ -1,3 +1,3 @@
 App do site
 
-https://delivery.ilhanet.com
+http://ionic.delivery24horas.com
