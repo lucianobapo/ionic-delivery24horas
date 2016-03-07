@@ -1,6 +1,6 @@
 // Ionic Starter App
 
-var jsonApiUrl = 'http://api.delivery24horas.com';
+var jsonApiUrl = 'http://delivery.localhost.com';
 var imagesUrl = 'https://s3.amazonaws.com/delivery-images/images/';
 var logoUrl = 'https://s3.amazonaws.com/delivery-images/logo/';
 
