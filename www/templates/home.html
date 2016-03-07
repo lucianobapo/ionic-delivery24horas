@@ -1,34 +1,30 @@
 <ion-view view-title="delivery24horas.com" ng-controller="ProductsCtrl">
-    <div class="bar bar-subheader bar-stable item-input-inset">
-        <i class="icon ion-search placeholder-icon"></i>
-        <input type="search" placeholder="Busca de produtos" ng-model="query" style="width: 100%">
+    <div class="bar bar-subheader item-input-inset">
+      <label class="item-input-wrapper">
+        <i class="icon ion-ios-search placeholder-icon"></i>
+        <input type="search" placeholder="Busca de produtos" ng-model="query">
+      </label>
+      <button class="button button-clear" ng-click="query = ''">
+        Cancel
+      </button>
     </div>
-    <ion-content class="has-subheader padding">
+    <ion-content class="has-subheader">
         <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
-        <div class="row responsive-lg row-center">
-            <div class="col col-33 text-center">
-                <img ng-src="{{logoUrl+'logo-delivery.png'}}">
-            </div>
-            <div class="col col-33 padding">
-                <h3>Categoria: {{ rootCategoriaSelecionada }}</h3>
 
-                <p ng-hide="$exposeAside.active"><< Mais categorias no Menu</p>
-            </div>
+        <div class="list">
+
+          <div class="item item-divider">
+            {{ rootCategoriaSelecionada }}
+          </div>
+
+          <a class="item item-thumbnail-left" href="#" ng-repeat="produto in products | filter: query" ng-class="{deliveryProductBlockCenter: true}">
+            <img ng-src="{{ imagesUrl+produto.imagem }}" alt="Imagem do produto {{ produto.nome }}" title="Imagem do produto {{ produto.nome }}">
+            <h2> Cerveja</h2>
+            <p>{{ produto.nome }}</p>
+            <p>{{ produto.valorUnitVenda | currency }}</p>
+          </a>
+
         </div>
 
-        <div class="row delivery-product-list">
-            <div class="padding delivery-product-block text-center" ng-repeat="produto in products | filter: query"
-                 ng-class="{deliveryProductBlockCenter: true}">
-                <div class="thumbnail">
-                    <img ng-src="{{ imagesUrl+produto.imagem }}"
-                         alt="Imagem do produto {{ produto.nome }}" title="Imagem do produto {{ produto.nome }}">
-
-                    <div class="caption">
-                        <h4 class="">{{ produto.valorUnitVenda | currency }}</h4>
-                        <p>{{ produto.nome }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
     </ion-content>
 </ion-view>

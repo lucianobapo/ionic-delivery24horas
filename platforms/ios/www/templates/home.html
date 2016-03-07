@@ -1,0 +1,34 @@
+<ion-view view-title="delivery24horas.com" ng-controller="ProductsCtrl">
+    <div class="bar bar-subheader bar-stable item-input-inset">
+        <i class="icon ion-search placeholder-icon"></i>
+        <input type="search" placeholder="Busca de produtos" ng-model="query" style="width: 100%">
+    </div>
+    <ion-content class="has-subheader padding">
+        <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
+        <div class="row responsive-lg row-center">
+            <div class="col col-33 text-center">
+                <img ng-src="{{logoUrl+'logo-delivery.png'}}">
+            </div>
+            <div class="col col-33 padding">
+                <h3>Categoria: {{ rootCategoriaSelecionada }}</h3>
+
+                <p ng-hide="$exposeAside.active"><< Mais categorias no Menu</p>
+            </div>
+        </div>
+
+        <div class="row delivery-product-list">
+            <div class="padding delivery-product-block text-center" ng-repeat="produto in products | filter: query"
+                 ng-class="{deliveryProductBlockCenter: true}">
+                <div class="thumbnail">
+                    <img ng-src="{{ imagesUrl+produto.imagem }}"
+                         alt="Imagem do produto {{ produto.nome }}" title="Imagem do produto {{ produto.nome }}">
+
+                    <div class="caption">
+                        <h4 class="">{{ produto.valorUnitVenda | currency }}</h4>
+                        <p>{{ produto.nome }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ion-content>
+</ion-view>
