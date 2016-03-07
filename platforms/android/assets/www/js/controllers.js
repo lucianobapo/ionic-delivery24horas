@@ -1,5 +1,8 @@
 angular.module('starter.controllers', [])
     .controller('MainCtrl', function ($scope, $ionicSideMenuDelegate, $rootScope, Products, Categories) {
+        $rootScope.imagesUrl = imagesUrl;
+        $rootScope.logoUrl = logoUrl;
+
         $rootScope.$watch(
             function () {
                 return Products.productsCheck();

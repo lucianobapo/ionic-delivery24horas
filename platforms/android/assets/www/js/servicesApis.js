@@ -19,7 +19,7 @@ angular.module('starter.servicesApis', [])
 
     .factory('ProductsApi', function (jsonApi) {
         function get(param) {
-            return jsonApi.get('/json/produtosDelivery'+param);
+            return jsonApi.get('/json/produtosDelivery/'+param);
         }
         return {
             get: get
