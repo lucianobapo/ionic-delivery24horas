@@ -8,7 +8,12 @@
                 <button class="button button-icon button-clear ion-navicon" ng-click="toggleLeft()"
                         ng-hide="$exposeAside.active"></button>
             </ion-nav-buttons>
+
             <ion-nav-buttons side="right">
+                <button class="button button-positive btn-social btn-facebook">
+                    <i class="ion-social-facebook"></i>Acessar com Facebook
+                </button>
+
                 <button class="button button-clear">
                     <i class="ion-android-cart"></i> (Vazio)
                 </button>
@@ -20,11 +25,13 @@
 
     <ion-side-menu expose-aside-when="large">
         <ion-header-bar class="bar-stable">
-            <h1 class="title">Categorias</h1>
+            <h1 class="title">Menu</h1>
         </ion-header-bar>
         <ion-content ng-controller="CategoriesCtrl">
             <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
             <div class="list list-inset">
+                <div class="item item-divider">Categorias</div>
+
                 <a href="#/event/home" class="item item-icon-left"
                    menu-close ng-click="loadCategoria('Todas');loadProducts()">
                     <i class="icon ion-beer"></i>
@@ -35,6 +42,11 @@
                     <i class="{{ item.icon }}"></i>
                     {{ item.nome }}
                 </a>
+                <div class="item item-divider">Minha conta</div>
+                <div class="item">Meus Dados</div>
+                <div class="item">Trocar Senha</div>
+                <div class="item">Sair</div>
+
             </div>
         </ion-content>
     </ion-side-menu>

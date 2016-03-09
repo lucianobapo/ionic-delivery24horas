@@ -7,42 +7,71 @@ body {
     background-color: #fff;
 }
 
-.delivery-product-block {
-    float: left;
+.btn-social {
+    position: relative;
+    padding-left: 44px;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 185px;
+    display: block;
 }
-.delivery-product-block>.thumbnail {
-    display: inline-block;
-    width: 200px;
-    height: 280px;
+.btn-social > :first-child {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 32px;
+    line-height: 34px;
+    font-size: 1.6em;
+    text-align: center;
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+}
 
-    padding: 4px;
-    margin-bottom: 20px;
-    line-height: 1.42857143;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    transition: border .2s ease-in-out;
+.btn-facebook {
+    color: #ffffff;
+    background-color: #3b5998;
+    border-color: rgba(0, 0, 0, 0.2);
 }
+
 @media (max-width:360px){
-    .deliveryProductBlockCenter {
-        width: 320px;
+    /*.deliveryProductBlockCenter {*/
+        /*width: 320px;*/
+    /*}*/
+    .delivery-product-block {
+        display: none;
+    }
+    .delivery-product-list>div>img:first-child {
+        width: auto;
     }
 }
 
-.delivery-product-list {
-    display: block;
-}
+@media (min-width:361px){
+    .delivery-product-list {
+        display: none;
+    }
+    .delivery-product-block>.row {
+        display: block;
+    }
+    .delivery-product-block>.row>.padding {
+        float: left;
+    }
+    .delivery-product-block>.row>.padding>.thumbnail {
+        display: inline-block;
+        width: 200px;
+        height: 280px;
 
-.caption {
-    overflow: hidden;
+        padding: 4px;
+        margin-bottom: 20px;
+        line-height: 1.42857143;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        transition: border .2s ease-in-out;
+    }
+    .delivery-product-block>.row>.padding>.thumbnail>img:first-child {
+        max-width: 100%;
+        height: auto;
+    }
 }
-
-.caption h4 {
-    white-space: nowrap;
-}
-
-/*.ratings {*/
-    /*padding-right: 10px;*/
-    /*padding-left: 10px;*/
-    /*color: #d17581;*/
-/*}*/
