@@ -1,10 +1,15 @@
 /* Empty. Add your own CSS if you like */
 body {
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 14px;
     line-height: 1.42857143;
     color: #333;
     background-color: #fff;
+}
+
+.delivery-bar-title {
+    left: auto !important;
+    right: auto !important;
 }
 
 .btn-social {
@@ -16,7 +21,13 @@ body {
     text-overflow: ellipsis;
     width: 185px;
     display: block;
+
+    /* facebook */
+    color: #ffffff;
+    background-color: #3b5998;
+    border-color: rgba(0, 0, 0, 0.2);
 }
+
 .btn-social > :first-child {
     position: absolute;
     left: 0;
@@ -29,35 +40,66 @@ body {
     border-right: 1px solid rgba(0, 0, 0, 0.2);
 }
 
-.btn-facebook {
-    color: #ffffff;
-    background-color: #3b5998;
-    border-color: rgba(0, 0, 0, 0.2);
+.delivery-logo-block {
+    width: 100%;
+    text-align: center;
 }
 
-@media (max-width:360px){
+.delivery-logo-block > img {
+    width: 100px;
+}
+
+.delivery-list > div {
+    border-color: transparent;
+    padding: 5px;
+}
+
+@media (max-width: 360px) {
     /*.deliveryProductBlockCenter {*/
-        /*width: 320px;*/
+    /*width: 320px;*/
     /*}*/
     .delivery-product-block {
         display: none;
     }
-    .delivery-product-list>div>img:first-child {
+
+    .delivery-product-list > div > img:first-child {
         width: auto;
+    }
+
+    .delivery-btn-social-header {
+        display: none;
+    }
+
+    .delivery-btn-social-top {
+        font-weight: 400;
+        font-size: 13px !important;
+        line-height: 32px !important;
+        width: auto;
+    }
+
+    .delivery-list > div:first-child {
+        height: 50px;
     }
 }
 
-@media (min-width:361px){
+@media (min-width: 361px) {
+    .delivery-list > div:first-child {
+        display: none;
+    }
+
     .delivery-product-list {
         display: none;
     }
-    .delivery-product-block>.row {
+
+    .delivery-product-block > .row {
         display: block;
     }
-    .delivery-product-block>.row>.padding {
+
+    .delivery-product-block > .row > .padding {
         float: left;
     }
-    .delivery-product-block>.row>.padding>.thumbnail {
+
+    .delivery-product-block > .row > .padding > .thumbnail {
         display: inline-block;
         width: 200px;
         height: 280px;
@@ -70,7 +112,8 @@ body {
         border-radius: 4px;
         transition: border .2s ease-in-out;
     }
-    .delivery-product-block>.row>.padding>.thumbnail>img:first-child {
+
+    .delivery-product-block > .row > .padding > .thumbnail > img:first-child {
         max-width: 100%;
         height: auto;
     }

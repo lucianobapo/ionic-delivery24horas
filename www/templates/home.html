@@ -1,4 +1,4 @@
-<ion-view view-title="delivery24horas.com" ng-controller="ProductsCtrl">
+<ion-view view-title="" ng-controller="ProductsCtrl">
     <div class="bar bar-subheader item-input-inset">
         <label class="item-input-wrapper">
             <i class="icon ion-ios-search placeholder-icon"></i>
@@ -10,6 +10,22 @@
     </div>
     <ion-content class="has-subheader">
         <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
+
+        <div class="list delivery-list">
+
+            <div class="item item-button-right">
+                <button class="delivery-btn-social-top button button-positive btn-social">
+                    <i class="ion-social-facebook"></i>Login com Facebook
+                </button>
+            </div>
+            <div class="item">
+                <div class="delivery-logo-block">
+                    <img ng-src="{{logoUrl+'logo-delivery2-compressed.png'}}">
+                    <p ng-hide="$exposeAside.active"><span class="ion-arrow-left-a"></span> Acesse o Menu ao lado</p>
+                </div>
+            </div>
+
+        </div>
 
         <div class="card delivery-product-block">
             <div class="item item-divider">{{ rootCategoriaSelecionada }}</div>
