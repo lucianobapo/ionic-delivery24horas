@@ -6,3 +6,5 @@ platforms/
 keystore/
 plugins/
 .idea/
+
+/vendor/

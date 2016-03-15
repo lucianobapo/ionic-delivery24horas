@@ -1,7 +1,10 @@
 # Aplicativo Delivery 24 horas
 
 [Site do aplicativo](http://ionic.delivery24horas.com)
+
 [GitHub](https://github.com/lucianobapo/ionic-delivery24horas)
+
+[![Latest Stable Version](https://poser.pugx.org/phpunit/phpunit/version)](https://packagist.org/packages/phpunit/phpunit) [![Latest Unstable Version](https://poser.pugx.org/phpunit/phpunit/v/unstable)](//packagist.org/packages/phpunit/phpunit) [![Total Downloads](https://poser.pugx.org/phpunit/phpunit/downloads)](https://packagist.org/packages/phpunit/phpunit)
 
 ### Quick start
 There's only a few steps you have to do in order to run the application. It implies you have installed all necessary tools for building Ionic project (android/ios sdk, ionic, cordova, node, git ...) which is not covered in this topic. Also, you have to be in root project directory when executing the following commands.

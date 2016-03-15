@@ -1,0 +1,14 @@
+{
+    "name": "ilhanet/ionic-delivery24horas",
+    "description": "Aplicativo Ionic Delivery 24 Horas",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Luciano Porto",
+            "email": "luciano.bapo@gmail.com",
+            "homepage": "ionic.delivery24horas.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {}
+}
