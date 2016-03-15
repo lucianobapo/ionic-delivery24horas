@@ -2,7 +2,7 @@
 
 [Site do aplicativo](http://ionic.delivery24horas.com)
 
-[GitHub](https://github.com/lucianobapo/ionic-delivery24horas)
+[Site do GitHub](https://github.com/lucianobapo/ionic-delivery24horas)
 
 [![Latest Stable Version](https://poser.pugx.org/ilhanet/ionic-delivery24horas/v/stable)](https://packagist.org/packages/ilhanet/ionic-delivery24horas) 
 [![Total Downloads](https://poser.pugx.org/ilhanet/ionic-delivery24horas/downloads)](https://packagist.org/packages/ilhanet/ionic-delivery24horas) 
