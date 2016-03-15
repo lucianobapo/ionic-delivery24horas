@@ -23,15 +23,13 @@
         };
 
         $scope.loadItems = function () {
-            //$rootScope.loadCategories();
-            Api
-                .sendRequest({
-                    method: "GET",
-                    url: AppConfig.apiEndpoint + '/categorias'
-                })
-                .then(function(response){
-                    $scope.categorias = response.data;
-                });
+            Api.sendRequest({
+                method: "GET",
+                url: AppConfig.apiEndpoint + '/categorias'
+            })
+            .then(function(response){
+                $scope.categorias = response.data;
+            });
         };
 
         $scope.doRefresh = function () {

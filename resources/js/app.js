@@ -35,8 +35,9 @@
     appModule.config([
         '$stateProvider',
         '$urlRouterProvider',
+        '$httpProvider',
 
-        function ($stateProvider, $urlRouterProvider) {
+        function ($stateProvider, $urlRouterProvider, $httpProvider) {
             $stateProvider
                 .state('app', {
                     url: "/app",
@@ -75,40 +76,41 @@
                 ;
 
             $urlRouterProvider.otherwise('/app/productlist');
+
+            $httpProvider.interceptors.push('loadingMarker');
         }
     ]);
 
-    appModule.config(function($httpProvider) {
-        $httpProvider.interceptors.push(function($rootScope) {
-            return {
-                request: function(config) {
-                    $rootScope.$broadcast('loading:show');
-                    return config;
-                },
-                response: function(response) {
-                    $rootScope.$broadcast('loading:hide');
-                    return response;
-                }
-            }
-        });
+    appModule.service('loadingMarker', function($rootScope) {
+        var service = this;
+
+        service.request = function(config) {
+            $rootScope.$broadcast('loading:show');
+            return config;
+        };
+
+        service.response = function(response) {
+            $rootScope.$broadcast('loading:hide');
+            return response;
+        };
     });
 
-    appModule.run(function($rootScope, $ionicLoading) {
+    appModule.run([
+        '$ionicPlatform',
+        '$rootScope',
+        '$ionicLoading',
+        appMain
+    ]);
+
+    function appMain($ionicPlatform, $rootScope, $ionicLoading) {
         $rootScope.$on('loading:show', function() {
-            $ionicLoading.show({template: "<p>Carregando...</p><ion-spinner></ion-spinner>"});
+            $ionicLoading.show({template: '<p>Carregando...</p><ion-spinner></ion-spinner>'});
         });
 
         $rootScope.$on('loading:hide', function() {
             $ionicLoading.hide();
         });
-    });
 
-    appModule.run([
-        '$ionicPlatform',
-        appMain
-    ]);
-
-    function appMain($ionicPlatform) {
         $ionicPlatform.ready(function () {
             // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
             // for form inputs)

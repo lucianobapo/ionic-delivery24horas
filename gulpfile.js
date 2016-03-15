@@ -138,7 +138,7 @@ gulp.task('uglify', function() {
     if (argv.production) {
         console.log('uglify STARTED');
         return gulp.src(paths.jsBundleDest+'app.bundle.js')
-            .pipe(uglify())
+            //.pipe(uglify())
             .pipe(rename({suffix: '.min'}))
             .pipe(gulp.dest(paths.jsBundleDest))
             .on('end', function() {
