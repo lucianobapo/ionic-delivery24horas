@@ -2,6 +2,15 @@
   "name": "ionic-delivery24horas",
   "version": "1.1.1",
   "description": "ionic-delivery24horas: An Ionic project",
+  "author": {
+    "name": "Luciano Porto",
+    "email": "luciano.bapo@gmail.com",
+    "url": "http://ionic.delivery24horas.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lucianobapo/ionic-delivery24horas.git"
+  },
   "dependencies": {
     "copy": "^0.1.3",
     "gulp": "^3.5.6",
