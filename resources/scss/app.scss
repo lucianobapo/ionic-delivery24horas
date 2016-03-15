@@ -1,0 +1,142 @@
+/*
+To customize the look and feel of Ionic, you can override the variables
+in ionic's _variables.scss file.
+
+For example, you might change some of the default colors:
+
+$light:                           #fff !default;
+$stable:                          #f8f8f8 !default;
+$positive:                        #387ef5 !default;
+$calm:                            #11c1f3 !default;
+$balanced:                        #33cd5f !default;
+$energized:                       #ffc900 !default;
+$assertive:                       #ef473a !default;
+$royal:                           #886aea !default;
+$dark:                            #444 !default;
+*/
+
+// The path for our ionicons font files, relative to the built CSS in www/css
+$ionicons-font-path: "../fonts" !default;
+
+// Include all of Ionic
+@import "resources/lib/ionic/scss/ionic";
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #333;
+  background-color: #fff;
+}
+
+.delivery-bar-title {
+  left: auto !important;
+  right: auto !important;
+}
+
+.btn-social {
+  position: relative;
+  padding-left: 44px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 185px;
+  display: block;
+
+  /* facebook */
+  color: #ffffff;
+  background-color: #3b5998;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.btn-social > :first-child {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 32px;
+  line-height: 34px;
+  font-size: 1.6em;
+  text-align: center;
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.delivery-logo-block {
+  width: 100%;
+  text-align: center;
+}
+
+.delivery-logo-block > img {
+  width: 100px;
+}
+
+.delivery-list > div {
+  border-color: transparent;
+  padding: 5px;
+}
+
+@media (max-width: 360px) {
+  /*.deliveryProductBlockCenter {*/
+  /*width: 320px;*/
+  /*}*/
+  .delivery-product-block {
+    display: none;
+  }
+
+  .delivery-product-list > div > img:first-child {
+    width: auto;
+  }
+
+  .delivery-btn-social-header {
+    display: none;
+  }
+
+  .delivery-btn-social-top {
+    font-weight: 400;
+    font-size: 13px !important;
+    line-height: 32px !important;
+    width: auto;
+  }
+
+  .delivery-list > div:first-child {
+    height: 50px;
+  }
+}
+
+@media (min-width: 361px) {
+  .delivery-list > div:first-child {
+    display: none;
+  }
+
+  .delivery-product-list {
+    display: none;
+  }
+
+  .delivery-product-block > .row {
+    display: block;
+  }
+
+  .delivery-product-block > .row > .padding {
+    float: left;
+  }
+
+  .delivery-product-block > .row > .padding > .thumbnail {
+    display: inline-block;
+    width: 200px;
+    height: 280px;
+
+    padding: 4px;
+    margin-bottom: 20px;
+    line-height: 1.42857143;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: border .2s ease-in-out;
+  }
+
+  .delivery-product-block > .row > .padding > .thumbnail > img:first-child {
+    max-width: 100%;
+    height: auto;
+  }
+}
