@@ -13,7 +13,7 @@
                 </button>
 
                 <button class="button button-clear">
-                    <i class="ion-android-cart"></i> (Vazio)
+                    <i class="ion-android-cart"></i> ({{ valorTotal | currency }})
                 </button>
             </ion-nav-buttons>
         </ion-nav-bar>
@@ -29,15 +29,25 @@
             <div class="list list-inset">
                 <div class="item item-divider">Categorias</div>
 
-                <a href="#/event/home" class="item item-icon-left"
+                <a href="#/app/productlist" class="item item-icon-left"
                    menu-close ng-click="loadCategoria('Todas');loadProducts()">
                     <i class="icon ion-beer"></i>
                     Todas
                 </a>
-                <a ng-repeat="item in categorias" href="#/event/home" class="item item-icon-left"
+                <a ng-repeat="item in categorias" href="#/app/productlist" class="item item-icon-left"
                    menu-close ng-click="loadCategoria(item.nome);loadProducts(item.id)">
                     <i class="{{ item.icon }}"></i>
                     {{ item.nome }}
+                </a>
+
+                <div class="item item-divider">Relatórios</div>
+                <a href="#/app/report" class="item item-icon-left" menu-close>
+                    <i class="ion-document-text"></i>
+                    Relatórios
+                </a>
+                <a href="#/app/browse" class="item item-icon-left" menu-close>
+                    <i class="ion-document-text"></i>
+                    Browse
                 </a>
 
                 <div class="item item-divider">Minha conta</div>

@@ -18,6 +18,8 @@ var imagemin = require('gulp-image-optimization');
 var shell = require('gulp-shell');
 var argv = require('yargs').argv;
 
+//var watch = require('gulp-watch');
+
 var paths = {
     sass: ['./resources/scss/app.scss'],
     cssDest: './www/css/',
@@ -25,6 +27,15 @@ var paths = {
     templates: ['./resources/js/**/*.html', './resources/templates/**/*.html'],
     vendor: ['./resources/lib/ionic/js/ionic.bundle.js', './resources/lib/angular-locale-pt-br/angular-locale_pt-br.js'],
     js: ['./resources/js/app.js'],
+    toWatch: [
+        './resources/scss/app.scss',
+        './resources/build/index.html',
+        './resources/js/**/*.html',
+        './resources/templates/**/*.html',
+        './resources/js/app.js',
+        './resources/js/config.js',
+        './resources/js/*/*.js'
+    ],
     jsBundleDest: './www/js/bundles/'
 };
 
@@ -50,7 +61,22 @@ gulp.task('default', ['build-css', 'copy-fonts', 'preprocess-js', 'build-templat
  * **********************************************************************************/
 gulp.task('watch', function () {
     //gulp.watch(paths.sass, ['sass']);
-    gulp.watch([paths.sass, './resources/js/**/*.js', paths.html, paths.templates], ['build-css', 'preprocess-js', 'build-templatecache', 'build-js', 'build-html']);
+    gulp.watch([paths.toWatch],
+        ['build-css', 'build-templatecache', 'build-html', 'preprocess-js', 'build-js'])
+        .on('change', function(event) {
+            console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+        });
+
+    //watch(paths.toWatch, {emit: "all"}, function(stream) {
+    //    gulp.start('build-css');
+    //    gulp.start('build-templatecache');
+    //    gulp.start('build-html');
+    //    gulp.start('preprocess-js');
+    //    gulp.start('build-js');
+    //})
+    //    .on('change', function(file) {
+    //    console.log('File ' + file + ' was changed, running tasks...');
+    //});
 });
 
 /* **********************************************************************************
@@ -164,7 +190,8 @@ gulp.task('preprocess-js', function() {
     console.log('preprocess-js STARTED');
     gulp.src('./resources/js/config.js')
         .pipe(preprocess({context: {ENVIRONMENT: argv.production ? 'production' : 'development'}}))
-        .pipe(gulp.dest('./resources/js/common/'))
+        .pipe(rename({suffix: '-build'}))
+        .pipe(gulp.dest('./resources/js/'))
         .on('end', function() {
             console.log('preprocess-js DONE');
         });
@@ -173,11 +200,12 @@ gulp.task('preprocess-js', function() {
 /* **********************************************************************************
  * Cache all angular templates to reduce the number of http requests
  * **********************************************************************************/
-gulp.task('build-templatecache', function (done) {
+gulp.task('build-templatecache', function () {
     console.log('build-templatecache STARTED');
     gulp.src(paths.templates)
         .pipe(templateCache())
-        .pipe(gulp.dest('./resources/js/utility/'))
+        .pipe(rename({suffix: '-build'}))
+        .pipe(gulp.dest('./resources/js/'))
         .on('end', function() {
             console.log('build-templatecache DONE');
         });
@@ -310,29 +338,35 @@ gulp.task('build-prepare',[
 gulp.task('reinstall-plugins', function() {
     console.log('reinstalling ionic plugins...');
     var pluginlist = [
-        "com.ionic.keyboard",
-        "cordova-plugin-whitelist"
+        "cordova-plugin-device",
+        "cordova-plugin-console",
+        "cordova-plugin-whitelist",
+        "cordova-plugin-splashscreen",
+        "cordova-plugin-statusbar",
+        "ionic-plugin-keyboard",
+        "phonegap-facebook-plugin --variable APP_ID=\"1630647053816087\" --variable APP_NAME=\"Delivery24hs local\""
+        //{ plugin: "phonegap-facebook-plugin", args: ' --variable APP_ID="1630647053816087" --variable APP_NAME="Delivery24hs local"'}
     ];
 
     // no need to configure below
     var fs    = require('fs');
     var path  = require('path');
-    var sys   = require('sys')
     var exec  = require('child_process').exec;
 
     function puts(error, stdout, stderr) {
-        sys.puts(stdout)
+        console.log(stdout);
     }
 
     pluginlist.forEach(function(plug) {
-        exec("ionic plugin add " + plug, puts);
+        if ((typeof plug)=='string') exec("ionic plugin add " + plug, puts);
+        if ((typeof plug)=='object') exec("ionic plugin add " + plug.plugin+plug.args, puts);
     });
 });
 
 /* **********************************************************************************
  * Increase version number only if '--production' flag is set
  * **********************************************************************************/
-gulp.task('version-increase', function() {
+gulp.task('version-increase', ['project-version-increase'], function() {
     console.log(process.env.CORDOVA_CMDLINE);
     console.log(argv.production);
     if (process.env.CORDOVA_CMDLINE && process.env.CORDOVA_CMDLINE.indexOf('--production') > 0) {
@@ -357,4 +391,103 @@ gulp.task('version-increase', function() {
             console.log('version-increase DONE');
         });
     }
+});
+
+/* **********************************************************************************
+ * Increase version number only if '--production' flag is set
+ * **********************************************************************************/
+gulp.task('project-version-increase', function() {
+    console.log(process.env.CORDOVA_CMDLINE);
+    console.log(argv.production);
+    if (process.env.CORDOVA_CMDLINE && process.env.CORDOVA_CMDLINE.indexOf('--production') > 0) {
+    //if (argv.production) {
+        console.log('project-version-increase STARTED');
+        var fs = require('fs');
+        var file = "package.json";
+
+        fs.readFile(file, 'utf8', function (err, data) {
+            if (err) {
+                return console.log(err);
+            }
+
+            //var version = data.match(/(\"version\" [^"]* \"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i);
+            var version = data.match(/(\"version\"[^\"]* \"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i)[2];
+            //console.log(version);
+            console.log('current minor version number is ',version, " increasing it to ", parseInt(version)+1);
+            version++;
+
+            var result = data.replace(/(\"version\"[^\"]* \"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i, '$1' + version + '$3');
+            //console.log(result);
+
+            fs.writeFile(file, result, 'utf8', function (err) {
+                if (err) return console.log(err);
+            });
+
+            console.log('project-version-increase DONE');
+        });
+    }
+});
+
+/* **********************************************************************************
+ * This task is usually called from a hook to prepare files for facebook
+ * **********************************************************************************/
+gulp.task('facebook',[
+    'facebook-strings',
+    'facebook-manifest'
+], function() {
+    console.log('facebook DONE');
+});
+
+/* **********************************************************************************
+ * Insert facebook tag into string file
+ * **********************************************************************************/
+gulp.task('facebook-strings', function() {
+    //console.log(process.env.CORDOVA_CMDLINE);
+    //console.log(argv.production);
+
+    console.log('facebook-strings STARTED');
+    var fs = require('fs');
+
+    var file = "platforms/android/res/values/strings.xml";
+    var facebook = '<string name="fb_app_id">1630647053816087</string>';
+
+    fs.readFile(file, 'utf8', function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
+        //var version = data.match(/(<widget [^>]* version=\"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i)[2];
+        var search = data.match(/(<string name=\"facebook_app_id\">)([0-9]+)/i);
+        if (search===null) {
+            //var result = data.replace(/(<widget [^>]* version=\"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i, '$1' + version + '$3');
+            var result = data.replace(/(<resources>)([^<]*)/i, '$1'+ '$2' + facebook + '$2');
+            fs.writeFile(file, result, 'utf8', function (err) {
+                if (err) return console.log(err);
+            });
+        } else console.log('facebook-strings already configured');
+        console.log('facebook-strings DONE');
+    });
+});
+
+/* **********************************************************************************
+ * Insert facebook tag into manifest file
+ * **********************************************************************************/
+gulp.task('facebook-manifest', function() {
+    console.log('facebook-manifest STARTED');
+    var fs = require('fs');
+    var file = "platforms/android/AndroidManifest.xml";
+    var facebook = '<meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id"/>';
+    fs.readFile(file, 'utf8', function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
+        var search = data.match(/(<meta-data android:name=\"com.facebook.sdk.ApplicationId\")/i);
+        //console.log(search);
+        if (search===null) {
+            var result = data.replace(/(<application [^>]* android:label=\"\@string\/app_name\"[^>]*>)([^<]*)/i, '$1'+ '$2' + facebook + '$2');
+            fs.writeFile(file, result, 'utf8', function (err) {
+                if (err) return console.log(err);
+            });
+        } else console.log('facebook-manifest already configured');
+        console.log('facebook-manifest DONE');
+    });
 });

@@ -8,15 +8,19 @@
     angular.module('App.Api', []);
     //angular.module('App.Playlist', []);
     angular.module('App.ProductList', []);
+    angular.module('App.Report', []);
     angular.module('templates', []);
 
-    require('./common/config');
+    //require('./common/config');
+    require('./config-build');
     require('./utility/helpers');
     require('./utility/api');
     require('./common/common');
     //require('./playlist/playlist');
     require('./productlist/productlist');
-    require('./utility/templates');
+    require('./report/report');
+    //require('./utility/templates');
+    require('./templates-build');
 
     var appModule = angular.module('App', [
 
@@ -30,6 +34,7 @@
         'App.Api',
         //'App.Playlist',
         'App.ProductList',
+        'App.Report',
         'templates'
     ]);
 
@@ -56,14 +61,34 @@
                 //    }
                 //})
 
-                //.state('app.browse', {
-                //    url: '/browse',
-                //    views: {
-                //        'menuContent': {
-                //            templateUrl: 'browse.html'
-                //        }
-                //    }
-                //})
+                .state('app.browse', {
+                    url: '/browse',
+                    views: {
+                        'menuContent': {
+                            templateUrl: 'browse.html'
+                        }
+                    }
+                })
+
+                .state('app.report', {
+                    url: '/report',
+                    views: {
+                        'menuContent': {
+                            templateUrl: 'report/templates/report.html',
+                            controller: 'ReportCtrl'
+                        }
+                    }
+                })
+
+                .state('app.reportperiod', {
+                    url: '/report/:period',
+                    views: {
+                        'menuContent': {
+                            templateUrl: 'report/templates/report.html',
+                            controller: 'ReportCtrl'
+                        }
+                    }
+                })
 
                 .state('app.productlist', {
                     url: '/productlist',
@@ -77,6 +102,7 @@
                 ;
 
             $urlRouterProvider.otherwise('/app/productlist');
+            //$urlRouterProvider.otherwise('/app/report');
 
             $httpProvider.interceptors.push('loadingMarker');
         }
@@ -128,7 +154,7 @@
 
     module.exports = appModule;
 })();
-},{"./common/common":2,"./common/config":3,"./productlist/productlist":4,"./utility/api":5,"./utility/helpers":6,"./utility/templates":7}],2:[function(require,module,exports){
+},{"./common/common":2,"./config-build":3,"./productlist/productlist":4,"./report/report":5,"./templates-build":6,"./utility/api":7,"./utility/helpers":8}],2:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -142,11 +168,25 @@
         //'$state',
         'AppConfig',
         'Api',
+        '$window',
         //'Helpers',
         commonCtrl
     ]);
 
-    function commonCtrl($scope, $rootScope, $ionicModal, $timeout, /*$state, */AppConfig, Api/*, Helpers*/) {
+    function commonCtrl($scope, $rootScope, $ionicModal, $timeout, /*$state, */AppConfig, Api, $window/*, Helpers*/) {
+
+        $rootScope.$watch(function(){
+            return $window.innerWidth;
+        }, function(value) {
+            //console.log(value);
+            if (value<=425) {
+                $rootScope.handhelds = true;
+                $rootScope.minMediumScreens = false;
+            } else {
+                $rootScope.handhelds = false;
+                $rootScope.minMediumScreens = true;
+            }
+        });
 
         $rootScope.rootCategoriaSelecionada = 'Todas';
         $rootScope.loadCategoria = function ($nome) {
@@ -159,7 +199,7 @@
                 url: AppConfig.apiEndpoint + '/categorias'
             })
             .then(function(response){
-                $scope.categorias = response.data;
+                $scope.categorias = response.data.data;
             });
         };
 
@@ -212,6 +252,7 @@
 (function () {
     'use strict';
 
+
     /* ***************************************************************************
      * ### Project common configuration ###
      *
@@ -251,15 +292,61 @@
         $scope.logoUrl = AppConfig.logoUrl;
         $scope.imagesUrl = AppConfig.imagesUrl;
 
+        $scope.quantidade = [];
+        $scope.valor = [];
+        $rootScope.valorTotal = 0;
+        $scope.products = [];
+
+
+        $scope.incrementa = function (id) {
+            var max = document.getElementById('quantidade['+id+']').attributes['max'].value;
+            if ($scope.quantidade[id] < max) {
+                $scope.quantidade[id]++;
+                $scope.somaTotal();
+            }
+
+        };
+        $scope.decrementa = function (id) {
+            var min = document.getElementById('quantidade['+id+']').attributes['min'].value;
+            if ($scope.quantidade[id] > min) {
+                $scope.quantidade[id]--;
+                $scope.somaTotal();
+            }
+        };
+
+        $scope.somaTotal = function () {
+            $rootScope.valorTotal = 0;
+            $scope.quantidade.forEach(function(valor, chave) {
+                //console.log($scope.valor[chave]);
+                if ($scope.quantidade[chave]>0)
+                    $rootScope.valorTotal = $scope.valorTotal + ($scope.valor[chave]*$scope.quantidade[chave]);
+            });
+        };
+
+        $scope.$watch(function(){
+            return $scope.products;
+        }, function(value) {
+            if ($scope.quantidade.length == 0 && $scope.products.length > 0){
+                $scope.products.forEach(function(item) {
+                    $scope.quantidade[item.id] = 0;
+                    $scope.valor[item.id] = item.valor;
+                });
+            }
+        });
+
         $rootScope.loadProducts = function (idCategory) {
             //$rootScope.loadProducts(idCategory);
-            Api
+
+                Api
                 .sendRequest({
                     method: "GET",
                     url: AppConfig.apiEndpoint + '/produtosDelivery/'+idCategory
                 })
                 .then(function(response){
-                    $scope.products = response.data;
+                    $scope.products = response.data.data;
+
+                    //console.log($scope.quant);
+                    //$scope.products = aux;
                 });
         };
 
@@ -269,11 +356,67 @@
             $scope.$apply();
         };
         $rootScope.loadProducts();
+
+        $scope.prepareImage = function (img) {
+            if (img==null) return 'http://placehold.it/80x80';
+            return AppConfig.imagesUrl+img;
+        };
     }
 
     module.exports = productListModule;
 })();
 },{}],5:[function(require,module,exports){
+(function () {
+    'use strict';
+
+    var reportModule = angular.module('App.Report');
+
+    reportModule
+        .controller('ReportCtrl', [
+            '$scope',
+            '$rootScope',
+            '$stateParams',
+            'AppConfig',
+            'Api',
+            reportCtrl
+        ]);
+
+    function reportCtrl($scope, $rootScope, $stateParams, AppConfig, Api) {
+        console.debug('Report Controller: ', $scope.commonArray);
+
+        //console.log($stateParams);
+        //$scope.titulo = $routeParams;
+
+        $rootScope.loadReport = function () {
+            Api
+                .sendRequest({
+                    method: "GET",
+                    url: AppConfig.apiEndpoint + '/relatorios'
+                })
+                .then(function(response){
+                    $scope.report = response.data.data;
+                    console.log(response.data.data);
+                });
+        };
+
+        $scope.doRefresh = function () {
+            $rootScope.loadReport();
+            $scope.$broadcast('scroll.refreshComplete');
+            $scope.$apply();
+        };
+        $rootScope.loadReport();
+    }
+    module.exports = reportModule;
+})();
+},{}],6:[function(require,module,exports){
+angular.module("templates").run(["$templateCache", function($templateCache) {$templateCache.put("common/templates/menu.html","<ion-side-menus enable-menu-with-back-views=\"false\">\n    <ion-side-menu-content>\n        <ion-nav-bar class=\"bar-stable\">\n            <ion-nav-back-button></ion-nav-back-button>\n            <ion-nav-buttons side=\"left\">\n                <button class=\"button button-icon button-clear ion-navicon\" menu-toggle=\"left\"\n                        ng-hide=\"$exposeAside.active\"></button>\n                <div class=\"delivery-bar-title title\">delivery24horas.com</div>\n            </ion-nav-buttons>\n            <ion-nav-buttons side=\"right\">\n                <button class=\"delivery-btn-social-header button button-positive btn-social\">\n                    <i class=\"ion-social-facebook\"></i>Login com Facebook\n                </button>\n\n                <button class=\"button button-clear\">\n                    <i class=\"ion-android-cart\"></i> ({{ valorTotal | currency }})\n                </button>\n            </ion-nav-buttons>\n        </ion-nav-bar>\n        <ion-nav-view name=\"menuContent\"></ion-nav-view>\n    </ion-side-menu-content>\n\n    <ion-side-menu expose-aside-when=\"large\">\n        <ion-header-bar class=\"bar-stable\">\n            <h1 class=\"title\">Menu</h1>\n        </ion-header-bar>\n        <ion-content>\n            <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n            <div class=\"list list-inset\">\n                <div class=\"item item-divider\">Categorias</div>\n\n                <a href=\"#/app/productlist\" class=\"item item-icon-left\"\n                   menu-close ng-click=\"loadCategoria(\'Todas\');loadProducts()\">\n                    <i class=\"icon ion-beer\"></i>\n                    Todas\n                </a>\n                <a ng-repeat=\"item in categorias\" href=\"#/app/productlist\" class=\"item item-icon-left\"\n                   menu-close ng-click=\"loadCategoria(item.nome);loadProducts(item.id)\">\n                    <i class=\"{{ item.icon }}\"></i>\n                    {{ item.nome }}\n                </a>\n\n                <div class=\"item item-divider\">Relatórios</div>\n                <a href=\"#/app/report\" class=\"item item-icon-left\" menu-close>\n                    <i class=\"ion-document-text\"></i>\n                    Relatórios\n                </a>\n                <a href=\"#/app/browse\" class=\"item item-icon-left\" menu-close>\n                    <i class=\"ion-document-text\"></i>\n                    Browse\n                </a>\n\n                <div class=\"item item-divider\">Minha conta</div>\n                <div class=\"item\">Meus Dados</div>\n                <div class=\"item\">Trocar Senha</div>\n                <div class=\"item\">Sair</div>\n\n            </div>\n        </ion-content>\n    </ion-side-menu>\n</ion-side-menus>");
+$templateCache.put("productlist/templates/productlist.html","<ion-view view-title=\"\">\n    <div class=\"bar bar-subheader item-input-inset\">\n        <label class=\"item-input-wrapper\">\n            <i class=\"icon ion-ios-search placeholder-icon\"></i>\n            <input type=\"search\" placeholder=\"Busca de produtos\" ng-model=\"query\">\n        </label>\n        <button class=\"button button-clear\" ng-click=\"query = \'\'\">\n            Cancelar\n        </button>\n    </div>\n    <ion-content class=\"has-subheader\">\n        <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n\n        <div class=\"list delivery-list\">\n\n            <div class=\"item item-button-right delivery-btn-social\">\n                <button class=\"button button-positive btn-social\">\n                    <i class=\"ion-social-facebook\"></i>Login com Facebook\n                </button>\n            </div>\n            <div class=\"item\">\n                <div class=\"delivery-logo-block\">\n                    <img ng-src=\"{{logoUrl+\'logo-delivery2-compressed.png\'}}\">\n                    <p ng-hide=\"$exposeAside.active\"><span class=\"ion-arrow-left-a\"></span> Acesse o Menu ao lado</p>\n                </div>\n            </div>\n\n        </div>\n\n        <div ng-class=\"{card: minMediumScreens, list: handhelds, \'list-inset\': handhelds}\">\n            <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n            <div class=\"delivery-product-item\" ng-class=\"{item: handhelds, \'item-thumbnail-left\': handhelds}\" ng-repeat=\"produto in products | filter: query\">\n\n                <img ng-src=\"{{ prepareImage(produto.imagem) }}\"\n                     alt=\"Imagem do produto {{ produto.nome }}\"\n                     title=\"Imagem do produto {{ produto.nome }}\">\n                <div>\n                    <h3>{{ produto.valor | currency }}<small ng-show=\"quantidade[produto.id]>0\"> x <span>{{ quantidade[produto.id] }}</span></small></h3>\n                    <p>{{ produto.nome }}</p>\n                </div>\n\n                <div class=\"range\">\n                    <button ng-click=\"decrementa(produto.id)\" class=\"button button-light\"><i class=\"icon ion-chevron-left\"></i></button>\n                    <input type=\"range\" ng-change=\"somaTotal()\" id=\"quantidade[{{ produto.id }}]\"\n                           name=\"quantidade[{{ produto.id }}]\" ng-model=\"quantidade[produto.id]\"\n                           min=\"0\" max=\"{{ produto.max }}\">\n                    <button ng-click=\"incrementa(produto.id)\" class=\"button button-light\"><i class=\"icon ion-chevron-right\"></i></button>\n                </div>\n            </div>\n        </div>\n    </ion-content>\n</ion-view>");
+$templateCache.put("report/templates/report.html","<ion-view view-title=\"Relatórios\">\n    <ion-content class=\"padding\">\n        <h1>{{ titulo }}</h1>\n        <p>\n            <a class=\"button icon icon-right ion-chevron-right\" href=\"#/app/report\">titulo</a>\n        </p>\n    </ion-content>\n</ion-view>");
+$templateCache.put("browse.html","<ion-view view-title=\"Browse\">\n  <ion-content>\n    <h1>Browse</h1>\n  </ion-content>\n</ion-view>\n");
+$templateCache.put("home.html","<ion-view view-title=\"\" ng-controller=\"ProductsCtrl\">\n    <div class=\"bar bar-subheader item-input-inset\">\n        <label class=\"item-input-wrapper\">\n            <i class=\"icon ion-ios-search placeholder-icon\"></i>\n            <input type=\"search\" placeholder=\"Busca de produtos\" ng-model=\"query\">\n        </label>\n        <button class=\"button button-clear\" ng-click=\"query = \'\'\">\n            Cancelar\n        </button>\n    </div>\n    <ion-content class=\"has-subheader\">\n        <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n\n        <div class=\"list delivery-list\">\n\n            <div class=\"item item-button-right\">\n                <button class=\"delivery-btn-social-top button button-positive btn-social\">\n                    <i class=\"ion-social-facebook\"></i>Login com Facebook\n                </button>\n            </div>\n            <div class=\"item\">\n                <div class=\"delivery-logo-block\">\n                    <img ng-src=\"{{logoUrl+\'logo-delivery2-compressed.png\'}}\">\n                    <p ng-hide=\"$exposeAside.active\"><span class=\"ion-arrow-left-a\"></span> Acesse o Menu ao lado</p>\n                </div>\n            </div>\n\n        </div>\n\n        <div class=\"card delivery-product-block\">\n            <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n            <div class=\"row\">\n                <div class=\"padding text-center\" ng-repeat=\"produto in products | filter: query\">\n                    <div class=\"thumbnail\">\n                        <img ng-src=\"{{ imagesUrl+produto.imagem }}\"\n                             alt=\"Imagem do produto {{ produto.nome }}\"\n                             title=\"Imagem do produto {{ produto.nome }}\">\n                        <h4 class=\"\">{{ produto.valorUnitVenda | currency }}</h4>\n                        <p>{{ produto.nome }}</p>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"list list-inset delivery-product-list\">\n\n            <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n\n            <div class=\"item item-thumbnail-left\" ng-repeat=\"produto in products | filter: query\">\n                <img ng-src=\"{{ imagesUrl+produto.imagem }}\"\n                     alt=\"Imagem do produto {{ produto.nome }}\"\n                     title=\"Imagem do produto {{ produto.nome }}\">\n                <h2>{{ produto.nome }}</h2>\n                <p>{{ produto.valorUnitVenda | currency }}</p>\n            </div>\n\n        </div>\n\n    </ion-content>\n</ion-view>");
+$templateCache.put("login.html","<ion-modal-view>\n  <ion-header-bar>\n    <h1 class=\"title\">Login</h1>\n    <div class=\"buttons\">\n      <button class=\"button button-clear\" ng-click=\"closeLogin()\">Close</button>\n    </div>\n  </ion-header-bar>\n  <ion-content>\n    <form ng-submit=\"doLogin()\">\n      <div class=\"list\">\n        <label class=\"item item-input\">\n          <span class=\"input-label\">Username</span>\n          <input type=\"text\" ng-model=\"loginData.username\">\n        </label>\n        <label class=\"item item-input\">\n          <span class=\"input-label\">Password</span>\n          <input type=\"password\" ng-model=\"loginData.password\">\n        </label>\n        <label class=\"item\">\n          <button class=\"button button-block button-positive\" type=\"submit\">Log in</button>\n        </label>\n      </div>\n    </form>\n  </ion-content>\n</ion-modal-view>\n");
+$templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-content>\n    <h1>Search</h1>\n  </ion-content>\n</ion-view>\n");}]);
+},{}],7:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -341,9 +484,10 @@
 
     module.exports = apiModule;
 })();
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function () {
     'use strict';
+
 
     /* ***************************************************************************
      * ### Helper module ###
@@ -409,11 +553,4 @@
 
     module.exports = helperModule;
 })();
-},{}],7:[function(require,module,exports){
-angular.module("templates").run(["$templateCache", function($templateCache) {$templateCache.put("common/templates/menu.html","<ion-side-menus enable-menu-with-back-views=\"false\">\n    <ion-side-menu-content>\n        <ion-nav-bar class=\"bar-stable\">\n            <ion-nav-back-button></ion-nav-back-button>\n            <ion-nav-buttons side=\"left\">\n                <button class=\"button button-icon button-clear ion-navicon\" menu-toggle=\"left\"\n                        ng-hide=\"$exposeAside.active\"></button>\n                <div class=\"delivery-bar-title title\">delivery24horas.com</div>\n            </ion-nav-buttons>\n            <ion-nav-buttons side=\"right\">\n                <button class=\"delivery-btn-social-header button button-positive btn-social\">\n                    <i class=\"ion-social-facebook\"></i>Login com Facebook\n                </button>\n\n                <button class=\"button button-clear\">\n                    <i class=\"ion-android-cart\"></i> (Vazio)\n                </button>\n            </ion-nav-buttons>\n        </ion-nav-bar>\n        <ion-nav-view name=\"menuContent\"></ion-nav-view>\n    </ion-side-menu-content>\n\n    <ion-side-menu expose-aside-when=\"large\">\n        <ion-header-bar class=\"bar-stable\">\n            <h1 class=\"title\">Menu</h1>\n        </ion-header-bar>\n        <ion-content>\n            <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n            <div class=\"list list-inset\">\n                <div class=\"item item-divider\">Categorias</div>\n\n                <a href=\"#/event/home\" class=\"item item-icon-left\"\n                   menu-close ng-click=\"loadCategoria(\'Todas\');loadProducts()\">\n                    <i class=\"icon ion-beer\"></i>\n                    Todas\n                </a>\n                <a ng-repeat=\"item in categorias\" href=\"#/event/home\" class=\"item item-icon-left\"\n                   menu-close ng-click=\"loadCategoria(item.nome);loadProducts(item.id)\">\n                    <i class=\"{{ item.icon }}\"></i>\n                    {{ item.nome }}\n                </a>\n\n                <div class=\"item item-divider\">Minha conta</div>\n                <div class=\"item\">Meus Dados</div>\n                <div class=\"item\">Trocar Senha</div>\n                <div class=\"item\">Sair</div>\n\n            </div>\n        </ion-content>\n    </ion-side-menu>\n</ion-side-menus>");
-$templateCache.put("productlist/templates/productlist.html","<ion-view view-title=\"\">\n    <div class=\"bar bar-subheader item-input-inset\">\n        <label class=\"item-input-wrapper\">\n            <i class=\"icon ion-ios-search placeholder-icon\"></i>\n            <input type=\"search\" placeholder=\"Busca de produtos\" ng-model=\"query\">\n        </label>\n        <button class=\"button button-clear\" ng-click=\"query = \'\'\">\n            Cancelar\n        </button>\n    </div>\n    <ion-content class=\"has-subheader\">\n        <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n\n        <div class=\"list delivery-list\">\n\n            <div class=\"item item-button-right\">\n                <button class=\"delivery-btn-social-top button button-positive btn-social\">\n                    <i class=\"ion-social-facebook\"></i>Login com Facebook\n                </button>\n            </div>\n            <div class=\"item\">\n                <div class=\"delivery-logo-block\">\n                    <img ng-src=\"{{logoUrl+\'logo-delivery2-compressed.png\'}}\">\n                    <p ng-hide=\"$exposeAside.active\"><span class=\"ion-arrow-left-a\"></span> Acesse o Menu ao lado</p>\n                </div>\n            </div>\n\n        </div>\n\n        <div class=\"card delivery-product-block\">\n            <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n            <div class=\"row\">\n                <div class=\"padding text-center\" ng-repeat=\"produto in products | filter: query\">\n                    <div class=\"thumbnail\">\n                        <img ng-src=\"{{ imagesUrl+produto.imagem }}\"\n                             alt=\"Imagem do produto {{ produto.nome }}\"\n                             title=\"Imagem do produto {{ produto.nome }}\">\n                        <h4 class=\"\">{{ produto.valorUnitVenda | currency }}</h4>\n                        <p>{{ produto.nome }}</p>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"list list-inset delivery-product-list\">\n\n            <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n\n            <div class=\"item item-thumbnail-left\" ng-repeat=\"produto in products | filter: query\">\n                <img ng-src=\"{{ imagesUrl+produto.imagem }}\"\n                     alt=\"Imagem do produto {{ produto.nome }}\"\n                     title=\"Imagem do produto {{ produto.nome }}\">\n                <h2>{{ produto.nome }}</h2>\n                <p>{{ produto.valorUnitVenda | currency }}</p>\n            </div>\n\n        </div>\n    </ion-content>\n</ion-view>");
-$templateCache.put("browse.html","<ion-view view-title=\"Browse\">\n  <ion-content>\n    <h1>Browse</h1>\n  </ion-content>\n</ion-view>\n");
-$templateCache.put("home.html","<ion-view view-title=\"\" ng-controller=\"ProductsCtrl\">\n    <div class=\"bar bar-subheader item-input-inset\">\n        <label class=\"item-input-wrapper\">\n            <i class=\"icon ion-ios-search placeholder-icon\"></i>\n            <input type=\"search\" placeholder=\"Busca de produtos\" ng-model=\"query\">\n        </label>\n        <button class=\"button button-clear\" ng-click=\"query = \'\'\">\n            Cancelar\n        </button>\n    </div>\n    <ion-content class=\"has-subheader\">\n        <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n\n        <div class=\"list delivery-list\">\n\n            <div class=\"item item-button-right\">\n                <button class=\"delivery-btn-social-top button button-positive btn-social\">\n                    <i class=\"ion-social-facebook\"></i>Login com Facebook\n                </button>\n            </div>\n            <div class=\"item\">\n                <div class=\"delivery-logo-block\">\n                    <img ng-src=\"{{logoUrl+\'logo-delivery2-compressed.png\'}}\">\n                    <p ng-hide=\"$exposeAside.active\"><span class=\"ion-arrow-left-a\"></span> Acesse o Menu ao lado</p>\n                </div>\n            </div>\n\n        </div>\n\n        <div class=\"card delivery-product-block\">\n            <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n            <div class=\"row\">\n                <div class=\"padding text-center\" ng-repeat=\"produto in products | filter: query\">\n                    <div class=\"thumbnail\">\n                        <img ng-src=\"{{ imagesUrl+produto.imagem }}\"\n                             alt=\"Imagem do produto {{ produto.nome }}\"\n                             title=\"Imagem do produto {{ produto.nome }}\">\n                        <h4 class=\"\">{{ produto.valorUnitVenda | currency }}</h4>\n                        <p>{{ produto.nome }}</p>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"list list-inset delivery-product-list\">\n\n            <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n\n            <div class=\"item item-thumbnail-left\" ng-repeat=\"produto in products | filter: query\">\n                <img ng-src=\"{{ imagesUrl+produto.imagem }}\"\n                     alt=\"Imagem do produto {{ produto.nome }}\"\n                     title=\"Imagem do produto {{ produto.nome }}\">\n                <h2>{{ produto.nome }}</h2>\n                <p>{{ produto.valorUnitVenda | currency }}</p>\n            </div>\n\n        </div>\n\n    </ion-content>\n</ion-view>");
-$templateCache.put("login.html","<ion-modal-view>\n  <ion-header-bar>\n    <h1 class=\"title\">Login</h1>\n    <div class=\"buttons\">\n      <button class=\"button button-clear\" ng-click=\"closeLogin()\">Close</button>\n    </div>\n  </ion-header-bar>\n  <ion-content>\n    <form ng-submit=\"doLogin()\">\n      <div class=\"list\">\n        <label class=\"item item-input\">\n          <span class=\"input-label\">Username</span>\n          <input type=\"text\" ng-model=\"loginData.username\">\n        </label>\n        <label class=\"item item-input\">\n          <span class=\"input-label\">Password</span>\n          <input type=\"password\" ng-model=\"loginData.password\">\n        </label>\n        <label class=\"item\">\n          <button class=\"button button-block button-positive\" type=\"submit\">Log in</button>\n        </label>\n      </div>\n    </form>\n  </ion-content>\n</ion-modal-view>\n");
-$templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-content>\n    <h1>Search</h1>\n  </ion-content>\n</ion-view>\n");}]);
 },{}]},{},[1]);

@@ -7,15 +7,19 @@
     angular.module('App.Api', []);
     //angular.module('App.Playlist', []);
     angular.module('App.ProductList', []);
+    angular.module('App.Report', []);
     angular.module('templates', []);
 
-    require('./common/config');
+    //require('./common/config');
+    require('./config-build');
     require('./utility/helpers');
     require('./utility/api');
     require('./common/common');
     //require('./playlist/playlist');
     require('./productlist/productlist');
-    require('./utility/templates');
+    require('./report/report');
+    //require('./utility/templates');
+    require('./templates-build');
 
     var appModule = angular.module('App', [
 
@@ -29,6 +33,7 @@
         'App.Api',
         //'App.Playlist',
         'App.ProductList',
+        'App.Report',
         'templates'
     ]);
 
@@ -55,14 +60,34 @@
                 //    }
                 //})
 
-                //.state('app.browse', {
-                //    url: '/browse',
-                //    views: {
-                //        'menuContent': {
-                //            templateUrl: 'browse.html'
-                //        }
-                //    }
-                //})
+                .state('app.browse', {
+                    url: '/browse',
+                    views: {
+                        'menuContent': {
+                            templateUrl: 'browse.html'
+                        }
+                    }
+                })
+
+                .state('app.report', {
+                    url: '/report',
+                    views: {
+                        'menuContent': {
+                            templateUrl: 'report/templates/report.html',
+                            controller: 'ReportCtrl'
+                        }
+                    }
+                })
+
+                .state('app.reportperiod', {
+                    url: '/report/:period',
+                    views: {
+                        'menuContent': {
+                            templateUrl: 'report/templates/report.html',
+                            controller: 'ReportCtrl'
+                        }
+                    }
+                })
 
                 .state('app.productlist', {
                     url: '/productlist',
@@ -76,6 +101,7 @@
                 ;
 
             $urlRouterProvider.otherwise('/app/productlist');
+            //$urlRouterProvider.otherwise('/app/report');
 
             $httpProvider.interceptors.push('loadingMarker');
         }

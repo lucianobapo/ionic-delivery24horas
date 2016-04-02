@@ -11,11 +11,25 @@
         //'$state',
         'AppConfig',
         'Api',
+        '$window',
         //'Helpers',
         commonCtrl
     ]);
 
-    function commonCtrl($scope, $rootScope, $ionicModal, $timeout, /*$state, */AppConfig, Api/*, Helpers*/) {
+    function commonCtrl($scope, $rootScope, $ionicModal, $timeout, /*$state, */AppConfig, Api, $window/*, Helpers*/) {
+
+        $rootScope.$watch(function(){
+            return $window.innerWidth;
+        }, function(value) {
+            //console.log(value);
+            if (value<=425) {
+                $rootScope.handhelds = true;
+                $rootScope.minMediumScreens = false;
+            } else {
+                $rootScope.handhelds = false;
+                $rootScope.minMediumScreens = true;
+            }
+        });
 
         $rootScope.rootCategoriaSelecionada = 'Todas';
         $rootScope.loadCategoria = function ($nome) {
@@ -28,7 +42,7 @@
                 url: AppConfig.apiEndpoint + '/categorias'
             })
             .then(function(response){
-                $scope.categorias = response.data;
+                $scope.categorias = response.data.data;
             });
         };
 

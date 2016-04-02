@@ -13,8 +13,8 @@
 
         <div class="list delivery-list">
 
-            <div class="item item-button-right">
-                <button class="delivery-btn-social-top button button-positive btn-social">
+            <div class="item item-button-right delivery-btn-social">
+                <button class="button button-positive btn-social">
                     <i class="ion-social-facebook"></i>Login com Facebook
                 </button>
             </div>
@@ -27,33 +27,26 @@
 
         </div>
 
-        <div class="card delivery-product-block">
+        <div ng-class="{card: minMediumScreens, list: handhelds, 'list-inset': handhelds}">
             <div class="item item-divider">{{ rootCategoriaSelecionada }}</div>
-            <div class="row">
-                <div class="padding text-center" ng-repeat="produto in products | filter: query">
-                    <div class="thumbnail">
-                        <img ng-src="{{ imagesUrl+produto.imagem }}"
-                             alt="Imagem do produto {{ produto.nome }}"
-                             title="Imagem do produto {{ produto.nome }}">
-                        <h4 class="">{{ produto.valorUnitVenda | currency }}</h4>
-                        <p>{{ produto.nome }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <div class="delivery-product-item" ng-class="{item: handhelds, 'item-thumbnail-left': handhelds}" ng-repeat="produto in products | filter: query">
 
-        <div class="list list-inset delivery-product-list">
-
-            <div class="item item-divider">{{ rootCategoriaSelecionada }}</div>
-
-            <div class="item item-thumbnail-left" ng-repeat="produto in products | filter: query">
-                <img ng-src="{{ imagesUrl+produto.imagem }}"
+                <img ng-src="{{ prepareImage(produto.imagem) }}"
                      alt="Imagem do produto {{ produto.nome }}"
                      title="Imagem do produto {{ produto.nome }}">
-                <h2>{{ produto.nome }}</h2>
-                <p>{{ produto.valorUnitVenda | currency }}</p>
-            </div>
+                <div>
+                    <h3>{{ produto.valor | currency }}<small ng-show="quantidade[produto.id]>0"> x <span>{{ quantidade[produto.id] }}</span></small></h3>
+                    <p>{{ produto.nome }}</p>
+                </div>
 
+                <div class="range">
+                    <button ng-click="decrementa(produto.id)" class="button button-light"><i class="icon ion-chevron-left"></i></button>
+                    <input type="range" ng-change="somaTotal()" id="quantidade[{{ produto.id }}]"
+                           name="quantidade[{{ produto.id }}]" ng-model="quantidade[produto.id]"
+                           min="0" max="{{ produto.max }}">
+                    <button ng-click="incrementa(produto.id)" class="button button-light"><i class="icon ion-chevron-right"></i></button>
+                </div>
+            </div>
         </div>
     </ion-content>
 </ion-view>
