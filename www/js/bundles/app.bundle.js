@@ -264,7 +264,7 @@
 
     configModule.constant('AppConfig', {
         apiEndpoint: 'http://api.delivery24horas.com/json',
-        imagesUrl: 'https://s3.amazonaws.com/delivery-images/images/',
+        imagesUrl: 'https://s3.amazonaws.com/delivery-images/thumbnails/',
         logoUrl: 'https://s3.amazonaws.com/delivery-images/logo/'
     });
     configModule.value("globals", {});
