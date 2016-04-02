@@ -190,6 +190,7 @@ gulp.task('uglify', function() {
  * **********************************************************************************/
 gulp.task('build-html', function() {
     console.log('build-html STARTED');
+    console.log(argv.production);
     gulp.src(paths.html)
         .pipe(preprocess({context: {ENVIRONMENT: argv.production ? 'production' : 'development'}}))
         .pipe(gulp.dest('./www/'))
