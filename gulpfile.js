@@ -55,14 +55,18 @@ var paths = {
 //});
 
 gulp.task('default', [
-    'build-css',
+    'core',
     'copy-fonts',
-    'preprocess-js',
-    'build-templatecache',
-    'build-js',
     'uglify',
-    'build-vendor',
-    'build-html'
+    'build-vendor'
+]);
+
+gulp.task('core', [
+    'build-css',
+    'build-templatecache',
+    'build-html',
+    'preprocess-js',
+    'build-js'
 ]);
 
 /* **********************************************************************************
@@ -70,8 +74,7 @@ gulp.task('default', [
  * **********************************************************************************/
 gulp.task('watch', function () {
     //gulp.watch(paths.sass, ['sass']);
-    gulp.watch([paths.toWatch],
-        ['build-css', 'build-templatecache', 'build-html', 'preprocess-js', 'build-js'])
+    gulp.watch([paths.toWatch], ['core'])
         .on('change', function(event) {
             console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
         });
@@ -334,7 +337,7 @@ gulp.task('release-detect', function() {
  * **********************************************************************************/
 gulp.task('build-prepare',[
     'release-detect',
-    'default',
+    //'default',
     'build-images',
     'version-increase'
 ], function() {
@@ -406,34 +409,50 @@ gulp.task('version-increase', ['project-version-increase'], function() {
  * Increase version number only if '--production' flag is set
  * **********************************************************************************/
 gulp.task('project-version-increase', function() {
-    console.log(process.env.CORDOVA_CMDLINE);
-    console.log(argv.production);
+    //console.log(process.env.CORDOVA_CMDLINE);
+    //console.log(argv.production);
     if (process.env.CORDOVA_CMDLINE && process.env.CORDOVA_CMDLINE.indexOf('--production') > 0) {
     //if (argv.production) {
         console.log('project-version-increase STARTED');
-        var fs = require('fs');
+        //var fs = require('fs');
+        var jeditor = require("gulp-json-editor");
         var file = "package.json";
+        //var json = JSON.parse(fs.readFileSync(file));
 
-        fs.readFile(file, 'utf8', function (err, data) {
-            if (err) {
-                return console.log(err);
-            }
-
-            //var version = data.match(/(\"version\" [^"]* \"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i);
-            var version = data.match(/(\"version\"[^\"]* \"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i)[2];
-            //console.log(version);
-            console.log('current minor version number is ',version, " increasing it to ", parseInt(version)+1);
-            version++;
-
-            var result = data.replace(/(\"version\"[^\"]* \"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i, '$1' + version + '$3');
-            //console.log(result);
-
-            fs.writeFile(file, result, 'utf8', function (err) {
-                if (err) return console.log(err);
+        gulp.src(file)
+            .pipe(jeditor(function(json) {
+                var version = json.version.match(/([0-9]+\.[0-9]+\.)([0-9]+)/i)[2];
+                console.log(file+' current minor version number is ',version, " increasing it to ", parseInt(version)+1);
+                version++;
+                var result = json.version.replace(/([0-9]+\.[0-9]+\.)([0-9]+)/i, '$1' + version);
+                json.version = result;
+                return json; // must return JSON object.
+            }))
+            .pipe(gulp.dest("./"))
+            .on('end', function() {
+                console.log('project-version-increase DONE');
             });
 
-            console.log('project-version-increase DONE');
-        });
+        //fs.readFile(file, 'utf8', function (err, data) {
+        //    if (err) {
+        //        return console.log(err);
+        //    }
+        //
+        //    //var version = data.match(/(\"version\" [^"]* \"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i);
+        //    var version = data.match(/(\"version\"[^\"]* \"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i)[2];
+        //    //console.log(version);
+        //    console.log('current minor version number is ',version, " increasing it to ", parseInt(version)+1);
+        //    version++;
+        //
+        //    var result = data.replace(/(\"version\"[^\"]* \"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i, '$1' + version + '$3');
+        //    //console.log(result);
+        //
+        //    fs.writeFile(file, result, 'utf8', function (err) {
+        //        if (err) return console.log(err);
+        //    });
+        //
+        //    console.log('project-version-increase DONE');
+        //});
     }
 });
 
