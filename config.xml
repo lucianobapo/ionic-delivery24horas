@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.ionicframework.ionicdelivery24horas213325" version="0.1.5" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>ionic-delivery24horas</name>
+<widget id="com.ionicframework.ionicdelivery24horas213325" version="0.1.6" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+  <name>Delivery 24 horas</name>
   <description>
         An Ionic Framework and Cordova project.
     </description>

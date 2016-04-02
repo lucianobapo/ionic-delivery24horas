@@ -54,7 +54,16 @@ var paths = {
 //        .on('end', done);
 //});
 
-gulp.task('default', ['build-css', 'copy-fonts', 'preprocess-js', 'build-templatecache', 'build-js', 'uglify', 'build-vendor', 'build-html']);
+gulp.task('default', [
+    'build-css',
+    'copy-fonts',
+    'preprocess-js',
+    'build-templatecache',
+    'build-js',
+    'uglify',
+    'build-vendor',
+    'build-html'
+]);
 
 /* **********************************************************************************
  * Watch task. Development only.
@@ -432,7 +441,7 @@ gulp.task('project-version-increase', function() {
  * This task is usually called from a hook to prepare files for facebook
  * **********************************************************************************/
 gulp.task('facebook',[
-    'facebook-strings',
+    //'facebook-strings',
     'facebook-manifest'
 ], function() {
     console.log('facebook DONE');
@@ -456,13 +465,13 @@ gulp.task('facebook-strings', function() {
             return console.log(err);
         }
         //var version = data.match(/(<widget [^>]* version=\"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i)[2];
-        var search = data.match(/(<string name=\"facebook_app_id\">)([0-9]+)/i);
+        var search = data.match(/(<string name=\"fb_app_id\">)([0-9]+)/i);
         if (search===null) {
             //var result = data.replace(/(<widget [^>]* version=\"[0-9]+\.[0-9]+\.)([0-9]+)(\")/i, '$1' + version + '$3');
             var result = data.replace(/(<resources>)([^<]*)/i, '$1'+ '$2' + facebook + '$2');
-            fs.writeFile(file, result, 'utf8', function (err) {
-                if (err) return console.log(err);
-            });
+            //fs.writeFile(file, result, 'utf8', function (err) {
+            //    if (err) return console.log(err);
+            //});
         } else console.log('facebook-strings already configured');
         console.log('facebook-strings DONE');
     });
