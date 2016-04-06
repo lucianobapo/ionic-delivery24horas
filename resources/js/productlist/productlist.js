@@ -9,6 +9,7 @@
             '$rootScope',
             'AppConfig',
             'Api',
+            '$ionicLoading',
             productListCtrl
         ]);
 
@@ -18,62 +19,93 @@
         $scope.logoUrl = AppConfig.logoUrl;
         $scope.imagesUrl = AppConfig.imagesUrl;
 
-        $scope.quantidade = [];
-        $scope.valor = [];
+        $rootScope.cartItems = [];
+        $rootScope.quantidade = [];
         $rootScope.valorTotal = 0;
         $scope.products = [];
 
 
+        $rootScope.removeCartItem = function (id) {
+            if ($rootScope.quantidade[id] > 0) {
+                $rootScope.quantidade[id]=0;
+                $scope.somaTotal();
+            }
+        };
+
         $scope.incrementa = function (id) {
             var max = document.getElementById('quantidade['+id+']').attributes['max'].value;
-            if ($scope.quantidade[id] < max) {
-                $scope.quantidade[id]++;
+            if ($rootScope.quantidade[id] < max) {
+                $rootScope.quantidade[id]++;
                 $scope.somaTotal();
             }
 
         };
         $scope.decrementa = function (id) {
             var min = document.getElementById('quantidade['+id+']').attributes['min'].value;
-            if ($scope.quantidade[id] > min) {
-                $scope.quantidade[id]--;
+            if ($rootScope.quantidade[id] > min) {
+                $rootScope.quantidade[id]--;
                 $scope.somaTotal();
             }
         };
 
+        $scope.searchProductById = function (id) {
+            var result = false;
+            $rootScope.allProducts.forEach(function(item) {
+                if (item.id==id) result = item;
+            });
+            return result;
+        };
+
         $scope.somaTotal = function () {
             $rootScope.valorTotal = 0;
-            $scope.quantidade.forEach(function(valor, chave) {
-                //console.log($scope.valor[chave]);
-                if ($scope.quantidade[chave]>0)
-                    $rootScope.valorTotal = $scope.valorTotal + ($scope.valor[chave]*$scope.quantidade[chave]);
+            $rootScope.cartItems = [];
+            $rootScope.quantidade.forEach(function(valor, chave) {
+                if ($rootScope.quantidade[chave]>0){
+                    var productSelected = $scope.searchProductById(chave);
+                    if (productSelected !==false ) {
+                        $rootScope.cartItems.push({
+                            id: productSelected.id,
+                            nome: productSelected.nome,
+                            quantidade: $rootScope.quantidade[chave],
+                            valor: productSelected.valor
+                        });
+                        $rootScope.valorTotal = $rootScope.valorTotal + (productSelected.valor*$rootScope.quantidade[chave]);
+                    }
+                }
             });
+            //console.log($rootScope.cartItems);
         };
 
         $scope.$watch(function(){
-            return $scope.products;
+            return $rootScope.allProducts;
         }, function(value) {
-            if ($scope.quantidade.length == 0 && $scope.products.length > 0){
-                $scope.products.forEach(function(item) {
-                    $scope.quantidade[item.id] = 0;
-                    $scope.valor[item.id] = item.valor;
+            if ($rootScope.quantidade.length == 0 && $rootScope.allProducts !== undefined){
+                $rootScope.allProducts.forEach(function(item) {
+                    $rootScope.quantidade[item.id] = 0;
                 });
             }
         });
 
         $rootScope.loadProducts = function (idCategory) {
-            //$rootScope.loadProducts(idCategory);
-
-                Api
+            if (idCategory===undefined) idCategory='todas';
+            Api
                 .sendRequest({
                     method: "GET",
                     url: AppConfig.apiEndpoint + '/produtosDelivery/'+idCategory
                 })
                 .then(function(response){
                     $scope.products = response.data.data;
-
-                    //console.log($scope.quant);
-                    //$scope.products = aux;
                 });
+            if ($rootScope.allProducts===undefined){
+                Api
+                    .sendRequest({
+                        method: "GET",
+                        url: AppConfig.apiEndpoint + '/produtosDelivery/todas'
+                    })
+                    .then(function(response){
+                        $rootScope.allProducts = response.data.data;
+                    });
+            }
         };
 
         $scope.doRefresh = function () {

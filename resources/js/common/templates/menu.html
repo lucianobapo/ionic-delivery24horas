@@ -12,7 +12,11 @@
                     <i class="ion-social-facebook"></i>Login com Facebook
                 </button>
 
-                <button class="button button-clear">
+                <!--<button class="button marging" ng-class="{'button-clear': (valorTotal=0), 'button-balanced': (valorTotal>0)}">-->
+                <button class="button marging"
+                        ng-click="showCart()"
+                        ng-class="(valorTotal>0)?'button-clear button-balanced': 'button-clear'">
+                <!--<button class="button button-clear">-->
                     <i class="ion-android-cart"></i> ({{ valorTotal | currency }})
                 </button>
             </ion-nav-buttons>

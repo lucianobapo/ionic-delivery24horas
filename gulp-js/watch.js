@@ -22,10 +22,14 @@ var paths = {
  * **********************************************************************************/
 gulp.task('watch', function () {
     //gulp.watch(paths.sass, ['sass']);
+    gutil.log('watch STARTED');
     gulp.watch([paths.toWatch], ['core'])
         .on('change', function(event) {
             //console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
             return gutil.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+        })
+        .on('end', function() {
+            return gutil.log('watch END');
         });
 
     //watch(paths.toWatch, {emit: "all"}, function(stream) {

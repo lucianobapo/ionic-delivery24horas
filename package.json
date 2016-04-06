@@ -1,7 +1,7 @@
 {
-  "name": "Delivery 24 horas",
+  "name": "ilhanet/ionic-delivery24horas",
   "version": "0.1.7",
-  "description": "ionic-delivery24horas: An Ionic project",
+  "description": "Aplicativo Ionic Delivery 24 Horas",
   "author": {
     "name": "Luciano Porto",
     "email": "luciano.bapo@gmail.com",

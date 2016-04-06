@@ -22,7 +22,7 @@ var paths = {
  * Builds scss into css
  * **********************************************************************************/
 gulp.task('build-css', function() {
-    gutil.log('build-css STARTED');
+    gutil.log('build-css STARTED Production:'+argv.production);
     return gulp.src(paths.sass)
         .pipe(sass({errLogToConsole: true}))
         .pipe(gulpif(argv.production, minifyCss({keepSpecialComments: 0})))

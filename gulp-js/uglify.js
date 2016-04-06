@@ -21,7 +21,7 @@ gulp.task('uglify',['core'], function() {
     if (argv.production) {
         gutil.log('uglify STARTED');
         return gulp.src(paths.jsBundleDest+paths.jsBundle)
-            //.pipe(uglify())
+            .pipe(uglify())
             .pipe(rename({suffix: '.min'}))
             .pipe(gulp.dest(paths.jsBundleDest))
             .on('end', function() {

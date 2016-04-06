@@ -2,24 +2,26 @@
     'use strict';
 
     angular.module('App.Config', []);
+    angular.module('templates', []);
     angular.module('App.Helpers', []);
-    angular.module('App.Common', []);
     angular.module('App.Api', []);
+    angular.module('App.cepDirective', []);
+
+    angular.module('App.Common', []);
     //angular.module('App.Playlist', []);
     angular.module('App.ProductList', []);
     angular.module('App.Report', []);
-    angular.module('templates', []);
 
-    //require('./common/config');
     require('./config-build');
+    require('./templates-build');
     require('./utility/helpers');
     require('./utility/api');
+    require('./utility/cep-directive');
+
     require('./common/common');
-    //require('./playlist/playlist');
     require('./productlist/productlist');
     require('./report/report');
-    //require('./utility/templates');
-    require('./templates-build');
+    //require('./playlist/playlist');
 
     var appModule = angular.module('App', [
 
@@ -43,6 +45,8 @@
         '$httpProvider',
 
         function ($stateProvider, $urlRouterProvider, $httpProvider) {
+            $httpProvider.interceptors.push('loadingMarker');
+
             $stateProvider
                 .state('app', {
                     url: "/app",
@@ -103,11 +107,14 @@
             $urlRouterProvider.otherwise('/app/productlist');
             //$urlRouterProvider.otherwise('/app/report');
 
-            $httpProvider.interceptors.push('loadingMarker');
         }
     ]);
 
-    appModule.service('loadingMarker', function($rootScope) {
+    appModule.service('loadingMarker', [
+        '$rootScope',
+        loadingMarker
+    ]);
+    function loadingMarker($rootScope) {
         var service = this;
 
         service.request = function(config) {
@@ -119,7 +126,31 @@
             $rootScope.$broadcast('loading:hide');
             return response;
         };
-    });
+    }
+
+    appModule.controller('bodyController', [
+        '$scope',
+        '$rootScope',
+        '$ionicModal',
+        bodyController
+    ]);
+    function bodyController($scope, $rootScope, $ionicModal) {
+        // Create the loading modal that we will use later
+        //$scope.loadingModal = $ionicModal.fromTemplate('loading.html');
+        $ionicModal.fromTemplateUrl('loading.html', {
+            scope: $scope
+        }).then(function (modal) {
+            $scope.loadingModal = modal;
+        });
+        $rootScope.closeLoading = function () {
+            $scope.loadingModal.hide();
+        };
+        $scope.$watch(function(){
+            return $scope.loadingModal;
+        }, function(value) {
+            value.show();
+        });
+    }
 
     appModule.run([
         '$ionicPlatform',
@@ -138,6 +169,7 @@
         });
 
         $ionicPlatform.ready(function () {
+            $rootScope.closeLoading();
             // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
             // for form inputs)
             if (window.cordova && window.cordova.plugins.Keyboard) {

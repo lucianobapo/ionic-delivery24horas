@@ -29,13 +29,14 @@
 
         <div ng-class="{card: minMediumScreens, list: handhelds, 'list-inset': handhelds}">
             <div class="item item-divider">{{ rootCategoriaSelecionada }}</div>
-            <div class="delivery-product-item" ng-class="{item: handhelds, 'item-thumbnail-left': handhelds}" ng-repeat="produto in products | filter: query">
+            <div class="delivery-product-item" ng-class="{item: handhelds, 'item-thumbnail-left': handhelds}"
+                 ng-repeat="produto in products | filter: query">
 
                 <img ng-src="{{ prepareImage(produto.imagem) }}"
                      alt="Imagem do produto {{ produto.nome }}"
                      title="Imagem do produto {{ produto.nome }}">
                 <div>
-                    <h3>{{ produto.valor | currency }}<small ng-show="quantidade[produto.id]>0"> x <span>{{ quantidade[produto.id] }}</span></small></h3>
+                    <span class="price">{{ produto.valor | currency }}<small ng-show="quantidade[produto.id]>0"> x <span class="quantity">{{ quantidade[produto.id] }}</span></small></span>
                     <p>{{ produto.nome }}</p>
                 </div>
 

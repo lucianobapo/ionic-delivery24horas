@@ -62,6 +62,45 @@
         };
 
         return scope;
+    };
+
+    helperModule.service('AddressDataService', [
+        'Api',
+        'AppConfig',
+        '$rootScope',
+        searchAddress
+    ]);
+
+    function searchAddress(Api, AppConfig, $rootScope) {
+        var searchAddress;
+        searchAddress = {
+            searchAddress: _handleResponse
+        };
+
+        function _handleResponse(searchFilter) {
+            //console.log('Searching addresses for ' + searchFilter);
+            Api.sendRequest({
+                    method: "GET",
+                    url: AppConfig.servicoCep('RJ/Rio das Ostras/'+searchFilter)
+                })
+                .then(function(response){
+                    $rootScope.cartData.matches = response.data.filter(function (address) {
+                        var removeAcentos = function(str){
+                            str = str.toLowerCase();
+                            var from = "ãàáäâẽèéëêìíïîõòóöôùúüûñç";
+                            var to   = "aaaaaeeeeeiiiiooooouuuunc";
+                            for (var i=0, l=from.length ; i<l ; i++) {
+                                str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+                            }
+                            return str;
+                        };
+                        var searchIn = removeAcentos(address.logradouro);
+                        var query = removeAcentos(searchFilter);
+                        if (searchIn.indexOf(query) !== -1) return true;
+                    });
+                });
+        };
+        return searchAddress;
     }
 
     module.exports = helperModule;
