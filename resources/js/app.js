@@ -156,10 +156,16 @@
         '$ionicPlatform',
         '$rootScope',
         '$ionicLoading',
+        'ReportSystem',
         appMain
     ]);
 
-    function appMain($ionicPlatform, $rootScope, $ionicLoading) {
+    function appMain($ionicPlatform, $rootScope, $ionicLoading, ReportSystem) {
+        $rootScope.c = ReportSystem;
+        //console.log(C);
+        //$rootScope.c.log('teste');
+        //$rootScope.c.debug('teste');
+
         $rootScope.$on('loading:show', function() {
             $ionicLoading.show({template: '<p>Carregando...</p><ion-spinner></ion-spinner>'});
         });

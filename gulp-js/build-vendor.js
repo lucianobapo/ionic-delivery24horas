@@ -33,8 +33,9 @@ gulp.task('build-vendor', function() {
     return gulp.src(paths.vendor)
         .pipe(concat('vendor.js'))
         .pipe(gulpif(argv.production, uglify()))
+        .pipe(gulpif(argv.production, rename({suffix: '.min'})))
         //.pipe(uglify())
-        .pipe(rename({suffix: '.min'}))
+        //.pipe(rename({suffix: '.min'}))
         .pipe(gulp.dest(paths.jsBundleDest))
         .on('end', function() {
             return gutil.log('build-vendor DONE');

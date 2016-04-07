@@ -1,4 +1,10 @@
 {
   "name": "ionic-delivery24horas",
-  "app_id": "90c1e71e"
+  "app_id": "90c1e71e",
+  "proxies": [
+      {
+        "path": "/json",
+        "proxyUrl": "http://api.localhost.com/json"
+      }
+    ]
 }

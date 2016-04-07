@@ -22,7 +22,6 @@
         $rootScope.$watch(function(){
             return $window.innerWidth;
         }, function(value) {
-            //console.log(value);
             if (value<=425) {
                 $rootScope.handhelds = true;
                 $rootScope.minMediumScreens = false;
@@ -40,10 +39,11 @@
         $scope.loadItems = function () {
             Api.sendRequest({
                 method: "GET",
-                url: AppConfig.apiEndpoint + '/categorias'
+                url: AppConfig.apiEndpoint + '/categorias/todas'
             })
             .then(function(response){
-                $scope.categorias = response.data.data;
+                //if (response.data!==null)
+                    $scope.categorias = response.data.data;
             });
         };
 
@@ -79,7 +79,8 @@
                         url: AppConfig.servicoCep($scope.cartData.cep)
                     })
                     .then(function(response){
-                        console.log(response);
+                        //console.log(response);
+                        //if (response.data!==null)
                         if (response.data.erro){
                             $scope.cartData.endereco = '';
                             $scope.cartData.bairro = '';
@@ -106,7 +107,7 @@
             });
 
             alertPopup.then(function(res) {
-                console.log('CEP:'+cep+' inválido');
+                $rootScope.c.debug('CEP:'+cep+' inválido');
             });
         };
 
@@ -126,7 +127,7 @@
         };
 
         $scope.commonArray = [4, 5, 6];
-        console.log('Common Controller');
+        $rootScope.c.debug('Common Controller');
 
         // Form data for the login modal
         $scope.loginData = {};

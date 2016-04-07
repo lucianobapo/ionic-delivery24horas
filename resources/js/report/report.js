@@ -14,7 +14,7 @@
         ]);
 
     function reportCtrl($scope, $rootScope, $stateParams, AppConfig, Api) {
-        console.debug('Report Controller: ', $scope.commonArray);
+        $rootScope.c.debug('Report Controller: ', $scope.commonArray);
 
         //console.log($stateParams);
         //$scope.titulo = $routeParams;

@@ -15,11 +15,12 @@
     apiModule.factory('Api', [
         '$q',
         '$http',
+        '$rootScope',
         'Helpers',
         apiService
     ]);
 
-    function apiService($q, $http, Helpers) {
+    function apiService($q, $http, $rootScope, Helpers) {
 
         var scope;
         scope = {
@@ -44,21 +45,31 @@
          * @return  {object}
          */
         function _sendRequest(params) {
-            //params.headers = {
-            //    'X-Requested-With': 'XMLHttpRequest'
-            //};
+            params.headers = {
+                'Accept': 'application/json'
+            };
 
+            //'Cache-Control': 'no-cache',
+            //'X-Requested-With': 'XMLHttpRequest',
+            //'Host': 'api.localhost.com',
+            //'Access-Control-Allow-Origin': '*',
+            //'Content-Type': 'application/json',
+            //'Accept-Encoding': 'gzip, deflate, sdch',
+            //'Accept-Language': 'pt-BR,en-US;q=0.8,en;q=0.6',
+
+            //$rootScope.c.debug(params);
+            Helpers.handleHttpParams(params);
             return $http(params)
-                .then(function (response) {
-                    if (response) {
-                        var responseData = (response.data && typeof response.data.Data !== 'undefined') ? response.data.Data : response.data;
-                        return params.customCallback ? responseData : Helpers.handleHttpResponse(response);
-                    }
-                })
-                .catch(function (response) {
-                    $q.reject('HTTP status: ' + response.status);
-                    return params.customCallback ? response.data : Helpers.handleHttpResponse(response);
-                });
+                .then(
+                    function (response) {
+                        //if (response) {
+                            var responseData = (response.data && typeof response.data.Data !== 'undefined') ? response.data.Data : response.data;
+                            return params.customCallback ? responseData : Helpers.handleHttpResponse(response);
+                        //}
+                    },
+                    function(response) {
+                        return Helpers.handleHttpErrorResponse(response);
+                    });
         }
         return scope;
     }

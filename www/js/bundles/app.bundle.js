@@ -157,10 +157,16 @@
         '$ionicPlatform',
         '$rootScope',
         '$ionicLoading',
+        'ReportSystem',
         appMain
     ]);
 
-    function appMain($ionicPlatform, $rootScope, $ionicLoading) {
+    function appMain($ionicPlatform, $rootScope, $ionicLoading, ReportSystem) {
+        $rootScope.c = ReportSystem;
+        //console.log(C);
+        //$rootScope.c.log('teste');
+        //$rootScope.c.debug('teste');
+
         $rootScope.$on('loading:show', function() {
             $ionicLoading.show({template: '<p>Carregando...</p><ion-spinner></ion-spinner>'});
         });
@@ -211,7 +217,6 @@
         $rootScope.$watch(function(){
             return $window.innerWidth;
         }, function(value) {
-            //console.log(value);
             if (value<=425) {
                 $rootScope.handhelds = true;
                 $rootScope.minMediumScreens = false;
@@ -229,10 +234,11 @@
         $scope.loadItems = function () {
             Api.sendRequest({
                 method: "GET",
-                url: AppConfig.apiEndpoint + '/categorias'
+                url: AppConfig.apiEndpoint + '/categorias/todas'
             })
             .then(function(response){
-                $scope.categorias = response.data.data;
+                //if (response.data!==null)
+                    $scope.categorias = response.data.data;
             });
         };
 
@@ -268,7 +274,8 @@
                         url: AppConfig.servicoCep($scope.cartData.cep)
                     })
                     .then(function(response){
-                        console.log(response);
+                        //console.log(response);
+                        //if (response.data!==null)
                         if (response.data.erro){
                             $scope.cartData.endereco = '';
                             $scope.cartData.bairro = '';
@@ -295,7 +302,7 @@
             });
 
             alertPopup.then(function(res) {
-                console.log('CEP:'+cep+' inválido');
+                $rootScope.c.debug('CEP:'+cep+' inválido');
             });
         };
 
@@ -315,7 +322,7 @@
         };
 
         $scope.commonArray = [4, 5, 6];
-        console.log('Common Controller');
+        $rootScope.c.debug('Common Controller');
 
         // Form data for the login modal
         $scope.loginData = {};
@@ -366,6 +373,7 @@
     var configModule = angular.module('App.Config');
 
     configModule.constant('AppConfig', {
+        debug: false,
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
         apiEndpoint: 'http://api.delivery24horas.com/json',
         imagesUrl: 'https://s3.amazonaws.com/delivery-images/thumbnails/',
@@ -392,7 +400,7 @@
         ]);
 
     function productListCtrl($scope, $rootScope, AppConfig, Api) {
-        console.debug('ProductList Controller: ', $scope.commonArray);
+        $rootScope.c.debug('ProductList Controller: ', $scope.commonArray);
 
         $scope.logoUrl = AppConfig.logoUrl;
         $scope.imagesUrl = AppConfig.imagesUrl;
@@ -473,15 +481,18 @@
                 })
                 .then(function(response){
                     $scope.products = response.data.data;
+                    if (idCategory=='todas')
+                        $rootScope.allProducts = response.data.data;
                 });
-            if ($rootScope.allProducts===undefined){
+            if ($rootScope.allProducts===undefined && idCategory!='todas'){
                 Api
                     .sendRequest({
                         method: "GET",
                         url: AppConfig.apiEndpoint + '/produtosDelivery/todas'
                     })
                     .then(function(response){
-                        $rootScope.allProducts = response.data.data;
+                        if (response.data!==null)
+                            $rootScope.allProducts = response.data.data;
                     });
             }
         };
@@ -518,7 +529,7 @@
         ]);
 
     function reportCtrl($scope, $rootScope, $stateParams, AppConfig, Api) {
-        console.debug('Report Controller: ', $scope.commonArray);
+        $rootScope.c.debug('Report Controller: ', $scope.commonArray);
 
         //console.log($stateParams);
         //$scope.titulo = $routeParams;
@@ -572,11 +583,12 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
     apiModule.factory('Api', [
         '$q',
         '$http',
+        '$rootScope',
         'Helpers',
         apiService
     ]);
 
-    function apiService($q, $http, Helpers) {
+    function apiService($q, $http, $rootScope, Helpers) {
 
         var scope;
         scope = {
@@ -601,21 +613,31 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
          * @return  {object}
          */
         function _sendRequest(params) {
-            //params.headers = {
-            //    'X-Requested-With': 'XMLHttpRequest'
-            //};
+            params.headers = {
+                'Accept': 'application/json'
+            };
 
+            //'Cache-Control': 'no-cache',
+            //'X-Requested-With': 'XMLHttpRequest',
+            //'Host': 'api.localhost.com',
+            //'Access-Control-Allow-Origin': '*',
+            //'Content-Type': 'application/json',
+            //'Accept-Encoding': 'gzip, deflate, sdch',
+            //'Accept-Language': 'pt-BR,en-US;q=0.8,en;q=0.6',
+
+            //$rootScope.c.debug(params);
+            Helpers.handleHttpParams(params);
             return $http(params)
-                .then(function (response) {
-                    if (response) {
-                        var responseData = (response.data && typeof response.data.Data !== 'undefined') ? response.data.Data : response.data;
-                        return params.customCallback ? responseData : Helpers.handleHttpResponse(response);
-                    }
-                })
-                .catch(function (response) {
-                    $q.reject('HTTP status: ' + response.status);
-                    return params.customCallback ? response.data : Helpers.handleHttpResponse(response);
-                });
+                .then(
+                    function (response) {
+                        //if (response) {
+                            var responseData = (response.data && typeof response.data.Data !== 'undefined') ? response.data.Data : response.data;
+                            return params.customCallback ? responseData : Helpers.handleHttpResponse(response);
+                        //}
+                    },
+                    function(response) {
+                        return Helpers.handleHttpErrorResponse(response);
+                    });
         }
         return scope;
     }
@@ -766,7 +788,9 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
 
         var scope;
         scope = {
-            handleHttpResponse: _handleHttpResponse
+            handleHttpResponse: _handleHttpResponse,
+            handleHttpErrorResponse: _handleHttpErrorResponse,
+            handleHttpParams: _handleHttpParams
         };
 
         /*
@@ -782,25 +806,55 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
          * @return  {object}
          */
         function _handleHttpResponse(response) {
-            var message = '',
-                type = '';
-            try {
-                message = (response.status && response.status !== 200) ? response.statusText : response.data.message;
-                type = response.data.success ? 'success' : 'error';
-            } catch (exception) {
-                type = 'error';
-                message = 'Server error';
-            }
+            //$rootScope.c.debug('Response: ');
+            $rootScope.c.debug('Response: '+JSON.stringify(response));
+            //var message = '',
+            //    type = '';
+            //$rootScope.c.debug(response);
+            //try {
+            //    //message = (response.status && response.status !== 200) ? response.statusText : response.data.message;
+            //    message = response.statusText;
+            //    type = response.data.success ? 'success' : 'error';
+            //    //$rootScope.c.log(message);
+            //} catch (exception) {
+            //    $rootScope.c.debug(exception);
+            //    type = 'error';
+            //    message = 'Server error';
+            //}
 
-            if (message) {
-                // Default logic for API responses
-            }
-
+            //if (message) {
+            //    // Default logic for API responses
+            //    //$rootScope.c.debug('Response: ' + message + 'Type: ' + type);
+            //}
+            //$rootScope.c.debug('Response: ' + response.statusText + ' Status: ' + response.status);
             return response;
-        };
+        }
+        function _handleHttpErrorResponse(response) {
+            $rootScope.c.debug('Erro na requisição: ', JSON.stringify(response));
+            $rootScope.c.debug('Status: ', response.status);
+            $rootScope.c.debug('StatusText: ', response.statusText);
+            $rootScope.c.debug('Url: ', response.config.url);
+            $rootScope.c.debug('Headers: ', JSON.stringify(response.config.headers));
+            response.data = {
+                data: []
+            };
+            return response;
+        }
+
+        function _handleHttpParams(params) {
+            $rootScope.c.debug('Parametros: ', JSON.stringify(params));
+            //$rootScope.c.debug('Status: ', response.status);
+            //$rootScope.c.debug('StatusText: ', response.statusText);
+            //$rootScope.c.debug('Url: ', response.config.url);
+            //$rootScope.c.debug('Headers: ', JSON.stringify(response.config.headers));
+            //response.data = {
+            //    data: []
+            //};
+            //return response;
+        }
 
         return scope;
-    };
+    }
 
     helperModule.service('AddressDataService', [
         'Api',
@@ -816,12 +870,13 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
         };
 
         function _handleResponse(searchFilter) {
-            //console.log('Searching addresses for ' + searchFilter);
+            $rootScope.c.debug('Searching addresses for ' + searchFilter);
             Api.sendRequest({
                     method: "GET",
                     url: AppConfig.servicoCep('RJ/Rio das Ostras/'+searchFilter)
                 })
                 .then(function(response){
+                    //$rootScope.c.debug('Response: ' + response);
                     $rootScope.cartData.matches = response.data.filter(function (address) {
                         var removeAcentos = function(str){
                             str = str.toLowerCase();
@@ -839,6 +894,28 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
                 });
         };
         return searchAddress;
+    }
+
+    helperModule.service('ReportSystem', [
+        'AppConfig',
+        log
+    ]);
+    function log(AppConfig){
+        //var response;
+        if (AppConfig.debug) return console;
+        else return {
+            log: function () {},
+            debug: function () {}
+        };
+        //response = {
+        //    log: function(srt){
+        //        if (AppConfig.debug) console.log(srt);
+        //    },
+        //    debug: function(srt){
+        //        if (AppConfig.debug) console.debug(srt);
+        //    }
+        //};
+        //return response;
     }
 
     module.exports = helperModule;

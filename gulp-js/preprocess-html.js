@@ -16,9 +16,9 @@ var paths = {
  * Builds html for development/production
  * **********************************************************************************/
 gulp.task('preprocess-html', function() {
-    gutil.log('preprocess-html STARTED Production:'+ argv.production);
+    gutil.log('preprocess-html STARTED CORDOVA_CMDLINE:'+(process.env.CORDOVA_CMDLINE!=undefined)+' Production:'+ argv.production);
     return gulp.src(paths.html)
-        .pipe(preprocess({context: {ENVIRONMENT: argv.production ? 'production' : 'development'}}))
+        .pipe(preprocess({context: {ENVIRONMENT: argv.production ? 'production' : 'development', CORDOVA:(process.env.CORDOVA_CMDLINE!=undefined)}}))
         .pipe(gulp.dest('./www/'))
         .on('end', function() {
             return gutil.log('preprocess-html DONE');

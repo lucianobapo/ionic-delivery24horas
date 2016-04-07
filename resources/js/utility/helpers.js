@@ -28,7 +28,9 @@
 
         var scope;
         scope = {
-            handleHttpResponse: _handleHttpResponse
+            handleHttpResponse: _handleHttpResponse,
+            handleHttpErrorResponse: _handleHttpErrorResponse,
+            handleHttpParams: _handleHttpParams
         };
 
         /*
@@ -44,25 +46,55 @@
          * @return  {object}
          */
         function _handleHttpResponse(response) {
-            var message = '',
-                type = '';
-            try {
-                message = (response.status && response.status !== 200) ? response.statusText : response.data.message;
-                type = response.data.success ? 'success' : 'error';
-            } catch (exception) {
-                type = 'error';
-                message = 'Server error';
-            }
+            //$rootScope.c.debug('Response: ');
+            $rootScope.c.debug('Response: '+JSON.stringify(response));
+            //var message = '',
+            //    type = '';
+            //$rootScope.c.debug(response);
+            //try {
+            //    //message = (response.status && response.status !== 200) ? response.statusText : response.data.message;
+            //    message = response.statusText;
+            //    type = response.data.success ? 'success' : 'error';
+            //    //$rootScope.c.log(message);
+            //} catch (exception) {
+            //    $rootScope.c.debug(exception);
+            //    type = 'error';
+            //    message = 'Server error';
+            //}
 
-            if (message) {
-                // Default logic for API responses
-            }
-
+            //if (message) {
+            //    // Default logic for API responses
+            //    //$rootScope.c.debug('Response: ' + message + 'Type: ' + type);
+            //}
+            //$rootScope.c.debug('Response: ' + response.statusText + ' Status: ' + response.status);
             return response;
-        };
+        }
+        function _handleHttpErrorResponse(response) {
+            $rootScope.c.debug('Erro na requisição: ', JSON.stringify(response));
+            $rootScope.c.debug('Status: ', response.status);
+            $rootScope.c.debug('StatusText: ', response.statusText);
+            $rootScope.c.debug('Url: ', response.config.url);
+            $rootScope.c.debug('Headers: ', JSON.stringify(response.config.headers));
+            response.data = {
+                data: []
+            };
+            return response;
+        }
+
+        function _handleHttpParams(params) {
+            $rootScope.c.debug('Parametros: ', JSON.stringify(params));
+            //$rootScope.c.debug('Status: ', response.status);
+            //$rootScope.c.debug('StatusText: ', response.statusText);
+            //$rootScope.c.debug('Url: ', response.config.url);
+            //$rootScope.c.debug('Headers: ', JSON.stringify(response.config.headers));
+            //response.data = {
+            //    data: []
+            //};
+            //return response;
+        }
 
         return scope;
-    };
+    }
 
     helperModule.service('AddressDataService', [
         'Api',
@@ -78,12 +110,13 @@
         };
 
         function _handleResponse(searchFilter) {
-            //console.log('Searching addresses for ' + searchFilter);
+            $rootScope.c.debug('Searching addresses for ' + searchFilter);
             Api.sendRequest({
                     method: "GET",
                     url: AppConfig.servicoCep('RJ/Rio das Ostras/'+searchFilter)
                 })
                 .then(function(response){
+                    //$rootScope.c.debug('Response: ' + response);
                     $rootScope.cartData.matches = response.data.filter(function (address) {
                         var removeAcentos = function(str){
                             str = str.toLowerCase();
@@ -101,6 +134,28 @@
                 });
         };
         return searchAddress;
+    }
+
+    helperModule.service('ReportSystem', [
+        'AppConfig',
+        log
+    ]);
+    function log(AppConfig){
+        //var response;
+        if (AppConfig.debug) return console;
+        else return {
+            log: function () {},
+            debug: function () {}
+        };
+        //response = {
+        //    log: function(srt){
+        //        if (AppConfig.debug) console.log(srt);
+        //    },
+        //    debug: function(srt){
+        //        if (AppConfig.debug) console.debug(srt);
+        //    }
+        //};
+        //return response;
     }
 
     module.exports = helperModule;

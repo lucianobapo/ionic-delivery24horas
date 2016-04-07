@@ -14,7 +14,7 @@
         ]);
 
     function productListCtrl($scope, $rootScope, AppConfig, Api) {
-        console.debug('ProductList Controller: ', $scope.commonArray);
+        $rootScope.c.debug('ProductList Controller: ', $scope.commonArray);
 
         $scope.logoUrl = AppConfig.logoUrl;
         $scope.imagesUrl = AppConfig.imagesUrl;
@@ -95,15 +95,18 @@
                 })
                 .then(function(response){
                     $scope.products = response.data.data;
+                    if (idCategory=='todas')
+                        $rootScope.allProducts = response.data.data;
                 });
-            if ($rootScope.allProducts===undefined){
+            if ($rootScope.allProducts===undefined && idCategory!='todas'){
                 Api
                     .sendRequest({
                         method: "GET",
                         url: AppConfig.apiEndpoint + '/produtosDelivery/todas'
                     })
                     .then(function(response){
-                        $rootScope.allProducts = response.data.data;
+                        if (response.data!==null)
+                            $rootScope.allProducts = response.data.data;
                     });
             }
         };
