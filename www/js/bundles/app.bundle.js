@@ -6,22 +6,28 @@
     angular.module('templates', []);
     angular.module('App.Helpers', []);
     angular.module('App.Api', []);
-    angular.module('App.cepDirective', []);
+    angular.module('App.Directives', []);
+    angular.module('App.Alerts', []);
+    angular.module('App.CartService', []);
 
     angular.module('App.Common', []);
     //angular.module('App.Playlist', []);
     angular.module('App.ProductList', []);
     angular.module('App.Report', []);
 
+
     require('./config-build');
     require('./templates-build');
     require('./utility/helpers');
     require('./utility/api');
-    require('./utility/cep-directive');
+    require('./utility/directives');
+    require('./utility/alerts');
+    require('./cart/cart-service');
 
     require('./common/common');
     require('./productlist/productlist');
     require('./report/report');
+
     //require('./playlist/playlist');
 
     var appModule = angular.module('App', [
@@ -34,6 +40,9 @@
         'App.Helpers',
         'App.Common',
         'App.Api',
+        'App.Directives',
+        'App.Alerts',
+        'App.CartService',
         //'App.Playlist',
         'App.ProductList',
         'App.Report',
@@ -133,9 +142,11 @@
         '$scope',
         '$rootScope',
         '$ionicModal',
+        'CartService',
         bodyController
     ]);
-    function bodyController($scope, $rootScope, $ionicModal) {
+    function bodyController($scope, $rootScope, $ionicModal, CartService) {
+        CartService.initCart();
         // Create the loading modal that we will use later
         //$scope.loadingModal = $ionicModal.fromTemplate('loading.html');
         $ionicModal.fromTemplateUrl('loading.html', {
@@ -192,7 +203,116 @@
 
     module.exports = appModule;
 })();
-},{"./common/common":2,"./config-build":3,"./productlist/productlist":4,"./report/report":5,"./templates-build":6,"./utility/api":7,"./utility/cep-directive":8,"./utility/helpers":9}],2:[function(require,module,exports){
+},{"./cart/cart-service":2,"./common/common":3,"./config-build":4,"./productlist/productlist":5,"./report/report":6,"./templates-build":7,"./utility/alerts":8,"./utility/api":9,"./utility/directives":10,"./utility/helpers":11}],2:[function(require,module,exports){
+(function () {
+    'use strict';
+
+    /* ***************************************************************************
+     * ### Common API module ###
+     *
+     * This is a project common api service. It's used for sending all api requests in the application.
+     * It handles success and error response by default, if it's not set custom callback function explicitly.
+     */
+
+    /*! */
+
+    var moduleApp = angular.module('App.CartService');
+
+    moduleApp.service('CartService', [
+        '$ionicModal',
+        'Alerts',
+        '$rootScope',
+        cartService
+    ]);
+
+    function cartService($ionicModal, Alerts, $rootScope) {
+
+        var interfaceObj;
+
+        interfaceObj = {
+            initCart: _initCart
+        };
+
+        /*
+         * ### *Public methods* ###
+         */
+
+        function _initCart() {
+            var cartModal;
+
+            // Create the login modal that we will use later
+            $ionicModal.fromTemplateUrl('cart/templates/cart.html', {
+                scope: $rootScope
+            }).then(function (modal) {
+                cartModal = modal;
+            });
+            // Triggered in the cart modal to close it
+            $rootScope.closeCart = function () {
+                $rootScope.c.debug('Closing modal');
+                cartModal.hide();
+            };
+            // Open the login modal
+            $rootScope.showCart = function () {
+                $rootScope.c.debug('Opening modal');
+                cartModal.show();
+            };
+            // Form data for the login modal
+            $rootScope.cartData = {};
+            $rootScope.cartData.pagamento = 'dinheiro';
+            $rootScope.cartData.matches = [];
+            $rootScope.cartData.cep = '';
+
+            // Form Submit
+            $rootScope.doDelivery = function() {
+                if($rootScope.cartData.nome==undefined || $rootScope.cartData.nome.length==0) {
+                    Alerts.customAlert('Nome', 'Digite um nome válido.');
+                    return false;
+                }
+
+                if ( ($rootScope.cartData.email==undefined || $rootScope.cartData.email.length==0)
+                && ($rootScope.cartData.telefone==undefined || $rootScope.cartData.telefone.length==0)
+                && ($rootScope.cartData.whatsapp==undefined || $rootScope.cartData.whatsapp.length==0) )
+                {
+                    Alerts.customAlert('Contato', 'Digite ao menos um contato válido. Email, Telefone ou Watsapp.');
+                    return false;
+                }
+
+                if($rootScope.cartData.endereco==undefined || $rootScope.cartData.endereco.length==0) {
+                    Alerts.customAlert('Endereço', 'Digite um endereço válido.');
+                    return false;
+                }
+
+                if($rootScope.cartData.matches.length!=0){
+                    Alerts.customAlert('Endereço', 'Selecione um endereço válido.');
+                    return false;
+                }
+
+                if($rootScope.cartData.bairro==undefined || $rootScope.cartData.bairro.length==0) {
+                    Alerts.customAlert('Endereço', 'Digite um bairro válido.');
+                    return false;
+                }
+
+                if($rootScope.cartData.numero==undefined || $rootScope.cartData.numero.length==0) {
+                    Alerts.customAlert('Endereço', 'Digite um número válido.');
+                    return false;
+                }
+
+                Alerts.customAlert('Entrega',JSON.stringify($rootScope.cartData));
+            };
+
+            $rootScope.selecionaEndereco = function (address) {
+                $rootScope.cartData.matches = [];
+                $rootScope.cartData.cep = address.cep.replace('-','');
+                $rootScope.cartData.endereco = address.logradouro;
+                $rootScope.cartData.bairro = address.bairro;
+            };
+        }
+        return interfaceObj;
+    }
+
+    module.exports = moduleApp;
+})();
+},{}],3:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -208,12 +328,15 @@
         'AppConfig',
         'Api',
         '$window',
-        'AddressDataService',
+        //'CartService',
         //'Helpers',
         commonCtrl
     ]);
 
-    function commonCtrl($scope, $rootScope, $ionicModal, $timeout, /*$state, */$ionicPopup, AppConfig, Api, $window, AddressDataService/*, Helpers*/) {
+    function commonCtrl($scope, $rootScope, $ionicModal, $timeout, /*$state, */$ionicPopup,
+                        AppConfig, Api, $window/*, CartService, Helpers*/) {
+        //CartService.initCart();
+
         $rootScope.$watch(function(){
             return $window.innerWidth;
         }, function(value) {
@@ -250,76 +373,7 @@
 
         $scope.loadItems();
 
-        // Create the login modal that we will use later
-        $ionicModal.fromTemplateUrl('cart.html', {
-            scope: $scope
-        }).then(function (modal) {
-            $scope.cartModal = modal;
-        });
-        // Triggered in the login modal to close it
-        $scope.closeCart = function () {
-            $scope.cartModal.hide();
-        };
-        // Open the login modal
-        $scope.showCart = function () {
-            $scope.cartModal.show();
-        };
-        // Form data for the login modal
-        $rootScope.cartData = {};
 
-        $scope.cepKeyup = function (e) {
-            if ($scope.cartData.cep.length == 8) {
-                Api.sendRequest({
-                        method: "GET",
-                        url: AppConfig.servicoCep($scope.cartData.cep)
-                    })
-                    .then(function(response){
-                        //console.log(response);
-                        //if (response.data!==null)
-                        if (response.data.erro){
-                            $scope.cartData.endereco = '';
-                            $scope.cartData.bairro = '';
-                            $scope.showAlert($scope.cartData.cep);
-                        } else {
-                            $scope.cartData.endereco = response.data.logradouro;
-                            $scope.cartData.bairro = response.data.bairro;
-                        }
-                    });
-            }
-        };
-
-        // An alert dialog
-        $scope.showAlert = function(cep) {
-            var alertPopup = $ionicPopup.alert({
-                title: 'CEP inválido',
-                template: 'CEP '+cep+' não foi encontrado',
-                buttons: [
-                    {
-                        text: 'OK',
-                        type: 'button-assertive'
-                    }
-                ]
-            });
-
-            alertPopup.then(function(res) {
-                $rootScope.c.debug('CEP:'+cep+' inválido');
-            });
-        };
-
-        $rootScope.cartData.matches = [];
-        $scope.selecionaEndereco = function (address) {
-            //console.log(address);
-            $rootScope.cartData.matches = [];
-            $scope.cartData.cep = address.cep.replace('-','');
-            $scope.cartData.endereco = address.logradouro;
-            $scope.cartData.bairro = address.bairro;
-        };
-
-        $scope.enderecoKeyup = function () {
-            if ($rootScope.cartData.endereco.length > 2) {
-                AddressDataService.searchAddress($rootScope.cartData.endereco);
-            } else $rootScope.cartData.matches = [];
-        };
 
         $scope.commonArray = [4, 5, 6];
         $rootScope.c.debug('Common Controller');
@@ -358,7 +412,7 @@
 
     module.exports = commonModule;
 })();
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -383,7 +437,7 @@
 
     module.exports = configModule;
 })();
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -505,14 +559,14 @@
         $rootScope.loadProducts();
 
         $scope.prepareImage = function (img) {
-            if (img==null) return 'http://placehold.it/80x80';
+            if (img==null || AppConfig.debug) return 'http://placehold.it/80x80';
             return AppConfig.imagesUrl+img;
         };
     }
 
     module.exports = productListModule;
 })();
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -555,17 +609,100 @@
     }
     module.exports = reportModule;
 })();
-},{}],6:[function(require,module,exports){
-angular.module("templates").run(["$templateCache", function($templateCache) {$templateCache.put("common/templates/menu.html","<ion-side-menus enable-menu-with-back-views=\"false\">\n    <ion-side-menu-content>\n        <ion-nav-bar class=\"bar-stable\">\n            <ion-nav-back-button></ion-nav-back-button>\n            <ion-nav-buttons side=\"left\">\n                <button class=\"button button-icon button-clear ion-navicon\" menu-toggle=\"left\"\n                        ng-hide=\"$exposeAside.active\"></button>\n                <div class=\"delivery-bar-title title\">delivery24horas.com</div>\n            </ion-nav-buttons>\n            <ion-nav-buttons side=\"right\">\n                <button class=\"delivery-btn-social-header button button-positive btn-social\">\n                    <i class=\"ion-social-facebook\"></i>Login com Facebook\n                </button>\n\n                <!--<button class=\"button marging\" ng-class=\"{\'button-clear\': (valorTotal=0), \'button-balanced\': (valorTotal>0)}\">-->\n                <button class=\"button marging\"\n                        ng-click=\"showCart()\"\n                        ng-class=\"(valorTotal>0)?\'button-clear button-balanced\': \'button-clear\'\">\n                <!--<button class=\"button button-clear\">-->\n                    <i class=\"ion-android-cart\"></i> ({{ valorTotal | currency }})\n                </button>\n            </ion-nav-buttons>\n        </ion-nav-bar>\n        <ion-nav-view name=\"menuContent\"></ion-nav-view>\n    </ion-side-menu-content>\n\n    <ion-side-menu expose-aside-when=\"large\">\n        <ion-header-bar class=\"bar-stable\">\n            <h1 class=\"title\">Menu</h1>\n        </ion-header-bar>\n        <ion-content>\n            <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n            <div class=\"list list-inset\">\n                <div class=\"item item-divider\">Categorias</div>\n\n                <a href=\"#/app/productlist\" class=\"item item-icon-left\"\n                   menu-close ng-click=\"loadCategoria(\'Todas\');loadProducts()\">\n                    <i class=\"icon ion-beer\"></i>\n                    Todas\n                </a>\n                <a ng-repeat=\"item in categorias\" href=\"#/app/productlist\" class=\"item item-icon-left\"\n                   menu-close ng-click=\"loadCategoria(item.nome);loadProducts(item.id)\">\n                    <i class=\"{{ item.icon }}\"></i>\n                    {{ item.nome }}\n                </a>\n\n                <div class=\"item item-divider\">Relatórios</div>\n                <a href=\"#/app/report\" class=\"item item-icon-left\" menu-close>\n                    <i class=\"ion-document-text\"></i>\n                    Relatórios\n                </a>\n                <a href=\"#/app/browse\" class=\"item item-icon-left\" menu-close>\n                    <i class=\"ion-document-text\"></i>\n                    Browse\n                </a>\n\n                <div class=\"item item-divider\">Minha conta</div>\n                <div class=\"item\">Meus Dados</div>\n                <div class=\"item\">Trocar Senha</div>\n                <div class=\"item\">Sair</div>\n\n            </div>\n        </ion-content>\n    </ion-side-menu>\n</ion-side-menus>");
+},{}],7:[function(require,module,exports){
+angular.module("templates").run(["$templateCache", function($templateCache) {$templateCache.put("cart/templates/cart.html","<ion-modal-view>\n    <ion-header-bar>\n        <h1 class=\"title\">Carrinho de Compras</h1>\n\n        <div class=\"buttons\">\n            <button class=\"button button-clear\" ng-click=\"closeCart()\">Fechar</button>\n        </div>\n    </ion-header-bar>\n    <ion-content>\n        <div class=\"text-center\" ng-hide=\"valorTotal>0\">\n            <button class=\"button button-large button-full button-dark\" ng-click=\"closeCart()\">\n                Nenhum item selecionado\n            </button>\n        </div>\n\n        <div class=\"list list-inset\" ng-show=\"valorTotal>0\">\n            <div class=\"item item-divider\">Itens</div>\n            <div class=\"item item-button-right\" ng-repeat=\"item in cartItems\">\n                <p>{{ item.nome }}</p>\n                <span class=\"quantity\">{{ item.quantidade }} <small>x</small> </span><span class=\"price\">{{ item.valor | currency }}</span>\n                <button class=\"button button-light\" ng-click=\"removeCartItem(item.id)\">\n                    <i class=\"icon ion-close-circled\"></i>\n                </button>\n            </div>\n        </div>\n\n        <form class=\"cancelEnter\" ng-submit=\"doDelivery()\" ng-show=\"valorTotal>0\">\n            <div class=\"list\">\n                <div class=\"item item-divider\">Forma de Pagamento</div>\n\n                <div class=\"item text-center\">\n                    Valor Total: <span class=\"price\">{{ valorTotal | currency }}</span>\n                    <ion-list class=\"text-left\">\n                        <ion-radio ng-model=\"cartData.pagamento\" ng-value=\"\'dinheiro\'\">Dinheiro</ion-radio>\n                        <ion-radio ng-model=\"cartData.pagamento\" ng-value=\"\'debito\'\">Cartão Debito</ion-radio>\n                        <ion-radio ng-model=\"cartData.pagamento\" ng-value=\"\'credito\'\">Cartão Crédito</ion-radio>\n                    </ion-list>\n                </div>\n                <div class=\"item\">\n\n                </div>\n\n                <div class=\"item item-divider\">Dados da Entrega</div>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Nome:</span>\n                    <input type=\"text\" name=\"nome\" ng-model=\"cartData.nome\" placeholder=\"Ex.: João da Silva\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">E-mail:</span>\n                    <input type=\"email\" name=\"email\" ng-model=\"cartData.email\" placeholder=\"Ex.: exemplo@gmail.com\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Telefone:</span>\n                    <input type=\"tel\" name=\"telefone\" ng-model=\"cartData.telefone\" placeholder=\"Ex.: (22)999 999 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Whatsapp:</span>\n                    <input type=\"tel\" name=\"whatsapp\" ng-model=\"cartData.whatsapp\" placeholder=\"Ex.: (22)999 999 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">CEP:</span>\n                    <input type=\"tel\"\n                           class=\"numbersOnly cancelEnter cepKeyUp\"\n                           autocomplete=\"off\"\n                           ng-model=\"cartData.cep\" placeholder=\"Ex.: 28893818\"\n                           maxlength=\"8\">\n                </label>\n                <label class=\"item item-input item-stacked-label item-button-right\">\n                    <span class=\"input-label\">Endereço:</span>\n                    <input type=\"text\"\n                           class=\"cancelEnter enderecoKeyUp\"\n                           autocomplete=\"off\"\n                           ng-model=\"cartData.endereco\" placeholder=\"Ex.: Av. Brasil\">\n                    <div class=\"list list-inset\" ng-show=\"cartData.matches.length>0\">\n                        <div class=\"item item-divider\">Endereços encontrados:</div>\n                        <label class=\"item address-item\" ng-repeat=\"address in cartData.matches\">\n                            <button class=\"button button-small button-light\" type=\"button\"\n                                    ng-click=\"selecionaEndereco(address)\">\n                                {{address.logradouro}} - CEP: {{address.cep}} - Bairro: {{address.bairro}}\n                            </button>\n                        </label>\n                    </div>\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Bairro:</span>\n                    <input type=\"text\" name=\"bairro\" ng-model=\"cartData.bairro\" placeholder=\"Ex.: Centro\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Número:</span>\n                    <input type=\"text\" name=\"numero\" ng-model=\"cartData.numero\" placeholder=\"Ex.: 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Complemento: <small>(opcional)</small></span>\n                    <input type=\"text\" name=\"complemento\" ng-model=\"cartData.complemento\" placeholder=\"Ex.: apartamento 109\">\n                </label>\n\n                <label class=\"item\">\n                    <button class=\"button button-block button-positive\" type=\"submit\">Solicitar Entrega</button>\n                </label>\n            </div>\n        </form>\n    </ion-content>\n</ion-modal-view>\n");
+$templateCache.put("common/templates/menu.html","<ion-side-menus enable-menu-with-back-views=\"false\">\n    <ion-side-menu-content>\n        <ion-nav-bar class=\"bar-stable\">\n            <ion-nav-back-button></ion-nav-back-button>\n            <ion-nav-buttons side=\"left\">\n                <button class=\"button button-icon button-clear ion-navicon\" menu-toggle=\"left\"\n                        ng-hide=\"$exposeAside.active\"></button>\n                <div class=\"delivery-bar-title title\">delivery24horas.com</div>\n            </ion-nav-buttons>\n            <ion-nav-buttons side=\"right\">\n                <button class=\"delivery-btn-social-header button button-positive btn-social\">\n                    <i class=\"ion-social-facebook\"></i>Login com Facebook\n                </button>\n\n                <!--<button class=\"button marging\" ng-class=\"{\'button-clear\': (valorTotal=0), \'button-balanced\': (valorTotal>0)}\">-->\n                <button class=\"button marging\"\n                        ng-click=\"showCart()\"\n                        ng-class=\"(valorTotal>0)?\'button-clear button-balanced\': \'button-clear\'\">\n                <!--<button class=\"button button-clear\">-->\n                    <i class=\"ion-android-cart\"></i> ({{ valorTotal | currency }})\n                </button>\n            </ion-nav-buttons>\n        </ion-nav-bar>\n        <ion-nav-view name=\"menuContent\"></ion-nav-view>\n    </ion-side-menu-content>\n\n    <ion-side-menu expose-aside-when=\"large\">\n        <ion-header-bar class=\"bar-stable\">\n            <h1 class=\"title\">Menu</h1>\n        </ion-header-bar>\n        <ion-content>\n            <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n            <div class=\"list list-inset\">\n                <div class=\"item item-divider\">Categorias</div>\n\n                <a href=\"#/app/productlist\" class=\"item item-icon-left\"\n                   menu-close ng-click=\"loadCategoria(\'Todas\');loadProducts()\">\n                    <i class=\"icon ion-beer\"></i>\n                    Todas\n                </a>\n                <a ng-repeat=\"item in categorias\" href=\"#/app/productlist\" class=\"item item-icon-left\"\n                   menu-close ng-click=\"loadCategoria(item.nome);loadProducts(item.id)\">\n                    <i class=\"{{ item.icon }}\"></i>\n                    {{ item.nome }}\n                </a>\n\n                <div class=\"item item-divider\">Relatórios</div>\n                <a href=\"#/app/report\" class=\"item item-icon-left\" menu-close>\n                    <i class=\"ion-document-text\"></i>\n                    Relatórios\n                </a>\n                <a href=\"#/app/browse\" class=\"item item-icon-left\" menu-close>\n                    <i class=\"ion-document-text\"></i>\n                    Browse\n                </a>\n\n                <div class=\"item item-divider\">Minha conta</div>\n                <div class=\"item\">Meus Dados</div>\n                <div class=\"item\">Trocar Senha</div>\n                <div class=\"item\">Sair</div>\n\n            </div>\n        </ion-content>\n    </ion-side-menu>\n</ion-side-menus>");
 $templateCache.put("productlist/templates/productlist.html","<ion-view view-title=\"\">\n    <div class=\"bar bar-subheader item-input-inset\">\n        <label class=\"item-input-wrapper\">\n            <i class=\"icon ion-ios-search placeholder-icon\"></i>\n            <input type=\"search\" placeholder=\"Busca de produtos\" ng-model=\"query\">\n        </label>\n        <button class=\"button button-clear\" ng-click=\"query = \'\'\">\n            Cancelar\n        </button>\n    </div>\n    <ion-content class=\"has-subheader\">\n        <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n\n        <div class=\"list delivery-list\">\n\n            <div class=\"item item-button-right delivery-btn-social\">\n                <button class=\"button button-positive btn-social\">\n                    <i class=\"ion-social-facebook\"></i>Login com Facebook\n                </button>\n            </div>\n            <div class=\"item\">\n                <div class=\"delivery-logo-block\">\n                    <img ng-src=\"{{logoUrl+\'logo-delivery2-compressed.png\'}}\">\n                    <p ng-hide=\"$exposeAside.active\"><span class=\"ion-arrow-left-a\"></span> Acesse o Menu ao lado</p>\n                </div>\n            </div>\n\n        </div>\n\n        <div ng-class=\"{card: minMediumScreens, list: handhelds, \'list-inset\': handhelds}\">\n            <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n            <div class=\"delivery-product-item\" ng-class=\"{item: handhelds, \'item-thumbnail-left\': handhelds}\"\n                 ng-repeat=\"produto in products | filter: query\">\n\n                <img ng-src=\"{{ prepareImage(produto.imagem) }}\"\n                     alt=\"Imagem do produto {{ produto.nome }}\"\n                     title=\"Imagem do produto {{ produto.nome }}\">\n                <div>\n                    <span class=\"price\">{{ produto.valor | currency }}<small ng-show=\"quantidade[produto.id]>0\"> x <span class=\"quantity\">{{ quantidade[produto.id] }}</span></small></span>\n                    <p>{{ produto.nome }}</p>\n                </div>\n\n                <div class=\"range\">\n                    <button ng-click=\"decrementa(produto.id)\" class=\"button button-light\"><i class=\"icon ion-chevron-left\"></i></button>\n                    <input type=\"range\" ng-change=\"somaTotal()\" id=\"quantidade[{{ produto.id }}]\"\n                           name=\"quantidade[{{ produto.id }}]\" ng-model=\"quantidade[produto.id]\"\n                           min=\"0\" max=\"{{ produto.max }}\">\n                    <button ng-click=\"incrementa(produto.id)\" class=\"button button-light\"><i class=\"icon ion-chevron-right\"></i></button>\n                </div>\n            </div>\n        </div>\n    </ion-content>\n</ion-view>");
 $templateCache.put("report/templates/report.html","<ion-view view-title=\"Relatórios\">\n    <ion-content class=\"padding\">\n        <h1>{{ titulo }}</h1>\n        <p>\n            <a class=\"button icon icon-right ion-chevron-right\" href=\"#/app/report\">titulo</a>\n        </p>\n    </ion-content>\n</ion-view>");
 $templateCache.put("browse.html","<ion-view view-title=\"Browse\">\n  <ion-content>\n    <h1>Browse</h1>\n  </ion-content>\n</ion-view>\n");
-$templateCache.put("cart.html","<ion-modal-view>\n    <ion-header-bar>\n        <h1 class=\"title\">Carrinho</h1>\n\n        <div class=\"buttons\">\n            <button class=\"button button-clear\" ng-click=\"closeCart()\">Fechar</button>\n        </div>\n    </ion-header-bar>\n    <ion-content>\n        <div class=\"text-center\" ng-hide=\"valorTotal>0\">\n            <button class=\"button button-large button-full button-dark\" ng-click=\"closeCart()\">\n                Carrinho de Compras Vazio\n            </button>\n        </div>\n\n        <div class=\"list list-inset\" ng-show=\"valorTotal>0\">\n            <div class=\"item item-divider\">Itens</div>\n            <div class=\"item item-button-right\" ng-repeat=\"item in cartItems\">\n                <p>{{ item.nome }}</p>\n                <span class=\"quantity\">{{ item.quantidade }} <small>x</small> </span><span class=\"price\">{{ item.valor | currency }}</span>\n                <button class=\"button button-light\" ng-click=\"removeCartItem(item.id)\">\n                    <i class=\"icon ion-close-circled\"></i>\n                </button>\n            </div>\n        </div>\n\n        <form ng-submit=\"doDelivery()\" ng-show=\"valorTotal>0\">\n            <div class=\"list\">\n                <div class=\"item item-divider\">Valor Total</div>\n                <div class=\"item text-center\"><span class=\"price\">{{ valorTotal | currency }}</span></div>\n                <div class=\"item item-divider\">Dados da Entrega</div>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Nome:</span>\n                    <input type=\"text\" name=\"nome\" ng-model=\"cartData.nome\" placeholder=\"Ex.: João da Silva\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">E-mail:</span>\n                    <input type=\"email\" name=\"email\" ng-model=\"cartData.email\" placeholder=\"Ex.: exemplo@gmail.com\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Telefone:</span>\n                    <input type=\"tel\" name=\"telefone\" ng-model=\"cartData.telefone\" placeholder=\"Ex.: (22)999 999 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Whatsapp:</span>\n                    <input type=\"tel\" name=\"whatsapp\" ng-model=\"cartData.whatsapp\" placeholder=\"Ex.: (22)999 999 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">CEP:</span>\n                    <input type=\"text\"\n                           ng-keyup=\"cepKeyup($event)\"\n                           autocomplete=\"off\"\n                           ng-model=\"cartData.cep\" placeholder=\"Ex.: 28893818\"\n                           maxlength=\"8\">\n                </label>\n                <label class=\"item item-input item-stacked-label item-button-right\">\n                    <span class=\"input-label\">Endereço:</span>\n                    <input type=\"text\"\n                           ng-keyup=\"enderecoKeyup()\"\n                           autocomplete=\"off\"\n                           ng-model=\"cartData.endereco\" placeholder=\"Ex.: Av. Brasil\">\n                    <div class=\"list list-inset\" ng-show=\"cartData.matches.length>0\">\n                        <div class=\"item item-divider\">Endereços encontrados:</div>\n                        <label class=\"item address-item\" ng-repeat=\"address in cartData.matches\">\n                            <button class=\"button button-small button-light\" type=\"button\" ng-click=\"selecionaEndereco(address)\">\n                                {{address.logradouro}} - CEP: {{address.cep}} - Bairro: {{address.bairro}}\n                            </button>\n                        </label>\n                    </div>\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Número:</span>\n                    <input type=\"text\" name=\"numero\" ng-model=\"cartData.numero\" placeholder=\"Ex.: 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Complemento:</span>\n                    <input type=\"text\" name=\"complemento\" ng-model=\"cartData.complemento\" placeholder=\"Ex.: apartamento 109\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Bairro:</span>\n                    <input type=\"text\" name=\"bairro\" ng-model=\"cartData.bairro\" placeholder=\"Ex.: Centro\">\n                </label>\n                <label class=\"item\">\n                    <button class=\"button button-block button-positive\" type=\"submit\">Solicitar Entrega</button>\n                </label>\n            </div>\n        </form>\n    </ion-content>\n</ion-modal-view>\n");
 $templateCache.put("home.html","<ion-view view-title=\"\" ng-controller=\"ProductsCtrl\">\n    <div class=\"bar bar-subheader item-input-inset\">\n        <label class=\"item-input-wrapper\">\n            <i class=\"icon ion-ios-search placeholder-icon\"></i>\n            <input type=\"search\" placeholder=\"Busca de produtos\" ng-model=\"query\">\n        </label>\n        <button class=\"button button-clear\" ng-click=\"query = \'\'\">\n            Cancelar\n        </button>\n    </div>\n    <ion-content class=\"has-subheader\">\n        <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n\n        <div class=\"list delivery-list\">\n\n            <div class=\"item item-button-right\">\n                <button class=\"delivery-btn-social-top button button-positive btn-social\">\n                    <i class=\"ion-social-facebook\"></i>Login com Facebook\n                </button>\n            </div>\n            <div class=\"item\">\n                <div class=\"delivery-logo-block\">\n                    <img ng-src=\"{{logoUrl+\'logo-delivery2-compressed.png\'}}\">\n                    <p ng-hide=\"$exposeAside.active\"><span class=\"ion-arrow-left-a\"></span> Acesse o Menu ao lado</p>\n                </div>\n            </div>\n\n        </div>\n\n        <div class=\"card delivery-product-block\">\n            <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n            <div class=\"row\">\n                <div class=\"padding text-center\" ng-repeat=\"produto in products | filter: query\">\n                    <div class=\"thumbnail\">\n                        <img ng-src=\"{{ imagesUrl+produto.imagem }}\"\n                             alt=\"Imagem do produto {{ produto.nome }}\"\n                             title=\"Imagem do produto {{ produto.nome }}\">\n                        <h4 class=\"\">{{ produto.valorUnitVenda | currency }}</h4>\n                        <p>{{ produto.nome }}</p>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"list list-inset delivery-product-list\">\n\n            <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n\n            <div class=\"item item-thumbnail-left\" ng-repeat=\"produto in products | filter: query\">\n                <img ng-src=\"{{ imagesUrl+produto.imagem }}\"\n                     alt=\"Imagem do produto {{ produto.nome }}\"\n                     title=\"Imagem do produto {{ produto.nome }}\">\n                <h2>{{ produto.nome }}</h2>\n                <p>{{ produto.valorUnitVenda | currency }}</p>\n            </div>\n\n        </div>\n\n    </ion-content>\n</ion-view>");
 $templateCache.put("loading.html","<div class=\"loading-container visible active\">\n    <div class=\"loading\">\n        <p>Carregando...</p><ion-spinner></ion-spinner>\n    </div>\n</div>");
 $templateCache.put("login.html","<ion-modal-view>\n  <ion-header-bar>\n    <h1 class=\"title\">Login</h1>\n    <div class=\"buttons\">\n      <button class=\"button button-clear\" ng-click=\"closeLogin()\">Close</button>\n    </div>\n  </ion-header-bar>\n  <ion-content>\n    <form ng-submit=\"doLogin()\">\n      <div class=\"list\">\n        <label class=\"item item-input\">\n          <span class=\"input-label\">Username</span>\n          <input type=\"text\" ng-model=\"loginData.username\">\n        </label>\n        <label class=\"item item-input\">\n          <span class=\"input-label\">Password</span>\n          <input type=\"password\" ng-model=\"loginData.password\">\n        </label>\n        <label class=\"item\">\n          <button class=\"button button-block button-positive\" type=\"submit\">Log in</button>\n        </label>\n      </div>\n    </form>\n  </ion-content>\n</ion-modal-view>\n");
 $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-content>\n    <h1>Search</h1>\n  </ion-content>\n</ion-view>\n");}]);
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
+(function () {
+    'use strict';
+
+    /* ***************************************************************************
+     * ### Common API module ###
+     *
+     * This is a project common api service. It's used for sending all api requests in the application.
+     * It handles success and error response by default, if it's not set custom callback function explicitly.
+     */
+
+    /*! */
+
+    var moduleApp = angular.module('App.Alerts');
+
+    moduleApp.service('Alerts', [
+        '$rootScope',
+        '$ionicPopup',
+        alerts
+    ]);
+
+    function alerts($rootScope, $ionicPopup) {
+        var returnObj;
+        returnObj = {
+            numbersOnly: _numbersOnly,
+            customAlert: _customAlert,
+            invalidCep: _invalidCep
+        };
+
+        function _numbersOnly() {
+            var alertPopup = $ionicPopup.alert({
+                title: 'Alerta',
+                template: 'Digite somente números',
+                buttons: [
+                    {
+                        text: 'OK',
+                        type: 'button-assertive'
+                    }
+                ]
+            });
+            alertPopup.then(function(res) {
+                $rootScope.c.debug('Campo somente números');
+            });
+        }
+
+        function _invalidCep(cep) {
+            var alertPopup = $ionicPopup.alert({
+                title: 'CEP inválido',
+                template: 'CEP '+cep+' não foi encontrado',
+                buttons: [
+                    {
+                        text: 'OK',
+                        type: 'button-assertive'
+                    }
+                ]
+            });
+            alertPopup.then(function(res) {
+                $rootScope.c.debug('CEP '+cep+' não foi encontrado');
+            });
+        }
+
+        function _customAlert(title,template) {
+            var alertPopup = $ionicPopup.alert({
+                title: title,
+                template: template,
+                buttons: [
+                    {
+                        text: 'OK',
+                        type: 'button-assertive'
+                    }
+                ]
+            });
+            alertPopup.then(function(res) {
+                $rootScope.c.debug(template);
+            });
+        }
+
+        return returnObj;
+
+    }
+
+    module.exports = moduleApp;
+})();
+},{}],9:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -644,7 +781,7 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
 
     module.exports = apiModule;
 })();
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -657,107 +794,136 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
 
     /*! */
 
-    var module = angular.module('App.cepDirective');
+    var moduleApp = angular.module('App.Directives');
 
-    module.directive('cepa', function () {
+    moduleApp.directive('numbersOnly', [
+        'Alerts',
+        numbersOnly
+    ]);
+
+    function numbersOnly(Alerts) {
         return {
+            // atribuímos em forma de classe css nesse caso
             restrict: 'C',
             link: function (scope, element, attrs) {
-                element.bind('change', function () {
-                    console.log(element.val());
+                // atribuímos o plugin jQuery ao parâmetro `element`
+                // nesse caso, o element do DOM que foi bindado a diretiva
+                element.on('keypress', function (e) {
+                    if (e.which != 13 && e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)){
+                        Alerts.numbersOnly();
+                        e.preventDefault();
+                        return false;
+                    }
                 });
             }
         }
-    });
+    }
 
+    moduleApp.directive('cancelEnter', [
+        '$rootScope',
+        cancelEnter
+    ]);
 
-    //function cep() {
-    //    return {
-    //        restrict: 'C',
-    //        link: function (scope, element, attrs) {
-    //            element.bind('change', function () {
-    //                console.log(element.val());
-    //                if (element.val().length == (attrs.maxlength)) {
-    //                    if ( (parseInt(element.val())<28890000)||((parseInt(element.val())>28899999)) ){
-    //                        //element.tooltip({
-    //                        //    animation: true,//'fade',
-    //                        //    title: "{{ trans('app.angular.cepForaFaixa') }}",
-    //                        //    html:true,
-    //                        //    trigger: 'manual'//'custom'
-    //                        //});
-    //                        //element.tooltip('show');
-    //                        //element.on('shown.bs.tooltip', function(){
-    //                        //    setTimeout(function () {
-    //                        //        element.tooltip('destroy');
-    //                        //    }, 2000);
-    //                        //});
-    //                    } else {
-    //                        $('input[name=endereco]').empty();
-    //                        $('input[name=endereco]').attr("disabled","true");
-    //                        $('input[name=bairro]').empty();
-    //                        $('input[name=bairro]').attr("disabled","true");
-    //                        //$('input[name=cidade]').empty();
-    //                        //$('input[name=cidade]').attr("disabled","true");
-    //                        //$('input[name=estado]').empty();
-    //                        //$('input[name=estado]').attr("disabled","true");
-    //
-    //                        $('#cep_spinner').attr("class","icon spinner spinner-android ng-show");
-    //                        $.get('//viacep.com.br/ws/'+element.val()+'/json/', function (endereco){
-    //                            if (endereco['erro']) {
-    //                                //element.tooltip({
-    //                                //    animation: true,//'fade',
-    //                                //    title: "{{ trans('app.angular.cepInvalido') }}",
-    //                                //    html:true,
-    //                                //    trigger: 'manual'//'custom'
-    //                                //});
-    //                                //element.tooltip('show');
-    //                                //element.on('shown.bs.tooltip', function(){
-    //                                //    setTimeout(function () {
-    //                                //        element.tooltip('destroy');
-    //                                //    }, 2000);
-    //                                //});
-    //                            }else{
-    //                                $('input[name=endereco]').val(endereco['logradouro']);
-    //                                $('input[name=bairro]').val(endereco['bairro']);
-    //                                //$('input[name=cidade]').val(endereco['localidade']);
-    //                                //$('input[name=estado]').val(endereco['uf']);
-    //                            }
-    //
-    //                            $('input[name=endereco]').removeAttr("disabled","true");
-    //                            $('input[name=bairro]').removeAttr("disabled","true");
-    //                            //$('input[name=cidade]').removeAttr("disabled","true");
-    //                            //$('input[name=estado]').removeAttr("disabled","true");
-    //                            $('#cep_spinner').attr("class","form-control-feedback ng-hide");
-    //                        }).fail(function() {
-    //                            $('input[name=endereco]').removeAttr("disabled","true");
-    //                            $('input[name=bairro]').removeAttr("disabled","true");
-    //                            //$('input[name=cidade]').removeAttr("disabled","true");
-    //                            //$('input[name=estado]').removeAttr("disabled","true");
-    //                            $('#cep_loading').attr("class","icon spinner spinner-android ng-hide");
-    //                            //element.tooltip({
-    //                            //    animation: true,//'fade',
-    //                            //    title: "{{ trans('app.angular.cepInvalido') }}",
-    //                            //    html:true,
-    //                            //    trigger: 'manual'//'custom'
-    //                            //});
-    //                            //element.tooltip('show');
-    //                            //element.on('shown.bs.tooltip', function(){
-    //                            //    setTimeout(function () {
-    //                            //        element.tooltip('destroy');
-    //                            //    }, 2000);
-    //                            //});
-    //                        });
-    //                    }
-    //
-    //                }
-    //            });
-    //        }
-    //    }
-    //}
+    function cancelEnter($rootScope) {
+        return {
+            // atribuímos em forma de classe css nesse caso
+            restrict: 'C',
+            link: function (scope, element, attrs) {
+                // atribuímos o plugin jQuery ao parâmetro `element`
+                // nesse caso, o element do DOM que foi bindado a diretiva
+                element.on('keypress', function (e) {
+                    if (e.which == 13){
+                        $rootScope.c.debug('Cancelando ação do enter');
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+        }
+    }
 
-    module.exports = module;
+    moduleApp.directive('cepKeyUp', [
+        '$rootScope',
+        'Api',
+        'AppConfig',
+        'Alerts',
+        cepKeyUp
+    ]);
+
+    function cepKeyUp($rootScope, Api, AppConfig, Alerts) {
+        return {
+            // atribuímos em forma de classe css nesse caso
+            restrict: 'C',
+            link: function (scope, element, attrs) {
+                // atribuímos o plugin jQuery ao parâmetro `element`
+                // nesse caso, o element do DOM que foi bindado a diretiva
+                element.on('keyup', function (e) {
+                    if (e.which != 13 && element.val().length == 8) {
+                        Api.sendRequest({
+                                method: "GET",
+                                url: AppConfig.servicoCep($rootScope.cartData.cep)
+                            })
+                            .then(function(response){
+                                if (response.data.erro){
+                                    $rootScope.cartData.endereco = '';
+                                    $rootScope.cartData.bairro = '';
+                                    Alerts.invalidCep($rootScope.cartData.cep);
+                                } else {
+                                    $rootScope.cartData.endereco = response.data.logradouro;
+                                    $rootScope.cartData.bairro = response.data.bairro;
+                                }
+                            });
+                    }
+                });
+            }
+        }
+    }
+
+    moduleApp.directive('enderecoKeyUp', [
+        '$rootScope',
+        'AddressDataService',
+        enderecoKeyUp
+    ]);
+
+    function enderecoKeyUp($rootScope, AddressDataService) {
+        return {
+            // atribuímos em forma de classe css nesse caso
+            restrict: 'C',
+            link: function (scope, element, attrs) {
+                // atribuímos o plugin jQuery ao parâmetro `element`
+                // nesse caso, o element do DOM que foi bindado a diretiva
+                element.on('keyup', function (e) {
+                    if (e.which != 13 && element.val().length >2) {
+                        //if ($rootScope.cartData.matches.length>0)
+                        //    $rootScope.monitoraMatch = true;
+                        //
+                        //if ($rootScope.monitoraMatch===true && $rootScope.cartData.matches.length==0){
+                        //    $rootScope.c.debug('parar busca');
+                        //    $rootScope.tamanhoCampo = element.val().length;
+                        //    $rootScope.buscar = false;
+                        //    $rootScope.monitoraMatch = false;
+                        //}
+                        //
+                        //if ($rootScope.tamanhoCampo>element.val().length && $rootScope.buscar === false){
+                        //    $rootScope.c.debug('ativar busca');
+                        //    $rootScope.monitoraMatch = false;
+                        //    $rootScope.buscar = true;
+                        //    $rootScope.tamanhoCampo = 0;
+                        //}
+                        //
+                        //if ($rootScope.buscar!==false) AddressDataService.searchAddress(element.val());
+
+                        AddressDataService.searchAddress(element.val());
+
+                    } else $rootScope.cartData.matches = [];
+                });
+            }
+        }
+    }
+
+    module.exports = moduleApp;
 })();
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -871,7 +1037,7 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
 
         function _handleResponse(searchFilter) {
             $rootScope.c.debug('Searching addresses for ' + searchFilter);
-            Api.sendRequest({
+            return Api.sendRequest({
                     method: "GET",
                     url: AppConfig.servicoCep('RJ/Rio das Ostras/'+searchFilter)
                 })
@@ -891,6 +1057,7 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
                         var query = removeAcentos(searchFilter);
                         if (searchIn.indexOf(query) !== -1) return true;
                     });
+                    return response;
                 });
         };
         return searchAddress;
@@ -907,17 +1074,7 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
             log: function () {},
             debug: function () {}
         };
-        //response = {
-        //    log: function(srt){
-        //        if (AppConfig.debug) console.log(srt);
-        //    },
-        //    debug: function(srt){
-        //        if (AppConfig.debug) console.debug(srt);
-        //    }
-        //};
-        //return response;
     }
-
     module.exports = helperModule;
 })();
 },{}]},{},[1]);

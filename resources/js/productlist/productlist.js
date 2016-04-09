@@ -119,7 +119,7 @@
         $rootScope.loadProducts();
 
         $scope.prepareImage = function (img) {
-            if (img==null) return 'http://placehold.it/80x80';
+            if (img==null || AppConfig.debug) return 'http://placehold.it/80x80';
             return AppConfig.imagesUrl+img;
         };
     }

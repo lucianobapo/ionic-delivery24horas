@@ -1,6 +1,6 @@
 <ion-modal-view>
     <ion-header-bar>
-        <h1 class="title">Carrinho</h1>
+        <h1 class="title">Carrinho de Compras</h1>
 
         <div class="buttons">
             <button class="button button-clear" ng-click="closeCart()">Fechar</button>
@@ -9,7 +9,7 @@
     <ion-content>
         <div class="text-center" ng-hide="valorTotal>0">
             <button class="button button-large button-full button-dark" ng-click="closeCart()">
-                Carrinho de Compras Vazio
+                Nenhum item selecionado
             </button>
         </div>
 
@@ -24,10 +24,22 @@
             </div>
         </div>
 
-        <form ng-submit="doDelivery()" ng-show="valorTotal>0">
+        <form class="cancelEnter" ng-submit="doDelivery()" ng-show="valorTotal>0">
             <div class="list">
-                <div class="item item-divider">Valor Total</div>
-                <div class="item text-center"><span class="price">{{ valorTotal | currency }}</span></div>
+                <div class="item item-divider">Forma de Pagamento</div>
+
+                <div class="item text-center">
+                    Valor Total: <span class="price">{{ valorTotal | currency }}</span>
+                    <ion-list class="text-left">
+                        <ion-radio ng-model="cartData.pagamento" ng-value="'dinheiro'">Dinheiro</ion-radio>
+                        <ion-radio ng-model="cartData.pagamento" ng-value="'debito'">Cartão Debito</ion-radio>
+                        <ion-radio ng-model="cartData.pagamento" ng-value="'credito'">Cartão Crédito</ion-radio>
+                    </ion-list>
+                </div>
+                <div class="item">
+
+                </div>
+
                 <div class="item item-divider">Dados da Entrega</div>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Nome:</span>
@@ -47,8 +59,8 @@
                 </label>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">CEP:</span>
-                    <input type="text"
-                           ng-keyup="cepKeyup($event)"
+                    <input type="tel"
+                           class="numbersOnly cancelEnter cepKeyUp"
                            autocomplete="off"
                            ng-model="cartData.cep" placeholder="Ex.: 28893818"
                            maxlength="8">
@@ -56,30 +68,32 @@
                 <label class="item item-input item-stacked-label item-button-right">
                     <span class="input-label">Endereço:</span>
                     <input type="text"
-                           ng-keyup="enderecoKeyup()"
+                           class="cancelEnter enderecoKeyUp"
                            autocomplete="off"
                            ng-model="cartData.endereco" placeholder="Ex.: Av. Brasil">
                     <div class="list list-inset" ng-show="cartData.matches.length>0">
                         <div class="item item-divider">Endereços encontrados:</div>
                         <label class="item address-item" ng-repeat="address in cartData.matches">
-                            <button class="button button-small button-light" type="button" ng-click="selecionaEndereco(address)">
+                            <button class="button button-small button-light" type="button"
+                                    ng-click="selecionaEndereco(address)">
                                 {{address.logradouro}} - CEP: {{address.cep}} - Bairro: {{address.bairro}}
                             </button>
                         </label>
                     </div>
                 </label>
                 <label class="item item-input item-stacked-label">
+                    <span class="input-label">Bairro:</span>
+                    <input type="text" name="bairro" ng-model="cartData.bairro" placeholder="Ex.: Centro">
+                </label>
+                <label class="item item-input item-stacked-label">
                     <span class="input-label">Número:</span>
                     <input type="text" name="numero" ng-model="cartData.numero" placeholder="Ex.: 999">
                 </label>
                 <label class="item item-input item-stacked-label">
-                    <span class="input-label">Complemento:</span>
+                    <span class="input-label">Complemento: <small>(opcional)</small></span>
                     <input type="text" name="complemento" ng-model="cartData.complemento" placeholder="Ex.: apartamento 109">
                 </label>
-                <label class="item item-input item-stacked-label">
-                    <span class="input-label">Bairro:</span>
-                    <input type="text" name="bairro" ng-model="cartData.bairro" placeholder="Ex.: Centro">
-                </label>
+
                 <label class="item">
                     <button class="button button-block button-positive" type="submit">Solicitar Entrega</button>
                 </label>

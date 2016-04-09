@@ -111,7 +111,7 @@
 
         function _handleResponse(searchFilter) {
             $rootScope.c.debug('Searching addresses for ' + searchFilter);
-            Api.sendRequest({
+            return Api.sendRequest({
                     method: "GET",
                     url: AppConfig.servicoCep('RJ/Rio das Ostras/'+searchFilter)
                 })
@@ -131,6 +131,7 @@
                         var query = removeAcentos(searchFilter);
                         if (searchIn.indexOf(query) !== -1) return true;
                     });
+                    return response;
                 });
         };
         return searchAddress;
@@ -147,16 +148,6 @@
             log: function () {},
             debug: function () {}
         };
-        //response = {
-        //    log: function(srt){
-        //        if (AppConfig.debug) console.log(srt);
-        //    },
-        //    debug: function(srt){
-        //        if (AppConfig.debug) console.debug(srt);
-        //    }
-        //};
-        //return response;
     }
-
     module.exports = helperModule;
 })();

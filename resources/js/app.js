@@ -5,22 +5,28 @@
     angular.module('templates', []);
     angular.module('App.Helpers', []);
     angular.module('App.Api', []);
-    angular.module('App.cepDirective', []);
+    angular.module('App.Directives', []);
+    angular.module('App.Alerts', []);
+    angular.module('App.CartService', []);
 
     angular.module('App.Common', []);
     //angular.module('App.Playlist', []);
     angular.module('App.ProductList', []);
     angular.module('App.Report', []);
 
+
     require('./config-build');
     require('./templates-build');
     require('./utility/helpers');
     require('./utility/api');
-    require('./utility/cep-directive');
+    require('./utility/directives');
+    require('./utility/alerts');
+    require('./cart/cart-service');
 
     require('./common/common');
     require('./productlist/productlist');
     require('./report/report');
+
     //require('./playlist/playlist');
 
     var appModule = angular.module('App', [
@@ -33,6 +39,9 @@
         'App.Helpers',
         'App.Common',
         'App.Api',
+        'App.Directives',
+        'App.Alerts',
+        'App.CartService',
         //'App.Playlist',
         'App.ProductList',
         'App.Report',
@@ -132,9 +141,11 @@
         '$scope',
         '$rootScope',
         '$ionicModal',
+        'CartService',
         bodyController
     ]);
-    function bodyController($scope, $rootScope, $ionicModal) {
+    function bodyController($scope, $rootScope, $ionicModal, CartService) {
+        CartService.initCart();
         // Create the loading modal that we will use later
         //$scope.loadingModal = $ionicModal.fromTemplate('loading.html');
         $ionicModal.fromTemplateUrl('loading.html', {
