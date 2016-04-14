@@ -196,15 +196,15 @@
         '$scope',
         '$rootScope',
         '$ionicModal',
-        '$window',
         'CartService',
         'Categorias',
-        '$location',
+        'Layout',
         bodyController
     ]);
-    function bodyController($scope, $rootScope, $ionicModal, $window, CartService, Categorias, $location) {
+    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias, Layout) {
         CartService.initCart();
         Categorias.loadItems();
+        Layout.check();
 
         // Create the loading modal that we will use later
         //$scope.loadingModal = $ionicModal.fromTemplate('loading.html');
@@ -220,20 +220,6 @@
             return $scope.loadingModal;
         }, function(value) {
             value.show();
-        });
-
-        $rootScope.$watch(function(){
-            return $window.innerWidth;
-        }, function(value) {
-            if (value<=425) {
-                $rootScope.handhelds = true;
-                $rootScope.minMediumScreens = false;
-                if ($location.path().indexOf("/app")!==-1) $location.path("/tab/home");
-            } else {
-                $rootScope.handhelds = false;
-                $rootScope.minMediumScreens = true;
-                if ($location.path().indexOf("/tab")!==-1) $location.path("/app/productlist");
-            }
         });
 
         $rootScope.rootCategoriaSelecionada = 'Todas';
@@ -507,7 +493,7 @@
     configModule.constant('AppConfig', {
         debug: false,
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
-        apiEndpoint: 'http://api.delivery24horas.com/json',
+        apiEndpoint: 'http://api.localhost.com/json',
         imagesUrl: 'https://s3.amazonaws.com/delivery-images/thumbnails/',
         logoUrl: 'https://s3.amazonaws.com/delivery-images/logo/'
     });
@@ -1382,6 +1368,52 @@ $templateCache.put("tabs/tabs.html","<!--\nCreate tabs with an icon and label, u
                 return null;
             }
         };
+    }
+
+    angularModule.service('Layout', [
+        '$rootScope',
+        '$location',
+        '$window',
+        Layout
+    ]);
+
+    function Layout($rootScope, $location, $window) {
+        var returnObj;
+        returnObj = {
+            check: _check
+        };
+
+        function _check() {
+            $rootScope.handheldsUrl = '/tab/home';
+            $rootScope.minMediumScreensUrl = '/app/productlist';
+            var switchLayout = function(value){
+                if (value<=425) {
+                    $rootScope.handhelds = true;
+                    $rootScope.minMediumScreens = false;
+                    if ($location.path().indexOf("/app")!==-1) {
+                        $rootScope.c.debug('Redirecting to: '+$rootScope.handheldsUrl);
+                        $location.path($rootScope.handheldsUrl);
+                    }
+                } else {
+                    $rootScope.handhelds = false;
+                    $rootScope.minMediumScreens = true;
+                    if ($location.path().indexOf("/tab")!==-1) {
+                        $rootScope.c.debug('Redirecting to: ' + $rootScope.minMediumScreensUrl);
+                        $location.path($rootScope.minMediumScreensUrl);
+                    }
+                }
+            };
+
+            switchLayout($window.innerWidth);
+
+            $rootScope.$watch(function(){
+                return $window.innerWidth;
+            }, function(value) {
+                switchLayout(value);
+            });
+        }
+
+        return returnObj;
     }
 
     module.exports = angularModule;

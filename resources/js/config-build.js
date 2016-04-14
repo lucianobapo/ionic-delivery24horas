@@ -14,7 +14,7 @@
     configModule.constant('AppConfig', {
         debug: false,
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
-        apiEndpoint: 'http://api.delivery24horas.com/json',
+        apiEndpoint: 'http://api.localhost.com/json',
         imagesUrl: 'https://s3.amazonaws.com/delivery-images/thumbnails/',
         logoUrl: 'https://s3.amazonaws.com/delivery-images/logo/'
     });

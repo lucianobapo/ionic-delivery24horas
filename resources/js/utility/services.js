@@ -127,5 +127,51 @@
         };
     }
 
+    angularModule.service('Layout', [
+        '$rootScope',
+        '$location',
+        '$window',
+        Layout
+    ]);
+
+    function Layout($rootScope, $location, $window) {
+        var returnObj;
+        returnObj = {
+            check: _check
+        };
+
+        function _check() {
+            $rootScope.handheldsUrl = '/tab/home';
+            $rootScope.minMediumScreensUrl = '/app/productlist';
+            var switchLayout = function(value){
+                if (value<=425) {
+                    $rootScope.handhelds = true;
+                    $rootScope.minMediumScreens = false;
+                    if ($location.path().indexOf("/app")!==-1) {
+                        $rootScope.c.debug('Redirecting to: '+$rootScope.handheldsUrl);
+                        $location.path($rootScope.handheldsUrl);
+                    }
+                } else {
+                    $rootScope.handhelds = false;
+                    $rootScope.minMediumScreens = true;
+                    if ($location.path().indexOf("/tab")!==-1) {
+                        $rootScope.c.debug('Redirecting to: ' + $rootScope.minMediumScreensUrl);
+                        $location.path($rootScope.minMediumScreensUrl);
+                    }
+                }
+            };
+
+            switchLayout($window.innerWidth);
+
+            $rootScope.$watch(function(){
+                return $window.innerWidth;
+            }, function(value) {
+                switchLayout(value);
+            });
+        }
+
+        return returnObj;
+    }
+
     module.exports = angularModule;
 })();

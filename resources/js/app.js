@@ -195,15 +195,15 @@
         '$scope',
         '$rootScope',
         '$ionicModal',
-        '$window',
         'CartService',
         'Categorias',
-        '$location',
+        'Layout',
         bodyController
     ]);
-    function bodyController($scope, $rootScope, $ionicModal, $window, CartService, Categorias, $location) {
+    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias, Layout) {
         CartService.initCart();
         Categorias.loadItems();
+        Layout.check();
 
         // Create the loading modal that we will use later
         //$scope.loadingModal = $ionicModal.fromTemplate('loading.html');
@@ -219,20 +219,6 @@
             return $scope.loadingModal;
         }, function(value) {
             value.show();
-        });
-
-        $rootScope.$watch(function(){
-            return $window.innerWidth;
-        }, function(value) {
-            if (value<=425) {
-                $rootScope.handhelds = true;
-                $rootScope.minMediumScreens = false;
-                if ($location.path().indexOf("/app")!==-1) $location.path("/tab/home");
-            } else {
-                $rootScope.handhelds = false;
-                $rootScope.minMediumScreens = true;
-                if ($location.path().indexOf("/tab")!==-1) $location.path("/app/productlist");
-            }
         });
 
         $rootScope.rootCategoriaSelecionada = 'Todas';
