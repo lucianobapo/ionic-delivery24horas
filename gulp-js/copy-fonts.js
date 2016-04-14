@@ -6,8 +6,8 @@ var gulp = require('gulp');
 var gutil = require('gulp-util');
 
 var paths = {
-    fontsBase: './resources/lib/ionic/fonts',
-    fontsFiles: '/*'
+    //fontsBase: './resources/lib/ionic/fonts',
+    fontsFiles: ['./resources/lib/ionic/fonts/*','./resources/lib/font-awesome/fonts/*']
 };
 
 /* **********************************************************************************
@@ -15,7 +15,7 @@ var paths = {
  * **********************************************************************************/
 gulp.task('copy-fonts', function() {
     gutil.log('copy-fonts STARTED');
-    return gulp.src(paths.fontsBase+paths.fontsFiles, {base: paths.fontsBase})
+    return gulp.src(paths.fontsFiles)
         .pipe(gulp.dest('./www/fonts/'))
         .on('end', function() {
             return gutil.log('copy-fonts DONE');

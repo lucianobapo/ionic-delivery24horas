@@ -1,5 +1,5 @@
 <ion-view view-title="">
-    <div class="bar bar-subheader item-input-inset">
+    <div class="bar item-input-inset" ng-class="{'bar-subheader': minMediumScreens}">
         <label class="item-input-wrapper">
             <i class="icon ion-ios-search placeholder-icon"></i>
             <input type="search" placeholder="Busca de produtos" ng-model="query">
@@ -8,7 +8,8 @@
             Cancelar
         </button>
     </div>
-    <ion-content class="has-subheader">
+    <ion-content ng-class="{'has-subheader': minMediumScreens, 'has-header': handhelds}"
+                 set-class-when-at-top="fix-to-top" overflow-scroll="false">
         <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
 
         <div class="list delivery-list">
@@ -18,7 +19,7 @@
                     <i class="ion-social-facebook"></i>Login com Facebook
                 </button>
             </div>
-            <div class="item">
+            <div class="item" ng-show="minMediumScreens">
                 <div class="delivery-logo-block">
                     <img ng-src="{{logoUrl+'logo-delivery2-resized-compressed.png'}}">
                     <p ng-hide="$exposeAside.active"><span class="ion-arrow-left-a"></span> Acesse o Menu ao lado</p>
@@ -27,27 +28,44 @@
 
         </div>
 
-        <div ng-class="{card: minMediumScreens, list: handhelds, 'list-inset': handhelds}">
-            <div class="item item-divider">{{ rootCategoriaSelecionada }}</div>
-            <div class="delivery-product-item" ng-class="{item: handhelds, 'item-thumbnail-left': handhelds}"
-                 ng-repeat="produto in products | filter: query">
+        <div class="delivery-list-with-menu">
+            <div affix-within-container=".delivery-list-with-menu" class="delivery-menu-left">
+                <!--<button ng-click="loadCategoria('Todas');loadProducts()"-->
+                        <!--class="delivery-button button button-outline button-positive">-->
+                    <!--<i class="{{ item.icon }}"></i>-->
+                    <!--<p>Todas</p>-->
+                <!--</button>-->
+                <!--<div ion-affix data-affix-within-parent-with-class="delivery-menu-left"-->
+                <button ng-repeat="item in categorias" ng-click="loadCategoria(item.nome);loadProducts(item.id)"
+                        class="delivery-button button button-outline button-positive">
+                    <i class="{{ item.icon }}"></i>
+                    <p>{{ item.nome }}</p>
+                </button>
+            </div>
 
-                <img ng-src="{{ prepareImage(produto.imagem) }}"
-                     alt="Imagem do produto {{ produto.nome }}"
-                     title="Imagem do produto {{ produto.nome }}">
-                <div>
-                    <span class="price">{{ produto.valor | currency }}<small ng-show="quantidade[produto.id]>0"> x <span class="quantity">{{ quantidade[produto.id] }}</span></small></span>
-                    <p>{{ produto.nome }}</p>
-                </div>
+            <div ng-class="{card: minMediumScreens, list: handhelds, 'list-inset': handhelds}">
+                <div class="item item-divider">{{ rootCategoriaSelecionada }}</div>
+                <div class="delivery-product-item" ng-class="{item: handhelds, 'item-thumbnail-left': handhelds}"
+                     ng-repeat="produto in products | filter: query">
 
-                <div class="range">
-                    <button ng-click="decrementa(produto.id)" class="button button-light"><i class="icon ion-chevron-left"></i></button>
-                    <input type="range" ng-change="somaTotal()" id="quantidade[{{ produto.id }}]"
-                           name="quantidade[{{ produto.id }}]" ng-model="quantidade[produto.id]"
-                           min="0" max="{{ produto.max }}">
-                    <button ng-click="incrementa(produto.id)" class="button button-light"><i class="icon ion-chevron-right"></i></button>
+                    <img ng-src="{{ prepareImage(produto.imagem) }}"
+                         alt="Imagem do produto {{ produto.nome }}"
+                         title="Imagem do produto {{ produto.nome }}">
+                    <div>
+                        <span class="price">{{ produto.valor | currency }}<small ng-show="quantidade[produto.id]>0"> x <span class="quantity">{{ quantidade[produto.id] }}</span></small></span>
+                        <p>{{ produto.nome }}</p>
+                    </div>
+
+                    <div class="range">
+                        <button ng-click="decrementa(produto.id)" class="button button-light"><i class="icon ion-chevron-left"></i></button>
+                        <input type="range" ng-change="somaTotal()" id="quantidade[{{ produto.id }}]"
+                               name="quantidade[{{ produto.id }}]" ng-model="quantidade[produto.id]"
+                               min="0" max="{{ produto.max }}">
+                        <button ng-click="incrementa(produto.id)" class="button button-light"><i class="icon ion-chevron-right"></i></button>
+                    </div>
                 </div>
             </div>
         </div>
+
     </ion-content>
 </ion-view>

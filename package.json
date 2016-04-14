@@ -1,5 +1,5 @@
 {
-  "name": "ilhanet/ionic-delivery24horas",
+  "name": "ionic-delivery24horas",
   "version": "0.1.8",
   "description": "Aplicativo Ionic Delivery 24 Horas",
   "author": {
@@ -32,6 +32,7 @@
     "gulp-uglify": "^1.4.0",
     "gulp-util": "^2.2.14",
     "shelljs": "^0.3.0",
+    "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "yargs": "^3.24.0"
   },

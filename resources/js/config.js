@@ -23,7 +23,7 @@
 
     // @if (ENVIRONMENT == 'development' && !CORDOVA)
     configModule.constant('AppConfig', {
-        debug: true,
+        debug: false,
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
         apiEndpoint: 'http://api.localhost.com/json',
         imagesUrl: 'https://s3.amazonaws.com/delivery-images/thumbnails/',

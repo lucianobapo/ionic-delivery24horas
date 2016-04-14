@@ -1,10 +1,12 @@
 {
-  "name": "ilhanet/ionic-delivery24horas",
+  "name": "ionic-delivery24horas",
   "private": "true",
-  "devDependencies": {
+  "devDependencies": {},
+  "dependencies": {
     "ionic": "driftyco/ionic-bower#master",
     "platform.js": "platform#^1.3.1",
     "bootstrap-sass": "bootstrap-sass#^3.3.6",
-    "angular-locale-pt-br": "^1.3.15"
+    "angular-locale-pt-br": "^1.3.15",
+    "font-awesome": "fortawesome/font-awesome#^4.5.0"
   }
 }

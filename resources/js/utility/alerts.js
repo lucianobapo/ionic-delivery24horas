@@ -22,8 +22,7 @@
         var returnObj;
         returnObj = {
             numbersOnly: _numbersOnly,
-            customAlert: _customAlert,
-            invalidCep: _invalidCep
+            customAlert: _customAlert
         };
 
         function _numbersOnly() {
@@ -39,22 +38,6 @@
             });
             alertPopup.then(function(res) {
                 $rootScope.c.debug('Campo somente números');
-            });
-        }
-
-        function _invalidCep(cep) {
-            var alertPopup = $ionicPopup.alert({
-                title: 'CEP inválido',
-                template: 'CEP '+cep+' não foi encontrado',
-                buttons: [
-                    {
-                        text: 'OK',
-                        type: 'button-assertive'
-                    }
-                ]
-            });
-            alertPopup.then(function(res) {
-                $rootScope.c.debug('CEP '+cep+' não foi encontrado');
             });
         }
 

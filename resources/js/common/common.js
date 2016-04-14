@@ -8,57 +8,16 @@
         '$rootScope',
         '$ionicModal',
         '$timeout',
-        //'$state',
-        '$ionicPopup',
-        'AppConfig',
-        'Api',
-        '$window',
-        //'CartService',
-        //'Helpers',
+        'Categorias',
         commonCtrl
     ]);
 
-    function commonCtrl($scope, $rootScope, $ionicModal, $timeout, /*$state, */$ionicPopup,
-                        AppConfig, Api, $window/*, CartService, Helpers*/) {
-        //CartService.initCart();
-
-        $rootScope.$watch(function(){
-            return $window.innerWidth;
-        }, function(value) {
-            if (value<=425) {
-                $rootScope.handhelds = true;
-                $rootScope.minMediumScreens = false;
-            } else {
-                $rootScope.handhelds = false;
-                $rootScope.minMediumScreens = true;
-            }
-        });
-
-        $rootScope.rootCategoriaSelecionada = 'Todas';
-        $rootScope.loadCategoria = function ($nome) {
-            $rootScope.rootCategoriaSelecionada = $nome;
-        };
-
-        $scope.loadItems = function () {
-            Api.sendRequest({
-                method: "GET",
-                url: AppConfig.apiEndpoint + '/categorias/todas'
-            })
-            .then(function(response){
-                //if (response.data!==null)
-                    $scope.categorias = response.data.data;
-            });
-        };
-
+    function commonCtrl($scope, $rootScope, $ionicModal, $timeout, Categorias) {
         $scope.doRefresh = function () {
-            $scope.loadItems();
+            Categorias.loadItems();
             $scope.$broadcast('scroll.refreshComplete');
             $scope.$apply();
         };
-
-        $scope.loadItems();
-
-
 
         $scope.commonArray = [4, 5, 6];
         $rootScope.c.debug('Common Controller');

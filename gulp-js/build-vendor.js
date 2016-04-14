@@ -19,7 +19,7 @@ var paths = {
         //'./resources/lib/angular/angular.js',
         //'./resources/lib/ionic/js/ionic.js',
         //'./resources/lib/ionic/js/ionic-angular.js',
-        //'./resources/lib/angular-locale-pt-br/angular-locale_pt-br.js'
+        //'./resources/lib/ion-affix/ion-affix.js',
         './resources/lib/angular-locale-pt-br/angular-locale_pt-br.js'
     ],
     jsBundleDest: './www/js/bundles/'

@@ -20,6 +20,7 @@ $ionicons-font-path: "../fonts" !default;
 
 // Include all of Ionic
 @import "resources/lib/ionic/scss/ionic";
+@import "resources/lib/font-awesome/scss/font-awesome";
 //@import "resources/lib/ionicons/scss/ionicons";
 //@import "resources/lib/bootstrap-sass/assets/stylesheets/_bootstrap";
 
@@ -107,7 +108,24 @@ body {
   }
 }
 
+
+
+
+
+
+.delivery-content{
+  //background-image: url('https://s3.amazonaws.com/delivery-images/logo/logo-delivery2-resized-compressed.png');
+  //background-repeat: no-repeat;
+  //background-position: top;
+  //position: relative;
+}
+.delivery-button{
+
+
+}
+
 .delivery-list {
+  background-color: transparent;
   margin: 0px;
   > div {
     border-color: transparent;
@@ -119,13 +137,7 @@ body {
   margin: 10px;
 }
 
-.range{
-  padding: 2px 0px;
-  > input{
-    margin-right: 5px;
-    margin-left: 5px;
-  }
-}
+
 
 
 @mixin respond-to($media) {
@@ -148,6 +160,61 @@ body {
   } @else if $media == wide-screens {
     @media only screen and (min-width: $break-large) {
       @content;
+    }
+  }
+}
+
+.delivery-menu-left{
+  @include respond-to(handhelds) {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    max-width: 52px;
+    > button {
+      border-radius: 0px;
+      margin: 0px 0px 5px;
+      display: inline-block;
+      float: left;
+      font-size: 10px;
+      line-height: 14px;
+      max-width: 52px;
+      padding: 0px 5px;
+      >p {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+    }
+  }
+  @include respond-to(min-medium-screens) {
+    display: none;
+  }
+}
+
+.range{
+  padding: 2px 0px;
+  > input{
+    margin-right: 5px;
+    margin-left: 5px;
+  }
+  @include respond-to(mini-handhelds) {
+    > input{
+      display: none;
+    }
+  }
+}
+
+.delivery-list-with-menu{
+  @include respond-to(handhelds) {
+    padding-left: 55px;
+    position: relative;
+  }
+}
+
+.fix-to-top{
+  @include respond-to(handhelds) {
+    > div > .delivery-list-with-menu > div:first-child{
+      display: none;
     }
   }
 }
