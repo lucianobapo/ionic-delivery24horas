@@ -108,22 +108,6 @@ body {
   }
 }
 
-
-
-
-
-
-.delivery-content{
-  //background-image: url('https://s3.amazonaws.com/delivery-images/logo/logo-delivery2-resized-compressed.png');
-  //background-repeat: no-repeat;
-  //background-position: top;
-  //position: relative;
-}
-.delivery-button{
-
-
-}
-
 .delivery-list {
   background-color: transparent;
   margin: 0px;
@@ -136,9 +120,6 @@ body {
 .card, .list-inset {
   margin: 10px;
 }
-
-
-
 
 @mixin respond-to($media) {
   @if $media == mini-handhelds {

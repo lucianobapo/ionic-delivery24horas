@@ -9,6 +9,7 @@
         </button>
     </div>
     <ion-content ng-class="{'has-subheader': minMediumScreens, 'has-header': handhelds}"
+                 class="scrollContainer"
                  set-class-when-at-top="fix-to-top" overflow-scroll="false">
         <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
 
@@ -29,18 +30,17 @@
         </div>
 
         <div class="delivery-list-with-menu">
-            <div affix-within-container=".delivery-list-with-menu" class="delivery-menu-left">
-                <!--<button ng-click="loadCategoria('Todas');loadProducts()"-->
-                        <!--class="delivery-button button button-outline button-positive">-->
-                    <!--<i class="{{ item.icon }}"></i>-->
-                    <!--<p>Todas</p>-->
-                <!--</button>-->
-                <!--<div ion-affix data-affix-within-parent-with-class="delivery-menu-left"-->
-                <button ng-repeat="item in categorias" ng-click="loadCategoria(item.nome);loadProducts(item.id)"
-                        class="delivery-button button button-outline button-positive">
-                    <i class="{{ item.icon }}"></i>
-                    <p>{{ item.nome }}</p>
-                </button>
+            <div affix-within-container="delivery-menu-left">
+                <div class="delivery-menu-left">
+                    <!--<button ng-click="loadCategoria(item.nome);loadProducts(item.id)" -->
+                    <button onclick="var scpRoot = angular.element(this).scope().$root; var item = angular.element(this)[0]; scpRoot.loadCategoria(item.name); scpRoot.loadProducts(item.id);"
+                            ng-repeat="item in categorias"
+                            id="{{ item.id }}" name="{{ item.nome }}"
+                            class="{{ item.nome }} delivery-button button button-outline button-positive">
+                        <i class="{{ item.icon }}"></i>
+                        <p>{{ item.nome }}</p>
+                    </button>
+                </div>
             </div>
 
             <div ng-class="{card: minMediumScreens, list: handhelds, 'list-inset': handhelds}">

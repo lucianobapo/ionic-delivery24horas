@@ -119,7 +119,6 @@
         }
     }
 
-
     moduleApp.directive('setClassWhenAtTop', [
         '$ionicScrollDelegate',
         setClassWhenAtTop
@@ -148,11 +147,9 @@
     }
 
     moduleApp.directive('affixWithinContainer', [
-        '$document',
-        '$ionicScrollDelegate',
         affixWithinContainer
     ]);
-    function affixWithinContainer($document, $ionicScrollDelegate) {
+    function affixWithinContainer() {
 
         var transition = function(element, dy, executeImmediately) {
             element.style[ionic.CSS.TRANSFORM] == 'translate3d(0, -' + dy + 'px, 0)' ||
@@ -165,10 +162,10 @@
 
         return {
             restrict: 'A',
-            require: '^$ionicScroll',
-            link: function($scope, $element, $attr, $ionicScroll) {
+            link: function($scope, $element, $attr) {
                 var $affixContainer = $element.parent();
-                //var $affixContainer = $element.closest($attr.affixWithinContainer) || $element.parent();
+                var $elementClone = angular.element(document.getElementsByClassName($attr.affixWithinContainer));
+                var $scrollContainer = angular.element(document.getElementsByClassName('scrollContainer'));
 
                 var top = 0;
                 var offsetTop = 0;
@@ -186,16 +183,6 @@
                     scrollMax = scrollMin + height;
                     scrollTransition = scrollMax - affixedHeight;
                 };
-                //var updateScrollLimits = _.throttle(function(scrollTop) {
-                //    top = $affixContainer.offset().top;
-                //    height = $affixContainer.outerHeight(false);
-                //    affixedHeight = $element.outerHeight(false);
-                //    scrollMin = scrollTop + top;
-                //    scrollMax = scrollMin + height;
-                //    scrollTransition = scrollMax - affixedHeight;
-                //}, 500, {
-                //    trailing: false
-                //});
 
                 var affix = null;
                 var unaffix = null;
@@ -205,11 +192,10 @@
                     affix = function() {
                         var css = {
                             position: 'fixed',
-                            top: offsetTop+'px'
+                            top: offsetTop+5+'px'
                         };
-                        $affixedClone = $element.clone().css(css);
-                        $ionicScroll.$element.append($affixedClone);
-
+                        $affixedClone = $elementClone.clone().css(css);
+                        $scrollContainer.append($affixedClone);
                         setupUnaffix();
                     };
                 };
@@ -229,7 +215,7 @@
 
                 var affixedJustNow;
                 var scrollTop;
-                $ionicScroll.$element.on('scroll', function(event) {
+                $scrollContainer.on('scroll', function(event) {
                     offsetTop = (event.detail || event.originalEvent && event.originalEvent.detail).target.offsetTop;
                     scrollTop = (event.detail || event.originalEvent && event.originalEvent.detail).scrollTop;
                     updateScrollLimits(offsetTop);
