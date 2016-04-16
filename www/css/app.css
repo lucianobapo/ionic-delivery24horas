@@ -11950,19 +11950,19 @@ body {
 
 @media only screen and (max-width: 425px) {
   .delivery-menu-left {
-    position: absolute;
+    position: fixed;
     top: 5px;
-    left: 5px;
+    left: 0px;
     max-width: 52px; }
     .delivery-menu-left > button {
       border-radius: 0px;
-      margin: 0px 0px 5px;
+      margin: 0px 0px 2px;
       display: inline-block;
       float: left;
       font-size: 10px;
       line-height: 14px;
       max-width: 52px;
-      padding: 0px 5px; }
+      padding: 0px 2px; }
       .delivery-menu-left > button > p {
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -11983,8 +11983,9 @@ body {
 
 @media only screen and (max-width: 425px) {
   .delivery-list-with-menu {
-    padding-left: 55px;
-    position: relative; } }
+    padding-left: 55px; }
+    .delivery-list-with-menu > div {
+      margin: 0px; } }
 
 @media only screen and (max-width: 425px) {
   .fix-to-top > div > .delivery-list-with-menu > div:first-child {

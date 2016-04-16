@@ -147,19 +147,19 @@ body {
 
 .delivery-menu-left{
   @include respond-to(handhelds) {
-    position: absolute;
+    position: fixed;
     top: 5px;
-    left: 5px;
+    left: 0px;
     max-width: 52px;
     > button {
       border-radius: 0px;
-      margin: 0px 0px 5px;
+      margin: 0px 0px 2px;
       display: inline-block;
       float: left;
       font-size: 10px;
       line-height: 14px;
       max-width: 52px;
-      padding: 0px 5px;
+      padding: 0px 2px;
       >p {
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -188,7 +188,10 @@ body {
 .delivery-list-with-menu{
   @include respond-to(handhelds) {
     padding-left: 55px;
-    position: relative;
+    //position: relative;
+    >div {
+      margin: 0px;
+    }
   }
 }
 
