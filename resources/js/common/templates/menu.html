@@ -15,7 +15,7 @@
                 <!--<button class="button marging" ng-class="{'button-clear': (valorTotal=0), 'button-balanced': (valorTotal>0)}">-->
                 <button class="button marging"
                         ng-click="CartService.showCart()"
-                        ng-class="(valorTotal>0)?'button-clear button-balanced': 'button-clear'">
+                        ng-class="(valorTotal>0)?'button-balanced': 'button-clear'">
                 <!--<button class="button button-clear">-->
                     <i class="ion-android-cart"></i> ({{ valorTotal | currency }})
                 </button>

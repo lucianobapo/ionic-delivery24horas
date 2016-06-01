@@ -12033,15 +12033,16 @@ body {
   margin-left: 0px !important; }
 
 .address-item {
-  white-space: normal;
-  padding: 5px; }
+  white-space: normal; }
   .address-item > div > .item-content {
     white-space: normal;
     padding-left: 5px !important;
     padding-top: 5px !important;
     padding-bottom: 5px !important;
+    min-height: 48px !important;
     font-size: 14px; }
   .address-item > button {
+    margin: 5px;
     max-height: none;
     line-height: normal; }
 
