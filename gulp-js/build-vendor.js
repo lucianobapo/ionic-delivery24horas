@@ -16,6 +16,7 @@ var paths = {
         //'./resources/lib/jquery/dist/jquery.js',
         //'./resources/lib/jquery-ui/jquery-ui.js',
         './resources/lib/ionic/js/ionic.bundle.js',
+        './resources/lib/ngstorage/ngStorage.js',
         //'./resources/lib/angular/angular.js',
         //'./resources/lib/ionic/js/ionic.js',
         //'./resources/lib/ionic/js/ionic-angular.js',

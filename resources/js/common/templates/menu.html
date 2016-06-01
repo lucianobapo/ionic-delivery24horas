@@ -8,13 +8,13 @@
                 <div class="delivery-bar-title title">delivery24horas.com</div>
             </ion-nav-buttons>
             <ion-nav-buttons side="right">
-                <button class="delivery-btn-social-header button button-positive btn-social">
+                <button ng-if="cordova" class="delivery-btn-social-header button button-positive btn-social">
                     <i class="ion-social-facebook"></i>Login com Facebook
                 </button>
 
                 <!--<button class="button marging" ng-class="{'button-clear': (valorTotal=0), 'button-balanced': (valorTotal>0)}">-->
                 <button class="button marging"
-                        ng-click="showCart()"
+                        ng-click="CartService.showCart()"
                         ng-class="(valorTotal>0)?'button-clear button-balanced': 'button-clear'">
                 <!--<button class="button button-clear">-->
                     <i class="ion-android-cart"></i> ({{ valorTotal | currency }})

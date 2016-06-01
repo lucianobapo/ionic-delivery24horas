@@ -57,6 +57,66 @@
         return returnObj;
     }
 
+    angularModule.service('Produtos', [
+        '$rootScope',
+        'AppConfig',
+        'Api',
+        Produtos
+    ]);
+
+    /*!
+     * Constructor function for all kinds of helper methods used through whole project.
+     *
+     * @return {object} this
+     */
+    function Produtos($rootScope, AppConfig, Api) {
+
+        var returnObj;
+        returnObj = {
+            loadItems: _loadItems
+        };
+
+        /*
+         * ### *Public methods* ###
+         */
+
+        /*
+         * Handles all kinds of http responses if it's not required to be hendled inside the controller.
+         * This implementation really depends of how you construct your backend logic but in general
+         * you should have one place for handling API requests.
+         *
+         * @param   {object} response
+         * @return  {object}
+         */
+        function _loadItems(idCategory) {
+            if (idCategory===undefined) idCategory='todas';
+            $rootScope.rootCategoriaAntiga = undefined;
+            $rootScope.clearSearch();
+
+            $rootScope.c.debug('Loading Produtos...');
+            Api.sendRequest({
+                    method: "GET",
+                    url: AppConfig.apiEndpoint + '/produtosDelivery/'+idCategory
+                })
+                .then(function(response){
+                    $rootScope.products = response.data.data;
+                    if (idCategory=='todas')
+                        $rootScope.allProducts = response.data.data;
+                    else if ($rootScope.allProducts===undefined) {
+                        Api.sendRequest({
+                                method: "GET",
+                                url: AppConfig.apiEndpoint + '/produtosDelivery/todas'
+                            })
+                            .then(function(response){
+                                    $rootScope.allProducts = response.data.data;
+                            });
+                    }
+                });
+        }
+
+        return returnObj;
+    }
+
     angularModule.service('loadingMarker', [
         '$rootScope',
         loadingMarker
@@ -137,24 +197,35 @@
     function Layout($rootScope, $location, $window) {
         var returnObj;
         returnObj = {
+            goHome: _goHome,
             check: _check
         };
+
+        function _goHome() {
+            if ($rootScope.handhelds)
+                $location.path($rootScope.handheldsUrl);
+            if ($rootScope.minMediumScreens)
+                $location.path($rootScope.minMediumScreensUrl);
+        }
 
         function _check() {
             $rootScope.handheldsUrl = '/tab/home';
             $rootScope.minMediumScreensUrl = '/app/productlist';
+
             var switchLayout = function(value){
+                $rootScope.c.debug('Checking: '+value);
+                $rootScope.c.debug('Path: '+$location.path());
                 if (value<=425) {
                     $rootScope.handhelds = true;
                     $rootScope.minMediumScreens = false;
-                    if ($location.path().indexOf("/app")!==-1) {
+                    if ($location.path()=="" || $location.path().indexOf("/app")!==-1) {
                         $rootScope.c.debug('Redirecting to: '+$rootScope.handheldsUrl);
                         $location.path($rootScope.handheldsUrl);
                     }
                 } else {
                     $rootScope.handhelds = false;
                     $rootScope.minMediumScreens = true;
-                    if ($location.path().indexOf("/tab")!==-1) {
+                    if ($location.path()=="" || $location.path().indexOf("/tab")!==-1) {
                         $rootScope.c.debug('Redirecting to: ' + $rootScope.minMediumScreensUrl);
                         $location.path($rootScope.minMediumScreensUrl);
                     }

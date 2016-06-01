@@ -13,6 +13,8 @@
 
     configModule.constant('AppConfig', {
         debug: false,
+        cordova: false,
+        facebookID: '1581785262035600',
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
         apiEndpoint: 'http://api.delivery24horas.com/json',
         imagesUrl: 'https://s3.amazonaws.com/delivery-images/thumbnails/',

@@ -8,13 +8,13 @@
             '$scope',
             '$rootScope',
             'AppConfig',
-            'Api',
-            '$ionicLoading',
+            'Produtos',
             productListCtrl
         ]);
 
-    function productListCtrl($scope, $rootScope, AppConfig, Api) {
+    function productListCtrl($scope, $rootScope, AppConfig, Produtos) {
         $rootScope.c.debug('ProductList Controller: ', $scope.commonArray);
+
 
         $scope.logoUrl = AppConfig.logoUrl;
         $scope.imagesUrl = AppConfig.imagesUrl;
@@ -22,14 +22,22 @@
         $rootScope.cartItems = [];
         $rootScope.quantidade = [];
         $rootScope.valorTotal = 0;
-        $scope.products = [];
+        $rootScope.products = [];
 
 
-        $rootScope.removeCartItem = function (id) {
+        $rootScope.removeItem = function (id) {
             if ($rootScope.quantidade[id] > 0) {
                 $rootScope.quantidade[id]=0;
                 $scope.somaTotal();
             }
+        };
+        $rootScope.removeTodosItens = function () {
+            $rootScope.quantidade.forEach(function(valor, chave) {
+                if ($rootScope.quantidade[chave] > 0) {
+                    $rootScope.quantidade[chave]=0;
+                }
+            });
+            $scope.somaTotal();
         };
 
         $scope.incrementa = function (id) {
@@ -55,6 +63,24 @@
             });
             return result;
         };
+
+        $rootScope.clearSearch = function () {
+            $scope.query='';
+        };
+        $scope.$watch(function(){
+            return $scope.query;
+        }, function(value) {
+            if ($scope.query && $scope.query.length>0){
+                if ($rootScope.rootCategoriaAntiga==undefined)
+                    $rootScope.rootCategoriaAntiga = $rootScope.rootCategoriaSelecionada;
+                $rootScope.loadCategoria("Resultados de '"+$scope.query+"'");
+            } else {
+                if ($rootScope.rootCategoriaAntiga!=undefined) {
+                    $rootScope.loadCategoria($rootScope.rootCategoriaAntiga);
+                    $rootScope.rootCategoriaAntiga = undefined;
+                }
+            }
+        });
 
         $scope.somaTotal = function () {
             $rootScope.valorTotal = 0;
@@ -87,36 +113,15 @@
         });
 
         $rootScope.loadProducts = function (idCategory) {
-            if (idCategory===undefined) idCategory='todas';
-            Api
-                .sendRequest({
-                    method: "GET",
-                    url: AppConfig.apiEndpoint + '/produtosDelivery/'+idCategory
-                })
-                .then(function(response){
-                    $scope.products = response.data.data;
-                    if (idCategory=='todas')
-                        $rootScope.allProducts = response.data.data;
-                });
-            if ($rootScope.allProducts===undefined && idCategory!='todas'){
-                Api
-                    .sendRequest({
-                        method: "GET",
-                        url: AppConfig.apiEndpoint + '/produtosDelivery/todas'
-                    })
-                    .then(function(response){
-                        if (response.data!==null)
-                            $rootScope.allProducts = response.data.data;
-                    });
-            }
+            Produtos.loadItems(idCategory);
         };
 
         $scope.doRefresh = function () {
-            $rootScope.loadProducts();
+            Produtos.loadItems();
             $scope.$broadcast('scroll.refreshComplete');
             $scope.$apply();
         };
-        $rootScope.loadProducts();
+        Produtos.loadItems();
 
         $scope.prepareImage = function (img) {
             if (img==null || AppConfig.debug) return 'http://placehold.it/80x80';

@@ -16,9 +16,10 @@ var paths = {
 
 
 gulp.task('preprocess-js', function() {
-    gutil.log('preprocess-js STARTED STARTED CORDOVA_CMDLINE:'+(process.env.CORDOVA_CMDLINE!=undefined)+'  Production:'+ argv.production);
+    var cordova = process.env.CORDOVA_CMDLINE || argv.cordova;
+    gutil.log('preprocess-js STARTED STARTED CORDOVA_CMDLINE:'+(cordova!=undefined)+'  Production:'+ argv.production);
     return gulp.src(paths.preprocessJs)
-        .pipe(preprocess({context: {ENVIRONMENT: argv.production ? 'production' : 'development', CORDOVA:(process.env.CORDOVA_CMDLINE!=undefined)}}))
+        .pipe(preprocess({context: {ENVIRONMENT: argv.production ? 'production' : 'development', CORDOVA:(cordova!=undefined)}}))
         .pipe(rename({suffix: '-build'}))
         .pipe(gulp.dest(paths.preprocessJsDest))
         .on('end', function() {

@@ -4,19 +4,34 @@
             <i class="icon ion-ios-search placeholder-icon"></i>
             <input type="search" placeholder="Busca de produtos" ng-model="query">
         </label>
-        <button class="button button-clear" ng-click="query = ''">
-            Cancelar
+        <button ng-if="query.length"
+                class="input-button button button-icon ion-close-circled"
+                ng-click="clearSearch()">
         </button>
+        <!--<button class="button button-clear" ng-click="query = ''">-->
+            <!--Cancelar-->
+        <!--</button>-->
     </div>
     <ion-content ng-class="{'has-subheader': minMediumScreens, 'has-header': handhelds}">
         <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
 
         <div class="list delivery-list delivery-list-with-menu">
 
-            <div class="item item-button-right delivery-btn-social">
-                <button class="button button-positive btn-social">
+            <div ng-if="cordova" class="item item-button-right delivery-btn-social">
+                <button ng-show="!user.userID" class="button button-positive btn-social" ng-click="facebookSignIn()">
                     <i class="ion-social-facebook"></i>Login com Facebook
                 </button>
+                <button ng-show="user.userID" class="button button-positive btn-social" ng-click="showLogOutMenu()">
+                    <i class="ion-social-facebook"></i>Logout {{ user.name }}
+                </button>
+            </div>
+            <div class="item" ng-if="!cordova">
+                <div id="fb-root"></div>
+                <!--<fb:login-button scope="public_profile,email" onlogin="console.log(angular);">-->
+                <!--</fb:login-button>-->
+                <div class="fb-login-button" data-max-rows="1" data-size="medium"
+                     data-scope="public_profile,email,user_birthday" data-show-faces="true" data-auto-logout-link="true"></div>
+                <!--<div id="status"></div>-->
             </div>
             <div class="item">
                 <div class="delivery-logo-block">
@@ -31,8 +46,10 @@
 
             <div ng-class="{card: minMediumScreens, list: handhelds, 'list-inset': handhelds}" class="padding-right">
                 <div class="item item-divider">{{ rootCategoriaSelecionada }}</div>
+                <div class="item resultCount" ng-if="query.length"><span>{{ filtered.length }} de {{ products.length }}</span></div>
                 <div class="delivery-product-item" ng-class="{item: handhelds, 'item-thumbnail-left': handhelds}"
-                     ng-repeat="produto in products | filter: query">
+                     ng-repeat="produto in filtered = (products | filter: query)">
+                     <!--ng-repeat="produto in products | filter: query as filtered">-->
 
                     <img ng-src="{{ prepareImage(produto.imagem) }}"
                          alt="Imagem do produto {{ produto.nome }}"
@@ -53,17 +70,17 @@
             </div>
         </div>
         <div class="delivery-menu-left">
-            <button ng-click="loadCategoria('Todas');loadProducts()"
+            <button ng-click="loadProducts();loadCategoria('Todas');"
                     class="delivery-button button button-stable">
-                <i class="fa fa-globe fa-2x"></i>
+                <i class="icon fa fa-globe"></i>
                 <p>Todas</p>
             </button>
-            <button ng-click="loadCategoria('Favoritos');loadProducts()"
+            <button ng-click="loadProducts();loadCategoria('Favoritos');"
                     class="delivery-button button button-stable">
-                <i class="fa fa-star fa-2x"></i>
+                <i class="icon fa fa-star"></i>
                 <p>Favoritos</p>
             </button>
-            <button ng-click="loadCategoria(item.nome);loadProducts(item.id)"
+            <button ng-click="loadProducts(item.id);loadCategoria(item.nome);"
                     ng-repeat="item in categorias"
                     class="delivery-button button button-stable">
                 <i class="{{ item.icon }}"></i>

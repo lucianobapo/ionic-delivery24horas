@@ -9,3 +9,4 @@ plugins/
 logs/
 
 /vendor/
+npm-debug.log

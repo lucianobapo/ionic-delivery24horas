@@ -15,13 +15,14 @@
     apiModule.factory('Api', [
         '$q',
         '$http',
-        '$rootScope',
+        '$ionicLoading',
         'Helpers',
+        'Layout',
         apiService
     ]);
 
-    function apiService($q, $http, $rootScope, Helpers) {
-
+    function apiService($q, $http, $ionicLoading, Helpers, Layout) {
+        //Layout.check();
         var scope;
         scope = {
             sendRequest: _sendRequest
@@ -45,6 +46,7 @@
          * @return  {object}
          */
         function _sendRequest(params) {
+
             params.headers = {
                 'Accept': 'application/json'
             };
@@ -68,6 +70,7 @@
                         //}
                     },
                     function(response) {
+                        $ionicLoading.hide();
                         return Helpers.handleHttpErrorResponse(response);
                     });
         }

@@ -2,31 +2,39 @@
     'use strict';
 
     angular.module('App.Config', []);
+    angular.module('App.HttpPostFix', []);
     angular.module('templates', []);
     angular.module('App.Helpers', []);
     angular.module('App.Api', []);
     angular.module('App.Directives', []);
     angular.module('App.Services', []);
-    angular.module('App.Alerts', []);
     angular.module('App.CartService', []);
+    angular.module('App.FacebookService', []);
+    angular.module('App.UserService', []);
+    angular.module('App.Alerts', []);
 
     angular.module('App.Common', []);
     //angular.module('App.Playlist', []);
     angular.module('App.ProductList', []);
+    angular.module('App.Cart', []);
     angular.module('App.Chat', []);
     angular.module('App.Report', []);
 
     require('./config-build');
     require('./templates-build');
+    require('./utility/postfix');
     require('./utility/helpers');
     require('./utility/api');
     require('./utility/directives');
     require('./utility/services');
+    require('./services/cart');
+    require('./services/facebook');
+    require('./services/user');
     require('./utility/alerts');
-    require('./cart/cart-service');
 
     require('./common/common');
     require('./productlist/productlist');
+    require('./cart/cart');
     require('./chat/chat');
     require('./report/report');
 
@@ -36,19 +44,25 @@
 
         // Ionic and angular modules
         'ionic',
+        'ngStorage',
         //'ion-affix',
+        //'httpPostFix',
 
         // Project modules
+        'App.HttpPostFix',
         'App.Config',
         'App.Helpers',
         'App.Common',
         'App.Api',
         'App.Directives',
         'App.Services',
-        'App.Alerts',
         'App.CartService',
+        'App.FacebookService',
+        'App.UserService',
+        'App.Alerts',
         //'App.Playlist',
         'App.ProductList',
+        'App.Cart',
         'App.Chat',
         'App.Report',
         'templates'
@@ -74,7 +88,7 @@
                 .state('tab', {
                     url: '/tab',
                     abstract: true,
-                    templateUrl: 'tabs/tabs.html'
+                    templateUrl: 'common/templates/tabs.html'
                 })
                 // Each tab has its own nav history stack:
 
@@ -82,8 +96,9 @@
                     url: '/cart',
                     views: {
                         'tab-cart': {
-                            templateUrl: 'tabs/tab-cart.html'
-                            //controller: 'DashCtrl'
+                            //templateUrl: 'tabs/tab-cart.html',
+                            templateUrl: 'cart/templates/cart.html',
+                            controller: 'CartCtrl'
                         }
                     }
                 })
@@ -92,7 +107,7 @@
                     url: '/chats',
                     views: {
                         'tab-chats': {
-                            templateUrl: 'chat/template/tab-chats.html',
+                            templateUrl: 'chat/templates/tab-chats.html',
                             controller: 'ChatsCtrl'
                         }
                     }
@@ -101,7 +116,7 @@
                     url: '/chats/:chatId',
                     views: {
                         'tab-chats': {
-                            templateUrl: 'chat/template/chat-detail.html',
+                            templateUrl: 'chat/templates/chat-detail.html',
                             controller: 'ChatDetailCtrl'
                         }
                     }
@@ -111,7 +126,7 @@
                     url: '/account',
                     views: {
                         'tab-account': {
-                            templateUrl: 'account/template/tab-account.html'//,
+                            templateUrl: 'account/templates/tab-account.html'//,
                             //controller: 'AccountCtrl'
                         }
                     }
@@ -126,14 +141,6 @@
                         }
                     }
                 })
-                //.state('tab.productlist2', {
-                //    url: '/productlist2',
-                //    views: {
-                //        'menuContent': {
-                //            templateUrl: 'productlist/templates/productlist2.html'
-                //        }
-                //    }
-                //})
 
                 //.state('app.search', {
                 //    url: '/search',
@@ -198,12 +205,23 @@
         'CartService',
         'Categorias',
         'Layout',
+        'Facebook',
+        'AppConfig',
         bodyController
     ]);
-    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias, Layout) {
-        CartService.initCart();
+    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias, Layout, Facebook, AppConfig) {
+        $rootScope.CartService = CartService;
+        $rootScope.CartService.initCart();
         Categorias.loadItems();
         Layout.check();
+
+        if (AppConfig.cordova) {
+            $rootScope.cordova = AppConfig.cordova;
+            Facebook.initCordova();
+        } else {
+            $rootScope.cordova = AppConfig.cordova;
+            Facebook.init();
+        }
 
         // Create the loading modal that we will use later
         //$scope.loadingModal = $ionicModal.fromTemplate('loading.html');
@@ -237,10 +255,6 @@
 
     function appMain($ionicPlatform, $rootScope, $ionicLoading, ReportSystem) {
         $rootScope.c = ReportSystem;
-
-        //console.log(C);
-        //$rootScope.c.log('teste');
-        //$rootScope.c.debug('teste');
 
         $rootScope.$on('loading:show', function() {
             $ionicLoading.show({template: '<p>Carregando...</p><ion-spinner></ion-spinner>'});
