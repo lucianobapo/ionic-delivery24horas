@@ -10,3 +10,6 @@ logs/
 
 /vendor/
 npm-debug.log
+release-keyhash-alias.txt
+release-key.keystore
+release-signing.properties
