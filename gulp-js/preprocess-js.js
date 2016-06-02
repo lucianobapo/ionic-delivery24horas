@@ -17,7 +17,7 @@ var paths = {
 
 gulp.task('preprocess-js', function() {
     var cordova = process.env.CORDOVA_CMDLINE || argv.cordova;
-    gutil.log('preprocess-js STARTED STARTED CORDOVA_CMDLINE:'+(cordova!=undefined)+'  Production:'+ argv.production);
+    gutil.log('preprocess-js STARTED CORDOVA_CMDLINE:'+(cordova!=undefined)+'  Production:'+ argv.production);
     return gulp.src(paths.preprocessJs)
         .pipe(preprocess({context: {ENVIRONMENT: argv.production ? 'production' : 'development', CORDOVA:(cordova!=undefined)}}))
         .pipe(rename({suffix: '-build'}))

@@ -7,7 +7,8 @@ var gutil = require('gulp-util');
 
 var paths = {
     apkBase: './platforms/android/build/outputs/apk',
-    apkFiles: '/android-debug.apk'
+    //apkFiles: ['./platforms/android/build/outputs/apk/android-release.apk', './platforms/android/build/outputs/apk/android-debug.apk']
+    apkFiles: './platforms/android/build/outputs/apk/android-release.apk'
 };
 
 /* **********************************************************************************
@@ -15,7 +16,7 @@ var paths = {
  * **********************************************************************************/
 gulp.task('copy-apk', function() {
     gutil.log('copy-apk STARTED');
-    return gulp.src(paths.apkBase+paths.apkFiles, {base: paths.apkBase})
+    return gulp.src(paths.apkFiles, {base: paths.apkBase})
         .pipe(gulp.dest('./'))
         .on('end', function() {
             return gutil.log('copy-apk DONE');

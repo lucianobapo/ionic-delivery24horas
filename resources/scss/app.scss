@@ -56,6 +56,7 @@ body {
 .margin-left-off{
   margin-left: 0px !important;
 }
+
 .address-item{
   white-space: normal;
   >div>.item-content{
@@ -71,6 +72,11 @@ body {
     max-height: none;
     line-height: normal;
   }
+}
+
+.img-thumbnail-facebook{
+  width: 32px;
+  padding: 3px 0px 3px 3px;
 }
 
 

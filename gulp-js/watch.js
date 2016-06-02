@@ -4,6 +4,7 @@
 
 var gulp = require('gulp');
 var gutil = require('gulp-util');
+var argv = require('yargs').argv;
 
 var paths = {
     toWatch: [
@@ -22,15 +23,28 @@ var paths = {
  * **********************************************************************************/
 gulp.task('watch', function () {
     //gulp.watch(paths.sass, ['sass']);
-    gutil.log('watch STARTED');
-    gulp.watch(paths.toWatch, ['core'])
-        .on('change', function(event) {
-            //console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
-            return gutil.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
-        })
-        .on('end', function() {
-            return gutil.log('watch END');
-        });
+    var cordova = process.env.CORDOVA_CMDLINE || argv.cordova;
+    gutil.log('watch STARTED CORDOVA_CMDLINE:'+(cordova!=undefined)+'  Production:'+ argv.production);
+    if (argv.production) {
+        gulp.watch(paths.toWatch, ['uglify'])
+            .on('change', function(event) {
+                //console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+                return gutil.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+            })
+            .on('end', function() {
+                return gutil.log('watch END');
+            });
+    } else {
+        gulp.watch(paths.toWatch, ['core'])
+            .on('change', function(event) {
+                //console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+                return gutil.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+            })
+            .on('end', function() {
+                return gutil.log('watch END');
+            });
+    }
+
 
     //watch(paths.toWatch, {emit: "all"}, function(stream) {
     //    gulp.start('build-css');

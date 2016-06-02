@@ -17,9 +17,10 @@ var paths = {
 /* **********************************************************************************
  * Uglify already bundled file
  * **********************************************************************************/
-gulp.task('uglify',['core'], function() {
+gulp.task('uglify',['build-js','core'], function() {
+    var cordova = process.env.CORDOVA_CMDLINE || argv.cordova;
+    gutil.log('uglify STARTED CORDOVA_CMDLINE:'+(cordova!=undefined)+'  Production:'+ argv.production);
     if (argv.production) {
-        gutil.log('uglify STARTED');
         return gulp.src(paths.jsBundleDest+paths.jsBundle)
             .pipe(uglify())
             .pipe(rename({suffix: '.min'}))

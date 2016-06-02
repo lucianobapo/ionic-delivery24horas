@@ -85,8 +85,8 @@
                     <input type="tel" name="whatsapp" ng-hide="user.partner_whatsapps.length>0"
                            ng-model="cartData.whatsapp" placeholder="Ex.: (22)999 999 999">
                 </label>
-                <label class="item item-input item-stacked-label">
-                    <div class="margin-left-off list list-inset" ng-show="cartData.addresses.length>0">
+                <label class="item item-input item-stacked-label" ng-show="cartData.addresses.length>0">
+                    <div class="margin-left-off list list-inset">
                         <div class="item item-divider">Endereços utilizados:</div>
                         <ion-list class="text-left">
                             <ion-radio name="address" ng-model="cartData.address_id" ng-value="address.id" class="address-item"

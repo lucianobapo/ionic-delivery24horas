@@ -16,13 +16,12 @@
         <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
 
         <div class="list delivery-list delivery-list-with-menu">
-
             <div ng-if="cordova" class="item item-button-right delivery-btn-social">
-                <button ng-show="!user.userID" class="button button-positive btn-social" ng-click="facebookSignIn()">
-                    <i class="ion-social-facebook"></i>Login com Facebook
+                <button ng-show="user==undefined" class="button btn-social" ng-click="facebookSignIn()">
+                    <i class="ion-social-facebook"></i>Entrar com Facebook
                 </button>
-                <button ng-show="user.userID" class="button button-positive btn-social" ng-click="showLogOutMenu()">
-                    <i class="ion-social-facebook"></i>Logout {{ user.name }}
+                <button ng-show="user!=undefined" class="button btn-social" ng-click="showLogOutMenu()">
+                    <i class="ion-social-facebook"></i>Sair {{ user.name }} <img class="img-thumbnail-facebook" ng-src="{{ user.picture }}">
                 </button>
             </div>
             <div class="item" ng-if="!cordova">

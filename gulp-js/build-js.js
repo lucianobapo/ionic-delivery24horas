@@ -9,7 +9,7 @@ var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var rename = require('gulp-rename');
 
-var production = process.env.NODE_ENV === 'production';
+//var production = process.env.NODE_ENV === 'production';
 
 var paths = {
     js: './resources/js/app.js',

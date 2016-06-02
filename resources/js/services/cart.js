@@ -86,52 +86,15 @@
         }
         function _doDelivery() {
             $rootScope.disableButton = true;
-            cartData = $rootScope.cartData;
-            cartData.itens = $rootScope.cartItems;
 
-            if ($rootScope.user.partner_nome==undefined){
-                if(cartData.nome==undefined || cartData.nome.length==0) {
-                    Alerts.customAlert('Alerta', 'Digite um nome válido.');
-                    $rootScope.disableButton = false;
-                    return false;
-                }
-            }
-
-            if ( ($rootScope.user.partner_emails.length==0 && (cartData.email==undefined || cartData.email.length==0))
-                && ($rootScope.user.partner_telefones.length==0 && (cartData.telefone==undefined || cartData.telefone.length==0))
-                && ($rootScope.user.partner_whatsapps.length==0 && (cartData.whatsapp==undefined || cartData.whatsapp.length==0)) )
-            {
-                Alerts.customAlert('Alerta', 'Digite ao menos um contato válido. Email, Telefone ou Watsapp.');
+            if (validateFields()===false) {
+                $rootScope.c.debug('Validate Error');
                 $rootScope.disableButton = false;
                 return false;
             }
 
-            if(cartData.address_id===false) {
-                if(cartData.endereco==undefined || cartData.endereco.length==0) {
-                    Alerts.customAlert('Alerta', 'Digite um endereço válido.');
-                    $rootScope.disableButton = false;
-                    return false;
-                }
-
-                if(cartData.matches.length!=0){
-                    Alerts.customAlert('Alerta', 'Selecione um endereço válido.');
-                    $rootScope.disableButton = false;
-                    return false;
-                }
-
-                if(cartData.bairro==undefined || cartData.bairro.length==0) {
-                    Alerts.customAlert('Alerta', 'Digite um bairro válido.');
-                    $rootScope.disableButton = false;
-                    return false;
-                }
-
-                if(cartData.numero==undefined || cartData.numero.length==0) {
-                    Alerts.customAlert('Alerta', 'Digite um número válido.');
-                    $rootScope.disableButton = false;
-                    return false;
-                }
-            }
-
+            cartData = $rootScope.cartData;
+            cartData.itens = $rootScope.cartItems;
             Api.sendRequest({
                     method: "POST",
                     data: { 'message' : cartData },
@@ -152,10 +115,66 @@
                     }
                     else {
                         Alerts.customAlert('Erro','Falha na Requisição');
-
                     }
                     $rootScope.disableButton = false;
                 });
+        }
+
+        function validateFields() {
+            // Valida nome
+            if ($rootScope.user==undefined || $rootScope.user.partner_nome==undefined){
+                if($rootScope.cartData.nome==undefined || $rootScope.cartData.nome.length==0) {
+                    Alerts.customAlert('Alerta', 'Digite um nome válido.');
+                    $rootScope.disableButton = false;
+                    return false;
+                }
+            }
+
+            // Valida contatos
+            if ($rootScope.user==undefined ||
+                ( ($rootScope.user.partner_emails==undefined || $rootScope.user.partner_emails.length==0)
+                && ($rootScope.user.partner_telefones==undefined || $rootScope.user.partner_telefones.length==0)
+                && ($rootScope.user.partner_whatsapps==undefined || $rootScope.user.partner_whatsapps.length==0) ))
+            {
+                if ($rootScope.cartData.email==undefined || $rootScope.cartData.email.length==0) {
+                    if ($rootScope.cartData.telefone==undefined || $rootScope.cartData.telefone.length==0){
+                        if ($rootScope.cartData.whatsapp==undefined || $rootScope.cartData.whatsapp.length==0){
+                            Alerts.customAlert('Alerta', 'Digite ao menos um contato válido. Email, Telefone ou Watsapp.');
+                            $rootScope.disableButton = false;
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // Valida endereço
+            if($rootScope.cartData.address_id===false) {
+                if($rootScope.cartData.endereco==undefined || $rootScope.cartData.endereco.length==0) {
+                    Alerts.customAlert('Alerta', 'Digite um endereço válido.');
+                    $rootScope.disableButton = false;
+                    return false;
+                }
+
+                if($rootScope.cartData.matches.length!=0){
+                    Alerts.customAlert('Alerta', 'Selecione um endereço válido.');
+                    $rootScope.disableButton = false;
+                    return false;
+                }
+
+                if($rootScope.cartData.bairro==undefined || $rootScope.cartData.bairro.length==0) {
+                    Alerts.customAlert('Alerta', 'Digite um bairro válido.');
+                    $rootScope.disableButton = false;
+                    return false;
+                }
+
+                if($rootScope.cartData.numero==undefined || $rootScope.cartData.numero.length==0) {
+                    Alerts.customAlert('Alerta', 'Digite um número válido.');
+                    $rootScope.disableButton = false;
+                    return false;
+                }
+            }
+
+            return true;
         }
         return interfaceObj;
     }
