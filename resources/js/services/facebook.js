@@ -224,7 +224,8 @@
                     // they are logged into this app or not.
                     $rootScope.c.debug('status else',response.status);
                     UserService.setUser();
-                    $rootScope.user = null;
+                    $rootScope.user = undefined;
+                    CartService.loadInitialData();
                     Layout.goHome();
                     $ionicLoading.hide();
 
