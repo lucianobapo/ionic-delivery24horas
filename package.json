@@ -1,6 +1,6 @@
 {
   "name": "ionic-delivery24horas",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Aplicativo Ionic Delivery 24 Horas",
   "author": {
     "name": "Luciano Porto",
@@ -42,8 +42,8 @@
     "cordova-plugin-whitelist",
     "cordova-plugin-splashscreen",
     "cordova-plugin-statusbar",
-    "ionic-plugin-keyboard",
     "phonegap-facebook-plugin --variable APP_ID=\"1630647053816087\" --variable APP_NAME=\"Delivery24hs local\"",
+    "ionic-plugin-keyboard",
     "phonegap-facebook-plugin"
   ],
   "cordovaPlatforms": [

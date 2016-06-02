@@ -637,6 +637,7 @@
             initCart: _initCart,
             closeCart: _closeCart,
             showCart: _showCart,
+            loadInitialData: _loadInitialData,
             doDelivery: _doDelivery,
             selecionaEndereco: _selecionaEndereco,
             existeItens: _existeItens
@@ -646,7 +647,7 @@
          * ### *Public methods* ###
          */
 
-        function loadInitialData() {
+        function _loadInitialData() {
             // Form data for the login modal
             $rootScope.cartData = {};
             $rootScope.cartData.pagamento = 'dinheiro';
@@ -667,7 +668,7 @@
                 $rootScope.cartModal = modal;
             });
 
-            loadInitialData();
+            _loadInitialData();
         }
 
         function _existeItens() {
@@ -750,7 +751,7 @@
                             Alerts.customAlert('Erro',resp.message);
                         else{
                             $rootScope.removeTodosItens();
-                            loadInitialData();
+                            _loadInitialData();
                             UserService.loadFromProviderId($rootScope.user.userID);
                             Layout.goHome();
                             Alerts.customAlert('Ordem Criada','Número '+resp.id+' - Valor Total ' + $filter('currency')(resp.valor_total));
@@ -788,10 +789,11 @@
         '$ionicLoading',
         '$q',
         '$ionicActionSheet',
+        'CartService',
         Facebook
     ]);
 
-    function Facebook($window, AppConfig, $rootScope, UserService, Layout, $ionicLoading, $q, $ionicActionSheet) {
+    function Facebook($window, AppConfig, $rootScope, UserService, Layout, $ionicLoading, $q, $ionicActionSheet, CartService) {
         var returnObj;
         returnObj = {
             initCordova: _initCordova,
@@ -913,9 +915,9 @@
             //This method is executed when the user press the "Logout" button
             $rootScope.showLogOutMenu = function() {
                 var hideSheet = $ionicActionSheet.show({
-                    destructiveText: 'Logout',
-                    titleText: 'Are you sure you want to logout? This app is awsome so I recommend you to stay.',
-                    cancelText: 'Cancel',
+                    destructiveText: 'Sair',
+                    titleText: 'Realmente deseja sair?',
+                    cancelText: 'Cancelar',
                     cancel: function() {},
                     buttonClicked: function(index) {
                         return true;
@@ -927,7 +929,8 @@
                         });
 
                         UserService.setUser();
-                        $rootScope.user = null;
+                        $rootScope.user = undefined;
+                        CartService.loadInitialData();
 
                         // Facebook logout
                         facebookConnectPlugin.logout(function(response){

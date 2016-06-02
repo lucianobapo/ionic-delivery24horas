@@ -30,6 +30,7 @@
             initCart: _initCart,
             closeCart: _closeCart,
             showCart: _showCart,
+            loadInitialData: _loadInitialData,
             doDelivery: _doDelivery,
             selecionaEndereco: _selecionaEndereco,
             existeItens: _existeItens
@@ -39,7 +40,7 @@
          * ### *Public methods* ###
          */
 
-        function loadInitialData() {
+        function _loadInitialData() {
             // Form data for the login modal
             $rootScope.cartData = {};
             $rootScope.cartData.pagamento = 'dinheiro';
@@ -60,7 +61,7 @@
                 $rootScope.cartModal = modal;
             });
 
-            loadInitialData();
+            _loadInitialData();
         }
 
         function _existeItens() {
@@ -143,7 +144,7 @@
                             Alerts.customAlert('Erro',resp.message);
                         else{
                             $rootScope.removeTodosItens();
-                            loadInitialData();
+                            _loadInitialData();
                             UserService.loadFromProviderId($rootScope.user.userID);
                             Layout.goHome();
                             Alerts.customAlert('Ordem Criada','Número '+resp.id+' - Valor Total ' + $filter('currency')(resp.valor_total));

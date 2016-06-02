@@ -17,10 +17,11 @@
         '$ionicLoading',
         '$q',
         '$ionicActionSheet',
+        'CartService',
         Facebook
     ]);
 
-    function Facebook($window, AppConfig, $rootScope, UserService, Layout, $ionicLoading, $q, $ionicActionSheet) {
+    function Facebook($window, AppConfig, $rootScope, UserService, Layout, $ionicLoading, $q, $ionicActionSheet, CartService) {
         var returnObj;
         returnObj = {
             initCordova: _initCordova,
@@ -142,9 +143,9 @@
             //This method is executed when the user press the "Logout" button
             $rootScope.showLogOutMenu = function() {
                 var hideSheet = $ionicActionSheet.show({
-                    destructiveText: 'Logout',
-                    titleText: 'Are you sure you want to logout? This app is awsome so I recommend you to stay.',
-                    cancelText: 'Cancel',
+                    destructiveText: 'Sair',
+                    titleText: 'Realmente deseja sair?',
+                    cancelText: 'Cancelar',
                     cancel: function() {},
                     buttonClicked: function(index) {
                         return true;
@@ -156,7 +157,8 @@
                         });
 
                         UserService.setUser();
-                        $rootScope.user = null;
+                        $rootScope.user = undefined;
+                        CartService.loadInitialData();
 
                         // Facebook logout
                         facebookConnectPlugin.logout(function(response){
