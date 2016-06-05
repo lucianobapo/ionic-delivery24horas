@@ -1183,7 +1183,8 @@
             //console.log('====================== '+test.toISOString());
             //console.log('====================== '+test.formatDate('Y-m-d'));
             //console.log('====================== '+test.getFullYear()+"-"+month+"-"+day);
-            if (d===null) objDate = new Date();
+            //if (d===null) objDate = new Date();
+            if (d===null) return undefined;
             else objDate = new Date(d[5],d[3],d[1]);
 
             //var day = ("0" + objDate.getDate()).slice(-2);
@@ -1203,7 +1204,7 @@
                 if (user.birthday != undefined && user.birthday.length == 10)
                     $rootScope.cartData.data_nascimento = srtDateToObj(user.birthday);
                 else
-                    $rootScope.cartData.data_nascimento = new Date();
+                    $rootScope.cartData.data_nascimento = undefined;
 
                 $rootScope.cartData.showEmailInput = true;
                 $rootScope.cartData.email = user.userEmail;
