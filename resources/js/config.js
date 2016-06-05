@@ -25,7 +25,7 @@
 
     // @if (ENVIRONMENT == 'production' && !CORDOVA)
     configModule.constant('AppConfig', {
-        debug: true,
+        debug: false,
         cordova: false,
         facebookID: '1581785262035600',
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
