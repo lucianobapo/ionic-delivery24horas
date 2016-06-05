@@ -34,8 +34,17 @@
         function srtDateToObj(str){
             var pattern = /(\d{2})(\/)(\d{2})(\/)(\d{4})/i;
             var d = str.match(pattern);
-            if (d===null) return new Date();
-            else return new Date(d[5],d[3],d[1]);
+            var objDate;
+            //console.log('====================== '+test.toISOString());
+            //console.log('====================== '+test.formatDate('Y-m-d'));
+            //console.log('====================== '+test.getFullYear()+"-"+month+"-"+day);
+            if (d===null) objDate = new Date();
+            else objDate = new Date(d[5],d[3],d[1]);
+
+            //var day = ("0" + objDate.getDate()).slice(-2);
+            //var month = ("0" + objDate.getMonth()).slice(-2);
+            //return objDate.getFullYear()+"-"+month+"-"+day;
+            return objDate;
         }
 
         function _getUserToCartData() {
@@ -45,7 +54,20 @@
             if ($rootScope.user!=undefined){
                 if ($rootScope.user.mandante!=undefined){
                     $rootScope.cartData.mandante = $rootScope.user.mandante;
+                } else $rootScope.cartData.mandante = 'ilhanet';
+
+                if ($rootScope.user.userID!=undefined){
+                    $rootScope.cartData.user_provider_id = $rootScope.user.userID;
                 }
+
+                if ($rootScope.user.user_id!=undefined){
+                    $rootScope.cartData.user_id = $rootScope.user.user_id;
+                } else {
+                    $rootScope.cartData.name = $rootScope.user.name;
+                    $rootScope.cartData.picture = $rootScope.user.picture;
+                    $rootScope.cartData.email = $rootScope.user.email;
+                }
+
                 if ($rootScope.user.partner_id!=undefined){
                     $rootScope.cartData.partner_id = $rootScope.user.partner_id;
                 }
@@ -116,6 +138,7 @@
                     var response_fields = {};
                     if (response.data.error===false) {
                         response_fields.mandante = response.data.mandante;
+                        response_fields.user_id = response.data.user_id;
                         response_fields.partner_id = response.data.partner_id;
                         response_fields.partner_nome = response.data.partner_nome;
                         response_fields.partner_data_nascimento = response.data.partner_data_nascimento;
@@ -127,7 +150,10 @@
                         $rootScope.user = _getUser();
                         _getUserToCartData();
                     }
-                    else $rootScope.c.debug(response.data.message);
+                    else {
+                        _getUserToCartData();
+                        $rootScope.c.debug(response.data.message);
+                    }
                 });
         }
 

@@ -49,6 +49,10 @@
             $rootScope.cartData.address_id = false;
             $rootScope.cartData.emailChanged = false;
             $rootScope.cartData.cep = '';
+            if (AppConfig.cordova)
+                $rootScope.cartData.origem = 'aplicativo';
+            else
+                $rootScope.cartData.origem = 'site';
             UserService.getUserToCartData();
         }
 
@@ -94,6 +98,12 @@
             }
 
             cartData = $rootScope.cartData;
+            if ($rootScope.cartData.data_nascimento!=undefined){
+                var objDate = $rootScope.cartData.data_nascimento;
+                var day = ("0" + objDate.getDate()).slice(-2);
+                var month = ("0" + objDate.getMonth()).slice(-2);
+                cartData.data_nascimento = day+"/"+month+"/"+objDate.getFullYear();
+            }
             cartData.itens = $rootScope.cartItems;
             Api.sendRequest({
                     method: "POST",
@@ -109,6 +119,7 @@
                             $rootScope.removeTodosItens();
                             _loadInitialData();
                             UserService.loadFromProviderId($rootScope.user.userID);
+                            if (!AppConfig.cordova) _closeCart();
                             Layout.goHome();
                             Alerts.customAlert('Ordem Criada','Número '+resp.id+' - Valor Total ' + $filter('currency')(resp.valor_total));
                         }

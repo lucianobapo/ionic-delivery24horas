@@ -34,7 +34,7 @@
                 userID: apiResponse.id,
                 name: apiResponse.name,
                 email: apiResponse.email,
-                picture : "http://graph.facebook.com/" + apiResponse.id + "/picture?type=large"
+                picture : "https://graph.facebook.com/" + apiResponse.id + "/picture?type=large"
             };
             if (apiResponse.age_range!=undefined) fields.minAge = apiResponse.age_range.min;
             if (apiResponse.birthday!=undefined) fields.birthday = apiResponse.birthday;
@@ -224,8 +224,7 @@
                     // they are logged into this app or not.
                     $rootScope.c.debug('status else',response.status);
                     UserService.setUser();
-                    $rootScope.user = undefined;
-                    CartService.loadInitialData();
+                    $rootScope.user = null;
                     Layout.goHome();
                     $ionicLoading.hide();
 
@@ -268,6 +267,7 @@
 
                     version    : 'v2.6' // use version 2.2
                 });
+
 
                 FB.Event.subscribe('auth.authResponseChange', function(response) {
                     statusChangeCallback(response);

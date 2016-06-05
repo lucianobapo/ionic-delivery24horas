@@ -117,7 +117,9 @@
         };
 
         $scope.doRefresh = function () {
-            Produtos.loadItems();
+            $rootScope.clearSearch();
+            $rootScope.loadProducts();
+            $rootScope.loadCategoria('Todas');
             $scope.$broadcast('scroll.refreshComplete');
             $scope.$apply();
         };
