@@ -415,7 +415,7 @@
     var configModule = angular.module('App.Config');
 
     configModule.constant('AppConfig', {
-        debug: false,
+        debug: true,
         cordova: false,
         facebookID: '1581785262035600',
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
@@ -1071,7 +1071,6 @@
 
                     version    : 'v2.6' // use version 2.2
                 });
-
 
                 FB.Event.subscribe('auth.authResponseChange', function(response) {
                     statusChangeCallback(response);

@@ -268,7 +268,6 @@
                     version    : 'v2.6' // use version 2.2
                 });
 
-
                 FB.Event.subscribe('auth.authResponseChange', function(response) {
                     statusChangeCallback(response);
                 });
