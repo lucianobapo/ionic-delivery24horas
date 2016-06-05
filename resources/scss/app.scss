@@ -92,13 +92,19 @@ body {
 }
 
 .btn-social {
+  font-weight: 400;
+  font-size: 13px !important;
+  line-height: 32px !important;
+  min-height: 34px;
+  width: auto;
+
   position: relative;
   padding-left: 44px;
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 185px;
+  //width: 185px;
   display: block;
 
   /* facebook */
@@ -234,18 +240,27 @@ body {
 }
 
 .delivery-btn-social{
-  @include respond-to(handhelds) {
-    height: 50px;
-    > button {
-      font-weight: 400;
-      font-size: 13px !important;
-      line-height: 32px !important;
-      width: auto;
-    }
-  }
-  @include respond-to(min-medium-screens) {
-    display: none;
-  }
+  height: 50px;
+  //@include respond-to(handhelds) {
+  //  height: 50px;
+  //  > button {
+  //    font-weight: 400;
+  //    font-size: 13px !important;
+  //    line-height: 32px !important;
+  //    width: auto;
+  //  }
+  //}
+  //@include respond-to(min-medium-screens) {
+  //  //display: none;
+  //  height: 50px;
+  //  > button {
+  //    //font-weight: 400;
+  //    //font-size: 13px !important;
+  //    //line-height: 32px !important;
+  //    //min-height: 34px;
+  //    //width: auto;
+  //  }
+  //}
 }
 .delivery-btn-social-header{
   @include respond-to(handhelds) {

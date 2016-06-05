@@ -208,13 +208,15 @@
         'Layout',
         'Facebook',
         'AppConfig',
+        'UserService',
         bodyController
     ]);
-    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias, Layout, Facebook, AppConfig) {
+    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias, Layout, Facebook, AppConfig, UserService) {
         $rootScope.CartService = CartService;
         $rootScope.CartService.initCart();
         Categorias.loadItems();
         Layout.check();
+        UserService.initUser();
 
         if (AppConfig.cordova) {
             $rootScope.cordova = AppConfig.cordova;
@@ -652,6 +654,7 @@
         function _loadInitialData() {
             // Form data for the login modal
             $rootScope.cartData = {};
+            $rootScope.cartData.mandante = 'ilhanet';
             $rootScope.cartData.pagamento = 'dinheiro';
             $rootScope.cartData.matches = [];
             $rootScope.cartData.addresses = [];
@@ -662,7 +665,12 @@
                 $rootScope.cartData.origem = 'aplicativo';
             else
                 $rootScope.cartData.origem = 'site';
-            UserService.getUserToCartData();
+
+            $rootScope.cartData.showNameInput = true;
+            $rootScope.cartData.showDateInput = true;
+            $rootScope.cartData.showEmailInput = true;
+            $rootScope.cartData.showTelefoneInput = true;
+            $rootScope.cartData.showWhatsappInput = true;
         }
 
         function _initCart() {
@@ -697,6 +705,7 @@
             //if (address.complemento!=undefined) $rootScope.cartData.complemento = address.complemento;
             $rootScope.cartData.bairro = address.bairro;
         }
+
         function _doDelivery() {
             $rootScope.disableButton = true;
 
@@ -727,7 +736,7 @@
                         else{
                             $rootScope.removeTodosItens();
                             _loadInitialData();
-                            UserService.loadFromProviderId($rootScope.user.userID);
+                            UserService.initUser();
                             if (!AppConfig.cordova) _closeCart();
                             Layout.goHome();
                             Alerts.customAlert('Ordem Criada','Número '+resp.id+' - Valor Total ' + $filter('currency')(resp.valor_total));
@@ -805,7 +814,7 @@
 (function () {
     'use strict';
     /* ***************************************************************************
-     * ### Helper module ###
+     * ### FacebookService module ###
      *
      * Contains the utility and helper functions used through whole application.
      */
@@ -831,22 +840,67 @@
             initCordova: _initCordova,
             init: _init
         };
+        var fbLogin;
+        var fbLogout;
+
+        //$rootScope.user = undefined;
 
         function setUserFields(apiResponse, authResponse){
             var fields = {
                 authResponse: authResponse,
                 userID: apiResponse.id,
                 name: apiResponse.name,
-                email: apiResponse.email,
-                picture : "https://graph.facebook.com/" + apiResponse.id + "/picture?type=large"
+                userEmail: apiResponse.email,
+                picture : "https://graph.facebook.com/" + apiResponse.id + "/picture?type=small"
             };
             if (apiResponse.age_range!=undefined) fields.minAge = apiResponse.age_range.min;
             if (apiResponse.birthday!=undefined) fields.birthday = apiResponse.birthday;
-            UserService.setUser(fields);
-            UserService.loadFromProviderId(apiResponse.id);
+            UserService.processUserFieldsFromFacebook(fields);
         }
 
         function _initCordova() {
+            fbLogin = function(){
+                facebookConnectPlugin.getLoginStatus(function(success){
+                    if(success.status === 'connected'){
+                        // The user is logged in and has authenticated your app, and response.authResponse supplies
+                        // the user's ID, a valid access token, a signed request, and the time the access token
+                        // and signed request each expire
+                        $rootScope.c.debug('getLoginStatus', success.status);
+                        fbLoginSuccess(success);
+                        $ionicLoading.hide();
+                    } else if(success.status === 'not_authorized'){
+                        $rootScope.c.debug('getLoginStatus', success.status);
+                    } else {
+                        // If (success.status === 'not_authorized') the user is logged in to Facebook,
+                        // but has not authenticated your app
+                        // Else the person is not logged into Facebook,
+                        // so we're not sure if they are logged into this app or not.
+                        $rootScope.c.debug('getLoginStatus', success.status);
+                        $ionicLoading.show({
+                            template: 'Logging in...'
+                        });
+                        // Ask the permissions you need. You can learn more about
+                        // FB permissions here: https://developers.facebook.com/docs/facebook-login/permissions/v2.4
+                        facebookConnectPlugin.login(['user_birthday', 'email', 'public_profile'], fbLoginSuccess, fbLoginError);
+                    }
+                });
+            };
+
+            fbLogout = function(){
+                $ionicLoading.show({
+                    template: 'Logging out...'
+                });
+                // Facebook logout
+                facebookConnectPlugin.logout(function(response){
+                        $rootScope.c.debug('facebookConnectPlugin logout', response);
+                        $ionicLoading.hide();
+                    },
+                    function(fail){
+                        $rootScope.c.debug('facebookConnectPlugin logout failed', fail);
+                        $ionicLoading.hide();
+                    });
+            };
+
             // This is the success callback from the login method
             var fbLoginSuccess = function(response) {
                 if (!response.authResponse){
@@ -892,94 +946,6 @@
                 );
                 return info.promise;
             };
-
-            var getLoginStatus = function(login){
-                facebookConnectPlugin.getLoginStatus(function(success){
-                    if(success.status === 'connected'){
-                        // The user is logged in and has authenticated your app, and response.authResponse supplies
-                        // the user's ID, a valid access token, a signed request, and the time the access token
-                        // and signed request each expire
-                        $rootScope.c.debug('getLoginStatus', success.status);
-
-                        // Check if we have our user saved
-                        //$rootScope.user = UserService.getUser();
-                        //
-                        //if($rootScope.user!=undefined && $rootScope.user.userID!=undefined){
-                        //    fbLoginSuccess(success);
-                        //}else{
-                        //    //$state.go('app.home');
-                        //    Layout.goHome();
-                        //}
-                        fbLoginSuccess(success);
-                        $ionicLoading.hide();
-                    } else if(success.status === 'not_authorized'){
-                        $rootScope.c.debug('getLoginStatus', success.status);
-                    } else {
-                        // If (success.status === 'not_authorized') the user is logged in to Facebook,
-                        // but has not authenticated your app
-                        // Else the person is not logged into Facebook,
-                        // so we're not sure if they are logged into this app or not.
-
-                        $rootScope.c.debug('getLoginStatus', success.status);
-
-                        if (login) {
-                            $ionicLoading.show({
-                                template: 'Logging in...'
-                            });
-
-                            // Ask the permissions you need. You can learn more about
-                            // FB permissions here: https://developers.facebook.com/docs/facebook-login/permissions/v2.4
-                            facebookConnectPlugin.login(['user_birthday', 'email', 'public_profile'], fbLoginSuccess, fbLoginError);
-                        }
-                    }
-                });
-            };
-
-            //getLoginStatus();
-            $rootScope.user = UserService.getUser();
-
-            //This method is executed when the user press the "Login with facebook" button
-            $rootScope.facebookSignIn = function() {
-                $rootScope.c.debug('clicked facebookSignIn');
-                getLoginStatus(true);
-            };
-
-            //This method is executed when the user press the "Logout" button
-            $rootScope.showLogOutMenu = function() {
-                var hideSheet = $ionicActionSheet.show({
-                    destructiveText: 'Sair',
-                    titleText: 'Realmente deseja sair?',
-                    cancelText: 'Cancelar',
-                    cancel: function() {},
-                    buttonClicked: function(index) {
-                        return true;
-                    },
-                    destructiveButtonClicked: function(){
-                        $rootScope.c.debug('destructiveButtonClicked');
-                        $ionicLoading.show({
-                            template: 'Logging out...'
-                        });
-
-                        UserService.setUser();
-                        $rootScope.user = undefined;
-                        CartService.loadInitialData();
-
-                        // Facebook logout
-                        facebookConnectPlugin.logout(function(response){
-                                $rootScope.c.debug('facebookConnectPlugin logout', response);
-                                Layout.goHome();
-                                $ionicLoading.hide();
-                                hideSheet();
-                                ////$state.go('welcome');
-                            },
-                            function(fail){
-                                $rootScope.c.debug('facebookConnectPlugin logout failed', fail);
-                                $ionicLoading.hide();
-                                hideSheet();
-                            });
-                    }
-                });
-            };
         }
 
         function _init() {
@@ -992,7 +958,40 @@
                 fjs.parentNode.insertBefore(js, fjs);
             }(document, 'script', 'facebook-jssdk'));
 
-            $rootScope.user = UserService.getUser();
+            fbLogin = function(){
+                FB.getLoginStatus(function(response) {
+                    $rootScope.c.debug('FB.getLoginStatus', response);
+                    if (response.status === 'connected') {
+                        $rootScope.c.debug('Logged in.');
+                    }
+                    else {
+                        $ionicLoading.show({
+                            template: 'Logging in...'
+                        });
+                        FB.login(function(response) {
+                            // user is now logged in
+                            $rootScope.c.debug('FB.login', response);
+                            $ionicLoading.hide();
+                        });
+                    }
+                });
+            };
+
+            fbLogout = function(){
+                FB.getLoginStatus(function(response) {
+                    $rootScope.c.debug('FB.getLoginStatus', response);
+                    if (response.status === 'connected') {
+                        $ionicLoading.show({
+                            template: 'Logging out...'
+                        });
+                        FB.logout(function(response) {
+                            // user is now logged out
+                            $rootScope.c.debug('FB.logout', response);
+                            $ionicLoading.hide();
+                        });
+                    }
+                });
+            };
 
             // This is called with the results from from FB.getLoginStatus().
             var statusChangeCallback = function(response) {
@@ -1058,7 +1057,7 @@
                      Set if you want to check the authentication status
                      at the start up of the app
                      */
-                    status: true,
+                    status: false,
 
                     /*
                      Enable cookies to allow the server to access
@@ -1077,6 +1076,35 @@
                 });
             };
         }
+
+        //This method is executed when the user press the "Login with facebook" button
+        $rootScope.facebookLogIn = function() {
+            $rootScope.c.debug('clicked facebookLogIn');
+            fbLogin();
+        };
+
+        //This method is executed when the user press the "Logout" button
+        $rootScope.facebookLogOut = function() {
+            $rootScope.c.debug('clicked facebookLogOut');
+            var hideSheet = $ionicActionSheet.show({
+                buttons: [
+                    { text: 'Cancelar' }
+                ],
+                destructiveText: 'Logout',
+                titleText: 'Deseja fazer Logout com Facebook?',
+                buttonClicked: function(index) {
+                    return true;
+                },
+                destructiveButtonClicked: function(){
+                    $rootScope.c.debug('destructiveButtonClicked');
+                    fbLogout();
+                    CartService.loadInitialData();
+                    UserService.resetUser();
+                    hideSheet();
+                    Layout.goHome();
+                }
+            });
+        };
 
         return returnObj;
     }
@@ -1105,10 +1133,13 @@
     function UserService($localStorage, $rootScope, Api, AppConfig) {
         var returnObj;
         returnObj = {
+            initUser: _initUser,
+            resetUser: _resetUser,
             getUserToCartData: _getUserToCartData,
             getUser: _getUser,
             updateUser: _updateUser,
             loadFromProviderId: _loadFromProviderId,
+            processUserFieldsFromFacebook: _processUserFieldsFromFacebook,
             setUser: _setUser
         };
 
@@ -1116,6 +1147,34 @@
             //things: []
             starter_facebook_user: null
         });
+
+        function _initUser(){
+            $rootScope.user = _getUser();
+            if ($rootScope.user!=undefined) _loadFromProviderId($rootScope.user.userID);
+        }
+
+        function _resetUser(){
+            _setUser();
+            _initUser();
+        }
+
+        function processFromApiPartnerError(){
+            //$rootScope.user = _getUser();
+            transferFieldsFromApiPartnerToCartData();
+        }
+
+        function processFieldsFromApiPartner(fields){
+            _updateUser(fields);
+            $rootScope.user = _getUser();
+            transferFieldsFromApiPartnerToCartData();
+        }
+
+        function _processUserFieldsFromFacebook(fields){
+            _setUser(fields);
+            $rootScope.user = _getUser();
+            transferFacebookUserToCartData();
+            _loadFromProviderId(fields.userID);
+        }
 
         function srtDateToObj(str){
             var pattern = /(\d{2})(\/)(\d{2})(\/)(\d{4})/i;
@@ -1133,61 +1192,134 @@
             return objDate;
         }
 
+        function transferFieldsFromApiPartnerToCartData() {
+            var user = _getUser();
+
+            function showInputsByDefault() {
+                $rootScope.cartData.showNameInput = true;
+                $rootScope.cartData.nome = user.name;
+
+                $rootScope.cartData.showDateInput = true;
+                if (user.birthday != undefined && user.birthday.length == 10)
+                    $rootScope.cartData.data_nascimento = srtDateToObj(user.birthday);
+                else
+                    $rootScope.cartData.data_nascimento = new Date();
+
+                $rootScope.cartData.showEmailInput = true;
+                $rootScope.cartData.email = user.userEmail;
+
+                $rootScope.cartData.showTelefoneInput = true;
+                $rootScope.cartData.showWhatsappInput = true;
+                $rootScope.cartData.showAddressList = false;
+            }
+
+            if (user!=undefined){
+                // define o mandante
+                if (user.mandante!=undefined) $rootScope.cartData.mandante = user.mandante;
+                else $rootScope.cartData.mandante = 'ilhanet';
+
+                if (user.user_id!=undefined) {
+                    // User encontrado
+                    $rootScope.cartData.user_id = user.user_id;
+
+                    if (user.partner_id!=undefined) {
+                        // Partner Encontrado
+                        $rootScope.cartData.partner_id = user.partner_id;
+
+                        $rootScope.cartData.showNameInput = false;
+                        $rootScope.cartData.showDateInput = !(user.partner_data_nascimento!=undefined && user.partner_data_nascimento.length==10);
+
+                        $rootScope.cartData.showEmailInput = (user.partner_emails==undefined);
+                        $rootScope.cartData.showTelefoneInput = (user.partner_telefones==undefined);
+                        $rootScope.cartData.showWhatsappInput = (user.partner_whatsapps==undefined);
+
+                        if (user.partner_addresses!=undefined){
+                            $rootScope.cartData.showAddressList = true;
+                            $rootScope.cartData.address_id = user.partner_addresses[0].id;
+                        } else $rootScope.cartData.showAddressList = false;
+
+                    } else {
+                        //Partner não encontrado
+                        showInputsByDefault();
+                    }
+                } else {
+                    // User não encontrado
+                    showInputsByDefault();
+                }
+            } else $rootScope.c.debug('Error: _getUser() return undefined in _transferFieldsFromApiPartnerToCartData()');
+
+        }
+
+        function transferFacebookUserToCartData() {
+            var user = _getUser();
+            if (user!=undefined){
+                //define campos do facebook
+                if (user.userID!=undefined) $rootScope.cartData.user_provider_id = user.userID;
+                if (user.name!=undefined) $rootScope.cartData.name = user.name;
+                if (user.picture!=undefined) $rootScope.cartData.picture = user.picture;
+                if (user.userEmail!=undefined) $rootScope.cartData.userEmail = user.userEmail;
+
+                //if (user.birthday!=undefined && user.birthday.length==10)
+                //    $rootScope.cartData.data_nascimento = srtDateToObj(user.birthday);
+
+            } else $rootScope.c.debug('Error: _getUser() return undefined in _transferFacebookUserToCartData()');
+        }
+
         function _getUserToCartData() {
             if ($rootScope.user==undefined){
-                $rootScope.user = _getUser();
+                //$rootScope.user = _getUser();
             }
             if ($rootScope.user!=undefined){
-                if ($rootScope.user.mandante!=undefined){
-                    $rootScope.cartData.mandante = $rootScope.user.mandante;
-                } else $rootScope.cartData.mandante = 'ilhanet';
+                //if ($rootScope.user.mandante!=undefined){
+                //    $rootScope.cartData.mandante = $rootScope.user.mandante;
+                //} else $rootScope.cartData.mandante = 'ilhanet';
 
-                if ($rootScope.user.userID!=undefined){
-                    $rootScope.cartData.user_provider_id = $rootScope.user.userID;
-                }
+                //if ($rootScope.user.userID!=undefined){
+                //    $rootScope.cartData.user_provider_id = $rootScope.user.userID;
+                //}
 
-                if ($rootScope.user.user_id!=undefined){
-                    $rootScope.cartData.user_id = $rootScope.user.user_id;
-                } else {
-                    $rootScope.cartData.name = $rootScope.user.name;
-                    $rootScope.cartData.picture = $rootScope.user.picture;
-                    $rootScope.cartData.email = $rootScope.user.email;
-                }
+                //if ($rootScope.user.user_id!=undefined){
+                //    $rootScope.cartData.user_id = $rootScope.user.user_id;
+                //} else {
+                //    //$rootScope.cartData.name = $rootScope.user.name;
+                //    //$rootScope.cartData.picture = $rootScope.user.picture;
+                //    //$rootScope.cartData.email = $rootScope.user.email;
+                //}
 
-                if ($rootScope.user.partner_id!=undefined){
-                    $rootScope.cartData.partner_id = $rootScope.user.partner_id;
-                }
-                if ($rootScope.user.partner_nome!=undefined){
-                    //$rootScope.cartData.nome = $rootScope.user.partner_nome;
-                } else $rootScope.cartData.nome = $rootScope.user.name;
+                //if ($rootScope.user.partner_id!=undefined){
+                //    $rootScope.cartData.partner_id = $rootScope.user.partner_id;
+                //}
+                //if ($rootScope.user.partner_nome!=undefined){
+                //    //$rootScope.cartData.nome = $rootScope.user.partner_nome;
+                //} else $rootScope.cartData.nome = $rootScope.user.name;
+                //
+                //if ($rootScope.user.partner_data_nascimento!=undefined){
+                //    //$rootScope.cartData.data_nascimento = srtDateToObj($rootScope.user.partner_data_nascimento);
+                //} else if ($rootScope.user.birthday!=undefined && $rootScope.user.birthday.length==10) {
+                //    $rootScope.cartData.data_nascimento = srtDateToObj($rootScope.user.birthday);
+                //}
+                //
+                //if ($rootScope.user.partner_emails!=undefined){
+                //    //$rootScope.cartData.email = $rootScope.user.partner_emails[0];
+                //} else $rootScope.cartData.email = $rootScope.user.email;
 
-                if ($rootScope.user.partner_data_nascimento!=undefined){
-                    //$rootScope.cartData.data_nascimento = srtDateToObj($rootScope.user.partner_data_nascimento);
-                } else if ($rootScope.user.birthday!=undefined && $rootScope.user.birthday.length==10) {
-                    $rootScope.cartData.data_nascimento = srtDateToObj($rootScope.user.birthday);
-                }
+                //if ($rootScope.user.partner_telefones!=undefined){
+                //    //$rootScope.cartData.telefone = $rootScope.user.partner_telefones[0];
+                //}
 
-                if ($rootScope.user.partner_emails!=undefined){
-                    //$rootScope.cartData.email = $rootScope.user.partner_emails[0];
-                } else $rootScope.cartData.email = $rootScope.user.email;
+                //if ($rootScope.user.partner_whatsapps!=undefined){
+                //    //$rootScope.cartData.whatsapp = $rootScope.user.partner_whatsapps[0];
+                //}
 
-                if ($rootScope.user.partner_telefones!=undefined){
-                    //$rootScope.cartData.telefone = $rootScope.user.partner_telefones[0];
-                }
-
-                if ($rootScope.user.partner_whatsapps!=undefined){
-                    //$rootScope.cartData.whatsapp = $rootScope.user.partner_whatsapps[0];
-                }
-
-                if ($rootScope.user.partner_addresses!=undefined){
-                    $rootScope.cartData.addresses = $rootScope.user.partner_addresses;
-                    $rootScope.cartData.address_id = $rootScope.user.partner_addresses[0].id;
-                    //$rootScope.cartData.cep = $rootScope.user.partner_addresses[0].cep;
-                    //$rootScope.cartData.endereco = $rootScope.user.partner_addresses[0].logradouro;
-                    //$rootScope.cartData.bairro = $rootScope.user.partner_addresses[0].bairro;
-                    //$rootScope.cartData.numero = $rootScope.user.partner_addresses[0].numero;
-                    //$rootScope.cartData.complemento = $rootScope.user.partner_addresses[0].complemento;
-                }
+                //if ($rootScope.user.partner_addresses!=undefined){
+                //    $rootScope.cartData.addresses = $rootScope.user.partner_addresses;
+                //    $rootScope.cartData.address_id = $rootScope.user.partner_addresses[0].id;
+                //    //$rootScope.cartData.cep = $rootScope.user.partner_addresses[0].cep;
+                //    //$rootScope.cartData.endereco = $rootScope.user.partner_addresses[0].logradouro;
+                //    //$rootScope.cartData.bairro = $rootScope.user.partner_addresses[0].bairro;
+                //    //$rootScope.cartData.numero = $rootScope.user.partner_addresses[0].numero;
+                //    //$rootScope.cartData.complemento = $rootScope.user.partner_addresses[0].complemento;
+                //}
             }
         }
 
@@ -1232,12 +1364,10 @@
                         if (response.data.partner_telefones!=undefined) response_fields.partner_telefones = response.data.partner_telefones;
                         if (response.data.partner_whatsapps!=undefined) response_fields.partner_whatsapps = response.data.partner_whatsapps;
                         if (response.data.partner_addresses!=undefined) response_fields.partner_addresses = response.data.partner_addresses;
-                        _updateUser(response_fields);
-                        $rootScope.user = _getUser();
-                        _getUserToCartData();
+                        processFieldsFromApiPartner(response_fields);
                     }
                     else {
-                        _getUserToCartData();
+                        processFromApiPartnerError();
                         $rootScope.c.debug(response.data.message);
                     }
                 });
@@ -1250,12 +1380,12 @@
 })();
 },{}],11:[function(require,module,exports){
 angular.module("templates").run(["$templateCache", function($templateCache) {$templateCache.put("account/templates/tab-account.html","<ion-view view-title=\"Account\">\n  <ion-content>\n    <ion-list>\n    <ion-toggle  ng-model=\"settings.enableFriends\">\n        Enable Friends\n    </ion-toggle>\n    </ion-list>\n  </ion-content>\n</ion-view>\n");
-$templateCache.put("cart/templates/cart.html","<ion-modal-view>\n    <ion-header-bar>\n        <h1 class=\"title\">Carrinho de Compras</h1>\n\n        <div class=\"buttons\" ng-if=\"minMediumScreens\">\n            <button class=\"button button-light\" ng-click=\"CartService.closeCart()\">Fechar</button>\n        </div>\n    </ion-header-bar>\n    <ion-content>\n        <div class=\"text-center\" ng-hide=\"CartService.existeItens()\">\n            <button class=\"button button-large button-full button-dark\" ng-click=\"CartService.closeCart()\">\n                Nenhum item selecionado\n            </button>\n        </div>\n\n        <div class=\"list list-inset\" ng-show=\"CartService.existeItens()\">\n            <div class=\"item item-divider\">Itens</div>\n            <div class=\"item item-button-right\" ng-repeat=\"item in cartItems\">\n                <p>{{ item.nome }}</p>\n                <span class=\"quantity\">{{ item.quantidade }} <small>x</small> </span><span class=\"price\">{{ item.valor | currency }}</span>\n                <button class=\"button button-light\" ng-click=\"removeItem(item.id)\">\n                    <i class=\"icon ion-close-circled\"></i>\n                </button>\n            </div>\n        </div>\n\n        <form class=\"cancelEnter\" ng-submit=\"CartService.doDelivery()\" ng-show=\"CartService.existeItens()\">\n            <div class=\"list\">\n                <div class=\"item item-divider\">Forma de Pagamento</div>\n\n                <div class=\"item text-center\">\n                    Valor Total: <span class=\"price\">{{ valorTotal | currency }}</span>\n                    <ion-list class=\"text-left\">\n                        <ion-radio name=\"pagamento\" ng-model=\"cartData.pagamento\" ng-value=\"\'dinheiro\'\">Dinheiro</ion-radio>\n                        <ion-radio name=\"pagamento\" ng-model=\"cartData.pagamento\" ng-value=\"\'debito\'\">\n                            <div class=\"pull-left\">Cartão Debito</div>\n                            <div class=\"pull-right\">\n                                <i class=\"fa fa-cc-visa fa-2x\"></i>\n                                <i class=\"fa fa-cc-mastercard fa-2x\"></i>\n                                <i class=\"fa fa-cc-diners-club fa-2x\"></i>\n                            </div>\n\n                        </ion-radio>\n                        <ion-radio name=\"pagamento\" ng-model=\"cartData.pagamento\" ng-value=\"\'credito\'\">\n                            <div class=\"pull-left\">Cartão Crédito</div>\n                            <div class=\"pull-right\">\n                                <i class=\"fa fa-cc-visa fa-2x\"></i>\n                                <i class=\"fa fa-cc-mastercard fa-2x\"></i>\n                                <i class=\"fa fa-cc-diners-club fa-2x\"></i>\n                            </div>\n                        </ion-radio>\n                    </ion-list>\n                </div>\n\n                <div class=\"item item-divider\">Dados da Entrega</div>\n\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Nome:</span>\n                    <label class=\"block\" ng-show=\"user.partner_nome.length>0\">{{user.partner_nome}}</label>\n                    <input type=\"text\" autocomplete=\"off\" name=\"nome\" ng-hide=\"user.partner_nome.length>0\" ng-model=\"cartData.nome\" placeholder=\"Ex.: João da Silva\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Nascimento: <small>(opcional)</small></span>\n                    <label class=\"block\" ng-show=\"user.partner_data_nascimento.length>0\">{{user.partner_data_nascimento}}</label>\n                    <input type=\"date\" autocomplete=\"off\" ng-hide=\"user.partner_data_nascimento.length>0\" name=\"data_nascimento\"\n                           ng-model=\"cartData.data_nascimento\"\n                           ng-value=\"cartData.data_nascimento\" placeholder=\"dd/mm/aaaa\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-class=\"{\'item-button-right\':(user.partner_emails.length>0)}\">\n                    <span class=\"input-label\">E-mail:</span>\n                    <!--<button type=\"button\" class=\"button button-light ion-edit\"-->\n                            <!--ng-show=\"user.partner_emails.length>0 && !cartData.emailChanged\" ng-click=\"cartData.emailChanged=true\"></button>-->\n                    <label class=\"block\" ng-show=\"user.partner_emails.length>0\">{{user.partner_emails[0]}}</label>\n                    <input type=\"email\" name=\"email\" ng-hide=\"user.partner_emails.length>0\" ng-model=\"cartData.email\" placeholder=\"Ex.: exemplo@gmail.com\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Telefone:</span>\n                    <label class=\"block\" ng-show=\"user.partner_telefones.length>0\">{{user.partner_telefones[0]}}</label>\n                    <input type=\"tel\" name=\"telefone\" ng-hide=\"user.partner_telefones.length>0\"\n                           ng-model=\"cartData.telefone\" placeholder=\"Ex.: (22)999 999 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Whatsapp:</span>\n                    <label class=\"block\" ng-show=\"user.partner_whatsapps.length>0\">{{user.partner_whatsapps[0]}}</label>\n                    <input type=\"tel\" name=\"whatsapp\" ng-hide=\"user.partner_whatsapps.length>0\"\n                           ng-model=\"cartData.whatsapp\" placeholder=\"Ex.: (22)999 999 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.addresses.length>0\">\n                    <div class=\"margin-left-off list list-inset\">\n                        <div class=\"item item-divider\">Endereços utilizados:</div>\n                        <ion-list class=\"text-left\">\n                            <ion-radio name=\"address\" ng-model=\"cartData.address_id\" ng-value=\"address.id\" class=\"address-item\"\n                                       ng-repeat=\"address in cartData.addresses\">\n                                {{address.logradouro}} {{address.numero}} {{address.complemento}} - CEP: {{address.cep}} - Bairro: {{address.bairro}}\n                            </ion-radio>\n                            <ion-radio name=\"address\" ng-model=\"cartData.address_id\" ng-value=\"false\">Criar Novo Endereço</ion-radio>\n                        </ion-list>\n                    </div>\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">CEP:</span>\n                    <input type=\"tel\"\n                           class=\"numbersOnly cancelEnter cepKeyUp\"\n                           autocomplete=\"off\"\n                           ng-model=\"cartData.cep\" placeholder=\"Ex.: 28893818\"\n                           maxlength=\"8\">\n                </label>\n                <label class=\"item item-input item-stacked-label item-button-right\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Endereço:</span>\n                    <input type=\"text\"\n                           class=\"cancelEnter enderecoKeyUp\"\n                           autocomplete=\"off\"\n                           ng-model=\"cartData.endereco\" placeholder=\"Ex.: Av. Brasil\">\n                    <div class=\"list list-inset\" ng-show=\"cartData.matches.length>0\">\n                        <div class=\"item item-divider\">Endereços encontrados:</div>\n                        <label class=\"item address-item\" ng-repeat=\"address in cartData.matches\">\n                            <button class=\"button button-small button-light\" type=\"button\"\n                                    ng-click=\"CartService.selecionaEndereco(address)\">\n                                {{address.logradouro}} {{address.complemento}} - CEP: {{address.cep}} - Bairro: {{address.bairro}}\n                            </button>\n                        </label>\n                    </div>\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Bairro:</span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"bairro\" ng-model=\"cartData.bairro\" placeholder=\"Ex.: Centro\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Número:</span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"numero\" ng-model=\"cartData.numero\" placeholder=\"Ex.: 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Complemento: <small>(opcional)</small></span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"complemento\" ng-model=\"cartData.complemento\" placeholder=\"Ex.: apartamento 109\">\n                </label>\n\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Observação: <small>(opcional)</small></span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"observacao\" ng-model=\"cartData.observacao\" placeholder=\"Ex.: enviar mensagem ao chegar\">\n                </label>\n\n                <label class=\"item\">\n                    <button class=\"button button-block button-positive\" type=\"submit\" ng-disabled=\"disableButton\">Solicitar Entrega</button>\n                </label>\n            </div>\n        </form>\n    </ion-content>\n</ion-modal-view>\n");
+$templateCache.put("cart/templates/cart.html","<ion-modal-view>\n    <ion-header-bar>\n        <h1 class=\"title\">Carrinho de Compras</h1>\n\n        <div class=\"buttons\" ng-if=\"minMediumScreens\">\n            <button class=\"button button-light\" ng-click=\"CartService.closeCart()\">Fechar</button>\n        </div>\n    </ion-header-bar>\n    <ion-content>\n        <div class=\"text-center\" ng-hide=\"CartService.existeItens()\">\n            <button class=\"button button-large button-full button-dark\" ng-click=\"CartService.closeCart()\">\n                Nenhum item selecionado\n            </button>\n        </div>\n\n        <div class=\"list list-inset\" ng-show=\"CartService.existeItens()\">\n            <div class=\"item item-divider\">Itens</div>\n            <div class=\"item item-button-right\" ng-repeat=\"item in cartItems\">\n                <p>{{ item.nome }}</p>\n                <span class=\"quantity\">{{ item.quantidade }} <small>x</small> </span><span class=\"price\">{{ item.valor | currency }}</span>\n                <button class=\"button button-light\" ng-click=\"removeItem(item.id)\">\n                    <i class=\"icon ion-close-circled\"></i>\n                </button>\n            </div>\n        </div>\n\n        <form class=\"cancelEnter\" ng-submit=\"CartService.doDelivery()\" ng-show=\"CartService.existeItens()\">\n            <div class=\"list\">\n                <div class=\"item item-divider\">Forma de Pagamento</div>\n\n                <div class=\"item text-center\">\n                    Valor Total: <span class=\"price\">{{ valorTotal | currency }}</span>\n                    <ion-list class=\"text-left\">\n                        <ion-radio name=\"pagamento\" ng-model=\"cartData.pagamento\" ng-value=\"\'dinheiro\'\">Dinheiro</ion-radio>\n                        <ion-radio name=\"pagamento\" ng-model=\"cartData.pagamento\" ng-value=\"\'debito\'\">\n                            <div class=\"pull-left\">Cartão Debito</div>\n                            <div class=\"pull-right\">\n                                <i class=\"fa fa-cc-visa fa-2x\"></i>\n                                <i class=\"fa fa-cc-mastercard fa-2x\"></i>\n                                <i class=\"fa fa-cc-diners-club fa-2x\"></i>\n                            </div>\n\n                        </ion-radio>\n                        <ion-radio name=\"pagamento\" ng-model=\"cartData.pagamento\" ng-value=\"\'credito\'\">\n                            <div class=\"pull-left\">Cartão Crédito</div>\n                            <div class=\"pull-right\">\n                                <i class=\"fa fa-cc-visa fa-2x\"></i>\n                                <i class=\"fa fa-cc-mastercard fa-2x\"></i>\n                                <i class=\"fa fa-cc-diners-club fa-2x\"></i>\n                            </div>\n                        </ion-radio>\n                    </ion-list>\n                </div>\n\n                <div class=\"item item-divider\">Dados da Entrega</div>\n\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Nome:</span>\n                    <label class=\"block\" ng-hide=\"cartData.showNameInput\">{{user.partner_nome}}</label>\n                    <input type=\"text\" autocomplete=\"off\" name=\"nome\" ng-show=\"cartData.showNameInput\" ng-model=\"cartData.nome\" placeholder=\"Ex.: João da Silva\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Nascimento: <small>(opcional)</small></span>\n                    <label class=\"block\" ng-hide=\"cartData.showDateInput\">{{user.partner_data_nascimento}}</label>\n                    <input type=\"date\" autocomplete=\"off\" ng-show=\"cartData.showDateInput\" name=\"data_nascimento\"\n                           ng-model=\"cartData.data_nascimento\"\n                           ng-value=\"cartData.data_nascimento\" placeholder=\"dd/mm/aaaa\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-class=\"{\'item-button-right\':(user.partner_emails.length>0)}\">\n                    <span class=\"input-label\">E-mail:</span>\n                    <!--<button type=\"button\" class=\"button button-light ion-edit\"-->\n                            <!--ng-show=\"user.partner_emails.length>0 && !cartData.emailChanged\" ng-click=\"cartData.emailChanged=true\"></button>-->\n                    <label class=\"block\" ng-hide=\"cartData.showEmailInput\">{{user.partner_emails[0]}}</label>\n                    <input type=\"email\" name=\"email\" ng-show=\"cartData.showEmailInput\" ng-model=\"cartData.email\" placeholder=\"Ex.: exemplo@gmail.com\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Telefone:</span>\n                    <label class=\"block\" ng-hide=\"cartData.showTelefoneInput\">{{user.partner_telefones[0]}}</label>\n                    <input type=\"tel\" name=\"telefone\" ng-show=\"cartData.showTelefoneInput\"\n                           ng-model=\"cartData.telefone\" placeholder=\"Ex.: (22)999 999 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Whatsapp:</span>\n                    <label class=\"block\" ng-hide=\"cartData.showWhatsappInput\">{{user.partner_whatsapps[0]}}</label>\n                    <input type=\"tel\" name=\"whatsapp\" ng-show=\"cartData.showWhatsappInput\"\n                           ng-model=\"cartData.whatsapp\" placeholder=\"Ex.: (22)999 999 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.showAddressList\">\n                    <div class=\"margin-left-off list list-inset\">\n                        <div class=\"item item-divider\">Endereços utilizados:</div>\n                        <ion-list class=\"text-left\">\n                            <ion-radio name=\"address\" ng-model=\"cartData.address_id\" ng-value=\"address.id\" class=\"address-item\"\n                                       ng-repeat=\"address in user.partner_addresses\">\n                                {{address.logradouro}} {{address.numero}} {{address.complemento}} - CEP: {{address.cep}} - Bairro: {{address.bairro}}\n                            </ion-radio>\n                            <ion-radio name=\"address\" ng-model=\"cartData.address_id\" ng-value=\"false\">Criar Novo Endereço</ion-radio>\n                        </ion-list>\n                    </div>\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">CEP:</span>\n                    <input type=\"tel\"\n                           class=\"numbersOnly cancelEnter cepKeyUp\"\n                           autocomplete=\"off\"\n                           ng-model=\"cartData.cep\" placeholder=\"Ex.: 28893818\"\n                           maxlength=\"8\">\n                </label>\n                <label class=\"item item-input item-stacked-label item-button-right\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Endereço:</span>\n                    <input type=\"text\"\n                           class=\"cancelEnter enderecoKeyUp\"\n                           autocomplete=\"off\"\n                           ng-model=\"cartData.endereco\" placeholder=\"Ex.: Av. Brasil\">\n                    <div class=\"list list-inset\" ng-show=\"cartData.matches.length>0\">\n                        <div class=\"item item-divider\">Endereços encontrados:</div>\n                        <label class=\"item address-item\" ng-repeat=\"address in cartData.matches\">\n                            <button class=\"button button-small button-light\" type=\"button\"\n                                    ng-click=\"CartService.selecionaEndereco(address)\">\n                                {{address.logradouro}} {{address.complemento}} - CEP: {{address.cep}} - Bairro: {{address.bairro}}\n                            </button>\n                        </label>\n                    </div>\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Bairro:</span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"bairro\" ng-model=\"cartData.bairro\" placeholder=\"Ex.: Centro\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Número:</span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"numero\" ng-model=\"cartData.numero\" placeholder=\"Ex.: 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Complemento: <small>(opcional)</small></span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"complemento\" ng-model=\"cartData.complemento\" placeholder=\"Ex.: apartamento 109\">\n                </label>\n\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Observação: <small>(opcional)</small></span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"observacao\" ng-model=\"cartData.observacao\" placeholder=\"Ex.: enviar mensagem ao chegar\">\n                </label>\n\n                <label class=\"item\">\n                    <button class=\"button button-block button-positive\" type=\"submit\" ng-disabled=\"disableButton\">Solicitar Entrega</button>\n                </label>\n            </div>\n        </form>\n    </ion-content>\n</ion-modal-view>\n");
 $templateCache.put("chat/templates/chat-detail.html","<!--\n  This template loads for the \'tab.friend-detail\' state (app.js)\n  \'friend\' is a $scope variable created in the FriendsCtrl controller (controllers.js)\n  The FriendsCtrl pulls data from the Friends service (service.js)\n  The Friends service returns an array of friend data\n-->\n<ion-view view-title=\"{{chat.name}}\">\n  <ion-content class=\"padding\">\n    <img ng-src=\"{{chat.face}}\" style=\"width: 64px; height: 64px\">\n    <p>\n      {{chat.lastText}}\n    </p>\n  </ion-content>\n</ion-view>\n");
 $templateCache.put("chat/templates/tab-chats.html","<ion-view view-title=\"Chats\">\n  <ion-content>\n    <ion-list>\n      <ion-item class=\"item-remove-animate item-avatar item-icon-right\" ng-repeat=\"chat in chats\" type=\"item-text-wrap\" href=\"#/tab/chats/{{chat.id}}\">\n        <img ng-src=\"{{chat.face}}\">\n        <h2>{{chat.name}}</h2>\n        <p>{{chat.lastText}}</p>\n        <i class=\"icon ion-chevron-right icon-accessory\"></i>\n\n        <ion-option-button class=\"button-assertive\" ng-click=\"remove(chat)\">\n          Delete\n        </ion-option-button>\n      </ion-item>\n    </ion-list>\n  </ion-content>\n</ion-view>\n");
 $templateCache.put("common/templates/menu.html","<ion-side-menus enable-menu-with-back-views=\"false\">\n    <ion-side-menu-content>\n        <ion-nav-bar class=\"bar-stable\">\n            <ion-nav-back-button></ion-nav-back-button>\n            <ion-nav-buttons side=\"left\">\n                <button class=\"button button-icon button-clear ion-navicon\" menu-toggle=\"left\"\n                        ng-hide=\"$exposeAside.active\"></button>\n                <div class=\"delivery-bar-title title\">delivery24horas.com</div>\n            </ion-nav-buttons>\n            <ion-nav-buttons side=\"right\">\n                <button ng-if=\"cordova\" class=\"delivery-btn-social-header button button-positive btn-social\">\n                    <i class=\"ion-social-facebook\"></i>Entrar com Facebook\n                </button>\n\n                <!--<button class=\"button marging\" ng-class=\"{\'button-clear\': (valorTotal=0), \'button-balanced\': (valorTotal>0)}\">-->\n                <button class=\"button marging\"\n                        ng-click=\"CartService.showCart()\"\n                        ng-class=\"(valorTotal>0)?\'button-balanced\': \'button-clear\'\">\n                <!--<button class=\"button button-clear\">-->\n                    <i class=\"ion-android-cart\"></i> ({{ valorTotal | currency }})\n                </button>\n\n            </ion-nav-buttons>\n        </ion-nav-bar>\n        <ion-nav-view name=\"menuContent\"></ion-nav-view>\n    </ion-side-menu-content>\n\n    <ion-side-menu expose-aside-when=\"large\">\n        <ion-header-bar class=\"bar-stable\">\n            <h1 class=\"title\">Menu</h1>\n        </ion-header-bar>\n        <ion-content>\n            <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n            <div class=\"list list-inset\">\n                <div class=\"item item-divider\">Categorias</div>\n\n                <a href=\"#/app/productlist\" class=\"item item-icon-left\"\n                   menu-close ng-click=\"loadCategoria(\'Todas\');loadProducts()\">\n                    <i class=\"icon ion-beer\"></i>\n                    Todas\n                </a>\n                <a ng-repeat=\"item in categorias\" href=\"#/app/productlist\" class=\"item item-icon-left\"\n                   menu-close ng-click=\"loadCategoria(item.nome);loadProducts(item.id)\">\n                    <i class=\"{{ item.icon }}\"></i>\n                    {{ item.nome }}\n                </a>\n\n                <div class=\"item item-divider\">Relatórios</div>\n                <a href=\"#/app/report\" class=\"item item-icon-left\" menu-close>\n                    <i class=\"ion-document-text\"></i>\n                    Relatórios\n                </a>\n                <a href=\"#/app/browse\" class=\"item item-icon-left\" menu-close>\n                    <i class=\"ion-document-text\"></i>\n                    Browse\n                </a>\n\n                <div class=\"item item-divider\">Minha conta</div>\n                <div class=\"item\">Meus Dados</div>\n                <div class=\"item\">Trocar Senha</div>\n                <div class=\"item\">Sair</div>\n\n            </div>\n        </ion-content>\n    </ion-side-menu>\n</ion-side-menus>");
 $templateCache.put("common/templates/tabs.html","<!--\nCreate tabs with an icon and label, using the tabs-positive style.\nEach tab\'s child <ion-nav-view> directive will have its own\nnavigation history that also transitions its views in and out.\n-->\n<ion-tabs class=\"tabs-icon-top tabs-color-active-positive\">\n    <!-- Home Tab -->\n    <ion-tab title=\"Produtos\" icon-off=\"ion-ios-home-outline\" icon-on=\"ion-ios-home\" href=\"#/tab/home\">\n        <ion-nav-view name=\"tab-home\"></ion-nav-view>\n    </ion-tab>\n\n     <!--Dashboard Tab-->\n    <ion-tab title=\"Carrinho {{ valorTotal | currency }}\" icon-off=\"ion-ios-cart-outline\" icon-on=\"ion-ios-cart\" href=\"#/tab/cart\">\n        <ion-nav-view name=\"tab-cart\"></ion-nav-view>\n    </ion-tab>\n\n    <!-- Chats Tab -->\n    <ion-tab title=\"Ajuda\" icon-off=\"ion-ios-chatboxes-outline\" icon-on=\"ion-ios-chatboxes\" href=\"#/tab/chats\">\n        <ion-nav-view name=\"tab-chats\"></ion-nav-view>\n    </ion-tab>\n\n    <!-- Account Tab -->\n    <ion-tab title=\"Minha Conta\" icon-off=\"ion-ios-gear-outline\" icon-on=\"ion-ios-gear\" href=\"#/tab/account\">\n        <ion-nav-view name=\"tab-account\"></ion-nav-view>\n    </ion-tab>\n</ion-tabs>");
-$templateCache.put("productlist/templates/productlist.html","<ion-view view-title=\"\">\n    <div class=\"bar item-input-inset\" ng-class=\"{\'bar-subheader\': minMediumScreens}\">\n        <label class=\"item-input-wrapper\">\n            <i class=\"icon ion-ios-search placeholder-icon\"></i>\n            <input type=\"search\" placeholder=\"Busca de produtos\" ng-model=\"query\">\n        </label>\n        <button ng-if=\"query.length\"\n                class=\"input-button button button-icon ion-close-circled\"\n                ng-click=\"clearSearch()\">\n        </button>\n        <!--<button class=\"button button-clear\" ng-click=\"query = \'\'\">-->\n            <!--Cancelar-->\n        <!--</button>-->\n    </div>\n    <ion-content ng-class=\"{\'has-subheader\': minMediumScreens, \'has-header\': handhelds}\">\n        <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n\n        <div class=\"list delivery-list delivery-list-with-menu\">\n            <div ng-if=\"cordova\" class=\"item item-button-right delivery-btn-social\">\n                <button ng-show=\"!user.userID\" class=\"button btn-social\" ng-click=\"facebookSignIn()\">\n                    <i class=\"ion-social-facebook\"></i>Entrar com Facebook\n                </button>\n                <button ng-show=\"user.userID\" class=\"button btn-social\" ng-click=\"showLogOutMenu()\">\n                    <i class=\"ion-social-facebook\"></i>Sair {{ user.name }} <img class=\"img-thumbnail-facebook\" ng-src=\"{{ user.picture }}\">\n                </button>\n            </div>\n            <div class=\"item\" ng-if=\"!cordova\">\n                <div id=\"fb-root\"></div>\n                <!--<fb:login-button scope=\"public_profile,email\" onlogin=\"console.log(angular);\">-->\n                <!--</fb:login-button>-->\n                <div class=\"fb-login-button\" data-max-rows=\"1\" data-size=\"medium\"\n                     data-scope=\"public_profile,email,user_birthday\" data-show-faces=\"true\" data-auto-logout-link=\"true\"></div>\n                <!--<div id=\"status\"></div>-->\n            </div>\n            <div class=\"item\">\n                <div class=\"delivery-logo-block\">\n                    <img ng-src=\"{{logoUrl+\'logo-delivery2-resized-compressed.png\'}}\">\n                    <!--<p ng-hide=\"$exposeAside.active\"><span class=\"ion-arrow-left-a\"></span> Acesse o Menu ao lado</p>-->\n                </div>\n            </div>\n\n        </div>\n\n        <div class=\"delivery-list-with-menu\">\n\n            <div ng-class=\"{card: minMediumScreens, list: handhelds, \'list-inset\': handhelds}\" class=\"padding-right\">\n                <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n                <div class=\"item resultCount\" ng-if=\"query.length\"><span>{{ filtered.length }} de {{ products.length }}</span></div>\n                <div class=\"delivery-product-item\" ng-class=\"{item: handhelds, \'item-thumbnail-left\': handhelds}\"\n                     ng-repeat=\"produto in filtered = (products | filter: query)\">\n                     <!--ng-repeat=\"produto in products | filter: query as filtered\">-->\n\n                    <img ng-src=\"{{ prepareImage(produto.imagem) }}\"\n                         alt=\"Imagem do produto {{ produto.nome }}\"\n                         title=\"Imagem do produto {{ produto.nome }}\">\n                    <div>\n                        <span class=\"price\">{{ produto.valor | currency }}<small ng-show=\"quantidade[produto.id]>0\"> x <span class=\"quantity\">{{ quantidade[produto.id] }}</span></small></span>\n                        <p>{{ produto.nome }}</p>\n                    </div>\n\n                    <div class=\"range\">\n                        <button ng-click=\"decrementa(produto.id)\" class=\"button button-light\"><i class=\"icon ion-chevron-left\"></i></button>\n                        <input type=\"range\" ng-change=\"somaTotal()\" id=\"quantidade[{{ produto.id }}]\"\n                               name=\"quantidade[{{ produto.id }}]\" ng-model=\"quantidade[produto.id]\"\n                               min=\"0\" max=\"{{ produto.max }}\">\n                        <button ng-click=\"incrementa(produto.id)\" class=\"button button-light\"><i class=\"icon ion-chevron-right\"></i></button>\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class=\"delivery-menu-left\">\n            <button ng-click=\"loadProducts();loadCategoria(\'Todas\');\"\n                    class=\"delivery-button button button-stable\">\n                <i class=\"icon fa fa-globe\"></i>\n                <p>Todas</p>\n            </button>\n            <button ng-click=\"loadProducts();loadCategoria(\'Favoritos\');\"\n                    class=\"delivery-button button button-stable\">\n                <i class=\"icon fa fa-star\"></i>\n                <p>Favoritos</p>\n            </button>\n            <button ng-click=\"loadProducts(item.id);loadCategoria(item.nome);\"\n                    ng-repeat=\"item in categorias\"\n                    class=\"delivery-button button button-stable\">\n                <i class=\"{{ item.icon }}\"></i>\n                <p>{{ item.nome }}</p>\n            </button>\n        </div>\n    </ion-content>\n\n</ion-view>");
+$templateCache.put("productlist/templates/productlist.html","<ion-view view-title=\"\">\n    <div class=\"bar item-input-inset\" ng-class=\"{\'bar-subheader\': minMediumScreens}\">\n        <label class=\"item-input-wrapper\">\n            <i class=\"icon ion-ios-search placeholder-icon\"></i>\n            <input type=\"search\" placeholder=\"Busca de produtos\" ng-model=\"query\">\n        </label>\n        <button ng-if=\"query.length\"\n                class=\"input-button button button-icon ion-close-circled\"\n                ng-click=\"clearSearch()\">\n        </button>\n        <!--<button class=\"button button-clear\" ng-click=\"query = \'\'\">-->\n            <!--Cancelar-->\n        <!--</button>-->\n    </div>\n    <ion-content ng-class=\"{\'has-subheader\': minMediumScreens, \'has-header\': handhelds}\">\n        <ion-refresher pulling-text=\"Deslize para Atualizar\" on-refresh=\"doRefresh()\"></ion-refresher>\n\n        <div class=\"list delivery-list delivery-list-with-menu\">\n            <div class=\"item\" ng-show=\"user.userID\">\n                <div class=\"list\">\n                    <div class=\"item item-avatar\">\n                        <img class=\"\" ng-src=\"{{ user.picture }}\">\n                        <p>{{ user.name }}</p>\n                        <button ng-show=\"user.userID\" class=\"button btn-social\" ng-click=\"facebookLogOut()\">\n                            <i class=\"ion-social-facebook\"></i>Logout Facebook\n                        </button>\n                    </div>\n                </div>\n            </div>\n            <div class=\"item item-button-right delivery-btn-social\" ng-show=\"!user.userID\">\n                <button ng-show=\"!user.userID\" class=\"button btn-social\" ng-click=\"facebookLogIn()\">\n                    <i class=\"ion-social-facebook\"></i>Login Facebook\n                </button>\n            </div>\n            <!--<div class=\"item\" ng-if=\"!cordova\">-->\n                <!--<div id=\"fb-root\"></div>-->\n                <!--&lt;!&ndash;<fb:login-button scope=\"public_profile,email\" onlogin=\"console.log(angular);\">&ndash;&gt;-->\n                <!--&lt;!&ndash;</fb:login-button>&ndash;&gt;-->\n                <!--<div class=\"fb-login-button\" data-max-rows=\"1\" data-size=\"medium\"-->\n                     <!--data-scope=\"public_profile,email,user_birthday\" data-show-faces=\"true\" data-auto-logout-link=\"true\"></div>-->\n                <!--&lt;!&ndash;<div id=\"status\"></div>&ndash;&gt;-->\n            <!--</div>-->\n            <div class=\"item\">\n                <div class=\"delivery-logo-block\">\n                    <img ng-src=\"{{logoUrl+\'logo-delivery2-resized-compressed.png\'}}\">\n                    <!--<p ng-hide=\"$exposeAside.active\"><span class=\"ion-arrow-left-a\"></span> Acesse o Menu ao lado</p>-->\n                </div>\n            </div>\n\n        </div>\n\n        <div class=\"delivery-list-with-menu\">\n\n            <div ng-class=\"{card: minMediumScreens, list: handhelds, \'list-inset\': handhelds}\" class=\"padding-right\">\n                <div class=\"item item-divider\">{{ rootCategoriaSelecionada }}</div>\n                <div class=\"item resultCount\" ng-if=\"query.length\"><span>{{ filtered.length }} de {{ products.length }}</span></div>\n                <div class=\"delivery-product-item\" ng-class=\"{item: handhelds, \'item-thumbnail-left\': handhelds}\"\n                     ng-repeat=\"produto in filtered = (products | filter: query)\">\n                     <!--ng-repeat=\"produto in products | filter: query as filtered\">-->\n\n                    <img ng-src=\"{{ prepareImage(produto.imagem) }}\"\n                         alt=\"Imagem do produto {{ produto.nome }}\"\n                         title=\"Imagem do produto {{ produto.nome }}\">\n                    <div>\n                        <span class=\"price\">{{ produto.valor | currency }}<small ng-show=\"quantidade[produto.id]>0\"> x <span class=\"quantity\">{{ quantidade[produto.id] }}</span></small></span>\n                        <p>{{ produto.nome }}</p>\n                    </div>\n\n                    <div class=\"range\">\n                        <button ng-click=\"decrementa(produto.id)\" class=\"button button-light\"><i class=\"icon ion-chevron-left\"></i></button>\n                        <input type=\"range\" ng-change=\"somaTotal()\" id=\"quantidade[{{ produto.id }}]\"\n                               name=\"quantidade[{{ produto.id }}]\" ng-model=\"quantidade[produto.id]\"\n                               min=\"0\" max=\"{{ produto.max }}\">\n                        <button ng-click=\"incrementa(produto.id)\" class=\"button button-light\"><i class=\"icon ion-chevron-right\"></i></button>\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class=\"delivery-menu-left\">\n            <button ng-click=\"loadProducts();loadCategoria(\'Todas\');\"\n                    class=\"delivery-button button button-stable\">\n                <i class=\"icon fa fa-globe\"></i>\n                <p>Todas</p>\n            </button>\n            <button ng-click=\"loadProducts();loadCategoria(\'Favoritos\');\"\n                    class=\"delivery-button button button-stable\">\n                <i class=\"icon fa fa-star\"></i>\n                <p>Favoritos</p>\n            </button>\n            <button ng-click=\"loadProducts(item.id);loadCategoria(item.nome);\"\n                    ng-repeat=\"item in categorias\"\n                    class=\"delivery-button button button-stable\">\n                <i class=\"{{ item.icon }}\"></i>\n                <p>{{ item.nome }}</p>\n            </button>\n        </div>\n    </ion-content>\n\n</ion-view>");
 $templateCache.put("report/templates/report.html","<ion-view view-title=\"Relatórios\">\n    <ion-content class=\"padding\">\n        <h1>{{ titulo }}</h1>\n        <p>\n            <a class=\"button icon icon-right ion-chevron-right\" href=\"#/app/report\">titulo</a>\n        </p>\n    </ion-content>\n</ion-view>");
 $templateCache.put("browse.html","<ion-view view-title=\"Browse\">\n  <ion-content>\n    <h1>Browse</h1>\n  </ion-content>\n</ion-view>\n");
 $templateCache.put("loading.html","<div class=\"loading-container visible active\">\n    <div class=\"loading\">\n        <p>Carregando...</p><ion-spinner></ion-spinner>\n    </div>\n</div>");

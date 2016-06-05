@@ -207,13 +207,15 @@
         'Layout',
         'Facebook',
         'AppConfig',
+        'UserService',
         bodyController
     ]);
-    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias, Layout, Facebook, AppConfig) {
+    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias, Layout, Facebook, AppConfig, UserService) {
         $rootScope.CartService = CartService;
         $rootScope.CartService.initCart();
         Categorias.loadItems();
         Layout.check();
+        UserService.initUser();
 
         if (AppConfig.cordova) {
             $rootScope.cordova = AppConfig.cordova;

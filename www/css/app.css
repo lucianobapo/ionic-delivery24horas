@@ -12060,13 +12060,17 @@ body {
   border-bottom: 1px solid #ddd; }
 
 .btn-social {
+  font-weight: 400;
+  font-size: 13px !important;
+  line-height: 32px !important;
+  min-height: 34px;
+  width: auto;
   position: relative;
   padding-left: 44px;
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 185px;
   display: block;
   /* facebook */
   color: #ffffff;
@@ -12151,18 +12155,8 @@ body {
   .fix-to-top > div > .delivery-list-with-menu > div:first-child {
     display: none; } }
 
-@media only screen and (max-width: 425px) {
-  .delivery-btn-social {
-    height: 50px; }
-    .delivery-btn-social > button {
-      font-weight: 400;
-      font-size: 13px !important;
-      line-height: 32px !important;
-      width: auto; } }
-
-@media only screen and (min-width: 426px) {
-  .delivery-btn-social {
-    display: none; } }
+.delivery-btn-social {
+  height: 50px; }
 
 @media only screen and (max-width: 425px) {
   .delivery-btn-social-header {

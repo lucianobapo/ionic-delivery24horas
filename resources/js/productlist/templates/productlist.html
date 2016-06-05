@@ -16,22 +16,30 @@
         <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
 
         <div class="list delivery-list delivery-list-with-menu">
-            <div ng-if="cordova" class="item item-button-right delivery-btn-social">
-                <button ng-show="!user.userID" class="button btn-social" ng-click="facebookSignIn()">
-                    <i class="ion-social-facebook"></i>Entrar com Facebook
-                </button>
-                <button ng-show="user.userID" class="button btn-social" ng-click="showLogOutMenu()">
-                    <i class="ion-social-facebook"></i>Sair {{ user.name }} <img class="img-thumbnail-facebook" ng-src="{{ user.picture }}">
+            <div class="item" ng-show="user.userID">
+                <div class="list">
+                    <div class="item item-avatar">
+                        <img class="" ng-src="{{ user.picture }}">
+                        <p>{{ user.name }}</p>
+                        <button ng-show="user.userID" class="button btn-social" ng-click="facebookLogOut()">
+                            <i class="ion-social-facebook"></i>Logout Facebook
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="item item-button-right delivery-btn-social" ng-show="!user.userID">
+                <button ng-show="!user.userID" class="button btn-social" ng-click="facebookLogIn()">
+                    <i class="ion-social-facebook"></i>Login Facebook
                 </button>
             </div>
-            <div class="item" ng-if="!cordova">
-                <div id="fb-root"></div>
-                <!--<fb:login-button scope="public_profile,email" onlogin="console.log(angular);">-->
-                <!--</fb:login-button>-->
-                <div class="fb-login-button" data-max-rows="1" data-size="medium"
-                     data-scope="public_profile,email,user_birthday" data-show-faces="true" data-auto-logout-link="true"></div>
-                <!--<div id="status"></div>-->
-            </div>
+            <!--<div class="item" ng-if="!cordova">-->
+                <!--<div id="fb-root"></div>-->
+                <!--&lt;!&ndash;<fb:login-button scope="public_profile,email" onlogin="console.log(angular);">&ndash;&gt;-->
+                <!--&lt;!&ndash;</fb:login-button>&ndash;&gt;-->
+                <!--<div class="fb-login-button" data-max-rows="1" data-size="medium"-->
+                     <!--data-scope="public_profile,email,user_birthday" data-show-faces="true" data-auto-logout-link="true"></div>-->
+                <!--&lt;!&ndash;<div id="status"></div>&ndash;&gt;-->
+            <!--</div>-->
             <div class="item">
                 <div class="delivery-logo-block">
                     <img ng-src="{{logoUrl+'logo-delivery2-resized-compressed.png'}}">

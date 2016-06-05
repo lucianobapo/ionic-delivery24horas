@@ -56,13 +56,13 @@
 
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Nome:</span>
-                    <label class="block" ng-show="user.partner_nome.length>0">{{user.partner_nome}}</label>
-                    <input type="text" autocomplete="off" name="nome" ng-hide="user.partner_nome.length>0" ng-model="cartData.nome" placeholder="Ex.: João da Silva">
+                    <label class="block" ng-hide="cartData.showNameInput">{{user.partner_nome}}</label>
+                    <input type="text" autocomplete="off" name="nome" ng-show="cartData.showNameInput" ng-model="cartData.nome" placeholder="Ex.: João da Silva">
                 </label>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Nascimento: <small>(opcional)</small></span>
-                    <label class="block" ng-show="user.partner_data_nascimento.length>0">{{user.partner_data_nascimento}}</label>
-                    <input type="date" autocomplete="off" ng-hide="user.partner_data_nascimento.length>0" name="data_nascimento"
+                    <label class="block" ng-hide="cartData.showDateInput">{{user.partner_data_nascimento}}</label>
+                    <input type="date" autocomplete="off" ng-show="cartData.showDateInput" name="data_nascimento"
                            ng-model="cartData.data_nascimento"
                            ng-value="cartData.data_nascimento" placeholder="dd/mm/aaaa">
                 </label>
@@ -70,27 +70,27 @@
                     <span class="input-label">E-mail:</span>
                     <!--<button type="button" class="button button-light ion-edit"-->
                             <!--ng-show="user.partner_emails.length>0 && !cartData.emailChanged" ng-click="cartData.emailChanged=true"></button>-->
-                    <label class="block" ng-show="user.partner_emails.length>0">{{user.partner_emails[0]}}</label>
-                    <input type="email" name="email" ng-hide="user.partner_emails.length>0" ng-model="cartData.email" placeholder="Ex.: exemplo@gmail.com">
+                    <label class="block" ng-hide="cartData.showEmailInput">{{user.partner_emails[0]}}</label>
+                    <input type="email" name="email" ng-show="cartData.showEmailInput" ng-model="cartData.email" placeholder="Ex.: exemplo@gmail.com">
                 </label>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Telefone:</span>
-                    <label class="block" ng-show="user.partner_telefones.length>0">{{user.partner_telefones[0]}}</label>
-                    <input type="tel" name="telefone" ng-hide="user.partner_telefones.length>0"
+                    <label class="block" ng-hide="cartData.showTelefoneInput">{{user.partner_telefones[0]}}</label>
+                    <input type="tel" name="telefone" ng-show="cartData.showTelefoneInput"
                            ng-model="cartData.telefone" placeholder="Ex.: (22)999 999 999">
                 </label>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Whatsapp:</span>
-                    <label class="block" ng-show="user.partner_whatsapps.length>0">{{user.partner_whatsapps[0]}}</label>
-                    <input type="tel" name="whatsapp" ng-hide="user.partner_whatsapps.length>0"
+                    <label class="block" ng-hide="cartData.showWhatsappInput">{{user.partner_whatsapps[0]}}</label>
+                    <input type="tel" name="whatsapp" ng-show="cartData.showWhatsappInput"
                            ng-model="cartData.whatsapp" placeholder="Ex.: (22)999 999 999">
                 </label>
-                <label class="item item-input item-stacked-label" ng-show="cartData.addresses.length>0">
+                <label class="item item-input item-stacked-label" ng-show="cartData.showAddressList">
                     <div class="margin-left-off list list-inset">
                         <div class="item item-divider">Endereços utilizados:</div>
                         <ion-list class="text-left">
                             <ion-radio name="address" ng-model="cartData.address_id" ng-value="address.id" class="address-item"
-                                       ng-repeat="address in cartData.addresses">
+                                       ng-repeat="address in user.partner_addresses">
                                 {{address.logradouro}} {{address.numero}} {{address.complemento}} - CEP: {{address.cep}} - Bairro: {{address.bairro}}
                             </ion-radio>
                             <ion-radio name="address" ng-model="cartData.address_id" ng-value="false">Criar Novo Endereço</ion-radio>

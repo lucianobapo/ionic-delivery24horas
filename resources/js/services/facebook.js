@@ -1,7 +1,7 @@
 (function () {
     'use strict';
     /* ***************************************************************************
-     * ### Helper module ###
+     * ### FacebookService module ###
      *
      * Contains the utility and helper functions used through whole application.
      */
@@ -27,22 +27,67 @@
             initCordova: _initCordova,
             init: _init
         };
+        var fbLogin;
+        var fbLogout;
+
+        //$rootScope.user = undefined;
 
         function setUserFields(apiResponse, authResponse){
             var fields = {
                 authResponse: authResponse,
                 userID: apiResponse.id,
                 name: apiResponse.name,
-                email: apiResponse.email,
-                picture : "https://graph.facebook.com/" + apiResponse.id + "/picture?type=large"
+                userEmail: apiResponse.email,
+                picture : "https://graph.facebook.com/" + apiResponse.id + "/picture?type=small"
             };
             if (apiResponse.age_range!=undefined) fields.minAge = apiResponse.age_range.min;
             if (apiResponse.birthday!=undefined) fields.birthday = apiResponse.birthday;
-            UserService.setUser(fields);
-            UserService.loadFromProviderId(apiResponse.id);
+            UserService.processUserFieldsFromFacebook(fields);
         }
 
         function _initCordova() {
+            fbLogin = function(){
+                facebookConnectPlugin.getLoginStatus(function(success){
+                    if(success.status === 'connected'){
+                        // The user is logged in and has authenticated your app, and response.authResponse supplies
+                        // the user's ID, a valid access token, a signed request, and the time the access token
+                        // and signed request each expire
+                        $rootScope.c.debug('getLoginStatus', success.status);
+                        fbLoginSuccess(success);
+                        $ionicLoading.hide();
+                    } else if(success.status === 'not_authorized'){
+                        $rootScope.c.debug('getLoginStatus', success.status);
+                    } else {
+                        // If (success.status === 'not_authorized') the user is logged in to Facebook,
+                        // but has not authenticated your app
+                        // Else the person is not logged into Facebook,
+                        // so we're not sure if they are logged into this app or not.
+                        $rootScope.c.debug('getLoginStatus', success.status);
+                        $ionicLoading.show({
+                            template: 'Logging in...'
+                        });
+                        // Ask the permissions you need. You can learn more about
+                        // FB permissions here: https://developers.facebook.com/docs/facebook-login/permissions/v2.4
+                        facebookConnectPlugin.login(['user_birthday', 'email', 'public_profile'], fbLoginSuccess, fbLoginError);
+                    }
+                });
+            };
+
+            fbLogout = function(){
+                $ionicLoading.show({
+                    template: 'Logging out...'
+                });
+                // Facebook logout
+                facebookConnectPlugin.logout(function(response){
+                        $rootScope.c.debug('facebookConnectPlugin logout', response);
+                        $ionicLoading.hide();
+                    },
+                    function(fail){
+                        $rootScope.c.debug('facebookConnectPlugin logout failed', fail);
+                        $ionicLoading.hide();
+                    });
+            };
+
             // This is the success callback from the login method
             var fbLoginSuccess = function(response) {
                 if (!response.authResponse){
@@ -88,94 +133,6 @@
                 );
                 return info.promise;
             };
-
-            var getLoginStatus = function(login){
-                facebookConnectPlugin.getLoginStatus(function(success){
-                    if(success.status === 'connected'){
-                        // The user is logged in and has authenticated your app, and response.authResponse supplies
-                        // the user's ID, a valid access token, a signed request, and the time the access token
-                        // and signed request each expire
-                        $rootScope.c.debug('getLoginStatus', success.status);
-
-                        // Check if we have our user saved
-                        //$rootScope.user = UserService.getUser();
-                        //
-                        //if($rootScope.user!=undefined && $rootScope.user.userID!=undefined){
-                        //    fbLoginSuccess(success);
-                        //}else{
-                        //    //$state.go('app.home');
-                        //    Layout.goHome();
-                        //}
-                        fbLoginSuccess(success);
-                        $ionicLoading.hide();
-                    } else if(success.status === 'not_authorized'){
-                        $rootScope.c.debug('getLoginStatus', success.status);
-                    } else {
-                        // If (success.status === 'not_authorized') the user is logged in to Facebook,
-                        // but has not authenticated your app
-                        // Else the person is not logged into Facebook,
-                        // so we're not sure if they are logged into this app or not.
-
-                        $rootScope.c.debug('getLoginStatus', success.status);
-
-                        if (login) {
-                            $ionicLoading.show({
-                                template: 'Logging in...'
-                            });
-
-                            // Ask the permissions you need. You can learn more about
-                            // FB permissions here: https://developers.facebook.com/docs/facebook-login/permissions/v2.4
-                            facebookConnectPlugin.login(['user_birthday', 'email', 'public_profile'], fbLoginSuccess, fbLoginError);
-                        }
-                    }
-                });
-            };
-
-            //getLoginStatus();
-            $rootScope.user = UserService.getUser();
-
-            //This method is executed when the user press the "Login with facebook" button
-            $rootScope.facebookSignIn = function() {
-                $rootScope.c.debug('clicked facebookSignIn');
-                getLoginStatus(true);
-            };
-
-            //This method is executed when the user press the "Logout" button
-            $rootScope.showLogOutMenu = function() {
-                var hideSheet = $ionicActionSheet.show({
-                    destructiveText: 'Sair',
-                    titleText: 'Realmente deseja sair?',
-                    cancelText: 'Cancelar',
-                    cancel: function() {},
-                    buttonClicked: function(index) {
-                        return true;
-                    },
-                    destructiveButtonClicked: function(){
-                        $rootScope.c.debug('destructiveButtonClicked');
-                        $ionicLoading.show({
-                            template: 'Logging out...'
-                        });
-
-                        UserService.setUser();
-                        $rootScope.user = undefined;
-                        CartService.loadInitialData();
-
-                        // Facebook logout
-                        facebookConnectPlugin.logout(function(response){
-                                $rootScope.c.debug('facebookConnectPlugin logout', response);
-                                Layout.goHome();
-                                $ionicLoading.hide();
-                                hideSheet();
-                                ////$state.go('welcome');
-                            },
-                            function(fail){
-                                $rootScope.c.debug('facebookConnectPlugin logout failed', fail);
-                                $ionicLoading.hide();
-                                hideSheet();
-                            });
-                    }
-                });
-            };
         }
 
         function _init() {
@@ -188,7 +145,40 @@
                 fjs.parentNode.insertBefore(js, fjs);
             }(document, 'script', 'facebook-jssdk'));
 
-            $rootScope.user = UserService.getUser();
+            fbLogin = function(){
+                FB.getLoginStatus(function(response) {
+                    $rootScope.c.debug('FB.getLoginStatus', response);
+                    if (response.status === 'connected') {
+                        $rootScope.c.debug('Logged in.');
+                    }
+                    else {
+                        $ionicLoading.show({
+                            template: 'Logging in...'
+                        });
+                        FB.login(function(response) {
+                            // user is now logged in
+                            $rootScope.c.debug('FB.login', response);
+                            $ionicLoading.hide();
+                        });
+                    }
+                });
+            };
+
+            fbLogout = function(){
+                FB.getLoginStatus(function(response) {
+                    $rootScope.c.debug('FB.getLoginStatus', response);
+                    if (response.status === 'connected') {
+                        $ionicLoading.show({
+                            template: 'Logging out...'
+                        });
+                        FB.logout(function(response) {
+                            // user is now logged out
+                            $rootScope.c.debug('FB.logout', response);
+                            $ionicLoading.hide();
+                        });
+                    }
+                });
+            };
 
             // This is called with the results from from FB.getLoginStatus().
             var statusChangeCallback = function(response) {
@@ -254,7 +244,7 @@
                      Set if you want to check the authentication status
                      at the start up of the app
                      */
-                    status: true,
+                    status: false,
 
                     /*
                      Enable cookies to allow the server to access
@@ -273,6 +263,35 @@
                 });
             };
         }
+
+        //This method is executed when the user press the "Login with facebook" button
+        $rootScope.facebookLogIn = function() {
+            $rootScope.c.debug('clicked facebookLogIn');
+            fbLogin();
+        };
+
+        //This method is executed when the user press the "Logout" button
+        $rootScope.facebookLogOut = function() {
+            $rootScope.c.debug('clicked facebookLogOut');
+            var hideSheet = $ionicActionSheet.show({
+                buttons: [
+                    { text: 'Cancelar' }
+                ],
+                destructiveText: 'Logout',
+                titleText: 'Deseja fazer Logout com Facebook?',
+                buttonClicked: function(index) {
+                    return true;
+                },
+                destructiveButtonClicked: function(){
+                    $rootScope.c.debug('destructiveButtonClicked');
+                    fbLogout();
+                    CartService.loadInitialData();
+                    UserService.resetUser();
+                    hideSheet();
+                    Layout.goHome();
+                }
+            });
+        };
 
         return returnObj;
     }

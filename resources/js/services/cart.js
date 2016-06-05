@@ -43,6 +43,7 @@
         function _loadInitialData() {
             // Form data for the login modal
             $rootScope.cartData = {};
+            $rootScope.cartData.mandante = 'ilhanet';
             $rootScope.cartData.pagamento = 'dinheiro';
             $rootScope.cartData.matches = [];
             $rootScope.cartData.addresses = [];
@@ -53,7 +54,12 @@
                 $rootScope.cartData.origem = 'aplicativo';
             else
                 $rootScope.cartData.origem = 'site';
-            UserService.getUserToCartData();
+
+            $rootScope.cartData.showNameInput = true;
+            $rootScope.cartData.showDateInput = true;
+            $rootScope.cartData.showEmailInput = true;
+            $rootScope.cartData.showTelefoneInput = true;
+            $rootScope.cartData.showWhatsappInput = true;
         }
 
         function _initCart() {
@@ -88,6 +94,7 @@
             //if (address.complemento!=undefined) $rootScope.cartData.complemento = address.complemento;
             $rootScope.cartData.bairro = address.bairro;
         }
+
         function _doDelivery() {
             $rootScope.disableButton = true;
 
@@ -118,7 +125,7 @@
                         else{
                             $rootScope.removeTodosItens();
                             _loadInitialData();
-                            UserService.loadFromProviderId($rootScope.user.userID);
+                            UserService.initUser();
                             if (!AppConfig.cordova) _closeCart();
                             Layout.goHome();
                             Alerts.customAlert('Ordem Criada','Número '+resp.id+' - Valor Total ' + $filter('currency')(resp.valor_total));
