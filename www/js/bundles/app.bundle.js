@@ -429,7 +429,7 @@
 
     configModule.constant('AppConfig', {
         debug: false,
-        cordova: true,
+        cordova: false,
         facebookID: '1581785262035600',
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
         apiEndpoint: 'http://api.delivery24horas.com/json',
