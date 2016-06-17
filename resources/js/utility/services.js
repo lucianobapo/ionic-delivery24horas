@@ -198,6 +198,7 @@
         var returnObj;
         returnObj = {
             goHome: _goHome,
+            goVersion: _goVersion,
             check: _check
         };
 
@@ -206,6 +207,10 @@
                 $location.path($rootScope.handheldsUrl);
             if ($rootScope.minMediumScreens)
                 $location.path($rootScope.minMediumScreensUrl);
+        }
+
+        function _goVersion() {
+            $location.path('/version');
         }
 
         function _check() {
@@ -219,15 +224,19 @@
                     $rootScope.handhelds = true;
                     $rootScope.minMediumScreens = false;
                     if ($location.path()=="" || $location.path().indexOf("/app")!==-1) {
-                        $rootScope.c.debug('Redirecting to: '+$rootScope.handheldsUrl);
-                        $location.path($rootScope.handheldsUrl);
+                        if ($location.path().indexOf("/version")===-1){
+                            $rootScope.c.debug('Redirecting to: '+$rootScope.handheldsUrl);
+                            $location.path($rootScope.handheldsUrl);
+                        }
                     }
                 } else {
                     $rootScope.handhelds = false;
                     $rootScope.minMediumScreens = true;
                     if ($location.path()=="" || $location.path().indexOf("/tab")!==-1) {
-                        $rootScope.c.debug('Redirecting to: ' + $rootScope.minMediumScreensUrl);
-                        $location.path($rootScope.minMediumScreensUrl);
+                        if ($location.path().indexOf("/version")===-1){
+                            $rootScope.c.debug('Redirecting to: ' + $rootScope.minMediumScreensUrl);
+                            $location.path($rootScope.minMediumScreensUrl);
+                        }
                     }
                 }
             };

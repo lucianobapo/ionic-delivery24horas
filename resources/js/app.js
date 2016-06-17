@@ -11,6 +11,7 @@
     angular.module('App.CartService', []);
     angular.module('App.FacebookService', []);
     angular.module('App.UserService', []);
+    angular.module('App.VersionService', []);
     angular.module('App.Alerts', []);
 
     angular.module('App.Common', []);
@@ -30,6 +31,7 @@
     require('./services/cart');
     require('./services/facebook');
     require('./services/user');
+    require('./services/version');
     require('./utility/alerts');
 
     require('./common/common');
@@ -59,6 +61,7 @@
         'App.CartService',
         'App.FacebookService',
         'App.UserService',
+        'App.VersionService',
         'App.Alerts',
         //'App.Playlist',
         'App.ProductList',
@@ -91,6 +94,11 @@
                     templateUrl: 'common/templates/tabs.html'
                 })
                 // Each tab has its own nav history stack:
+
+                .state('version', {
+                    url: '/version',
+                    templateUrl: 'version/templates/version.html'
+                })
 
                 .state('tab.cart', {
                     url: '/cart',
@@ -192,6 +200,7 @@
                 ;
 
             $urlRouterProvider.otherwise('/tab/home');
+            //$urlRouterProvider.otherwise('/version');
             //$urlRouterProvider.otherwise('/app/productlist');
             //$urlRouterProvider.otherwise('/app/report');
 
@@ -208,9 +217,10 @@
         'Facebook',
         'AppConfig',
         'UserService',
+        'VersionService',
         bodyController
     ]);
-    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias, Layout, Facebook, AppConfig, UserService) {
+    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias, Layout, Facebook, AppConfig, UserService, VersionService) {
         $rootScope.CartService = CartService;
         $rootScope.CartService.initCart();
         Categorias.loadItems();
@@ -220,6 +230,7 @@
         if (AppConfig.cordova) {
             $rootScope.cordova = AppConfig.cordova;
             Facebook.initCordova();
+            VersionService.check();
         } else {
             $rootScope.cordova = AppConfig.cordova;
             Facebook.init();
