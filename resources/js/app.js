@@ -230,7 +230,7 @@
         if (AppConfig.cordova) {
             $rootScope.cordova = AppConfig.cordova;
             Facebook.initCordova();
-            VersionService.check();
+            //VersionService.check();
         } else {
             $rootScope.cordova = AppConfig.cordova;
             Facebook.init();
@@ -263,10 +263,11 @@
         '$rootScope',
         '$ionicLoading',
         'ReportSystem',
+        'VersionService',
         appMain
     ]);
 
-    function appMain($ionicPlatform, $rootScope, $ionicLoading, ReportSystem) {
+    function appMain($ionicPlatform, $rootScope, $ionicLoading, ReportSystem, VersionService) {
         $rootScope.c = ReportSystem;
 
         $rootScope.$on('loading:show', function() {
@@ -278,7 +279,7 @@
         });
 
         $ionicPlatform.ready(function () {
-            $rootScope.closeLoading();
+            //$rootScope.closeLoading();
             // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
             // for form inputs)
             if (window.cordova && window.cordova.plugins.Keyboard) {
@@ -288,6 +289,13 @@
             if (window.StatusBar) {
                 // org.apache.cordova.statusbar required
                 StatusBar.styleDefault();
+            }
+            if(window.cordova){
+                cordova.getAppVersion.getVersionNumber().then(
+                    function (version) {
+                        VersionService.check(version);
+                    }
+                );
             }
         });
     }

@@ -231,7 +231,7 @@
         if (AppConfig.cordova) {
             $rootScope.cordova = AppConfig.cordova;
             Facebook.initCordova();
-            VersionService.check();
+            //VersionService.check();
         } else {
             $rootScope.cordova = AppConfig.cordova;
             Facebook.init();
@@ -264,10 +264,11 @@
         '$rootScope',
         '$ionicLoading',
         'ReportSystem',
+        'VersionService',
         appMain
     ]);
 
-    function appMain($ionicPlatform, $rootScope, $ionicLoading, ReportSystem) {
+    function appMain($ionicPlatform, $rootScope, $ionicLoading, ReportSystem, VersionService) {
         $rootScope.c = ReportSystem;
 
         $rootScope.$on('loading:show', function() {
@@ -279,7 +280,7 @@
         });
 
         $ionicPlatform.ready(function () {
-            $rootScope.closeLoading();
+            //$rootScope.closeLoading();
             // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
             // for form inputs)
             if (window.cordova && window.cordova.plugins.Keyboard) {
@@ -289,6 +290,13 @@
             if (window.StatusBar) {
                 // org.apache.cordova.statusbar required
                 StatusBar.styleDefault();
+            }
+            if(window.cordova){
+                cordova.getAppVersion.getVersionNumber().then(
+                    function (version) {
+                        VersionService.check(version);
+                    }
+                );
             }
         });
     }
@@ -1406,31 +1414,46 @@
         'Api',
         'AppConfig',
         'Layout',
+        '$window',
         VersionService
     ]);
 
-    function VersionService($rootScope, Api, AppConfig, Layout) {
+    function VersionService($rootScope, Api, AppConfig, Layout, $window) {
         var returnObj;
         returnObj = {
             check: _check
         };
 
-        function _check(){
-            if (AppConfig.cordova) {
-                cordova.getAppVersion(function(version) {
-                    Api.sendRequest({
-                            method: "GET",
-                            url: AppConfig.apiEndpoint + '/appVersion'
-                        })
-                        .then(function(response){
-                            if (response.data.version!==version && response.data.version.replace(".","")>version.replace(".","")) {
-                                $rootScope.appVersion = version;
-                                $rootScope.appNewVersion = response.data.version;
-                                Layout.goVersion();
-                            }//else console.log(response.data.version);
-                        });
+        function _check(version){
+            Api.sendRequest({
+                    method: "GET",
+                    url: AppConfig.apiEndpoint + '/appVersion'
+                })
+                .then(function(response){
+                    if (response.data.version!==version && response.data.version.replace(".","")>version.replace(".","")) {
+                        $rootScope.appVersion = version;
+                        $rootScope.appNewVersion = response.data.version;
+                        Layout.goVersion();
+                    }//else console.log(response.data.version);
                 });
-            }
+
+            //if (AppConfig.cordova) {
+            //    console.log(cordova.getAppVersion);
+            //    //console.log(window.cordova.plugins);
+            //    cordova.getAppVersion(function(version) {
+            //        Api.sendRequest({
+            //                method: "GET",
+            //                url: AppConfig.apiEndpoint + '/appVersion'
+            //            })
+            //            .then(function(response){
+            //                if (response.data.version!==version && response.data.version.replace(".","")>version.replace(".","")) {
+            //                    $rootScope.appVersion = version;
+            //                    $rootScope.appNewVersion = response.data.version;
+            //                    Layout.goVersion();
+            //                }//else console.log(response.data.version);
+            //            });
+            //    });
+            //}
         }
 
         return returnObj;
@@ -1538,11 +1561,11 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
         '$http',
         '$ionicLoading',
         'Helpers',
-        'Layout',
+        '$rootScope',
         apiService
     ]);
 
-    function apiService($q, $http, $ionicLoading, Helpers, Layout) {
+    function apiService($q, $http, $ionicLoading, Helpers, $rootScope) {
         //Layout.check();
         var scope;
         scope = {
@@ -1586,6 +1609,8 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
                 .then(
                     function (response) {
                         //if (response) {
+                        $ionicLoading.hide();
+                        $rootScope.closeLoading();
                             var responseData = (response.data && typeof response.data.Data !== 'undefined') ? response.data.Data : response.data;
                             return params.customCallback ? responseData : Helpers.handleHttpResponse(response);
                         //}

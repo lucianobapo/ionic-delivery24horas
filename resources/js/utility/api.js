@@ -17,11 +17,11 @@
         '$http',
         '$ionicLoading',
         'Helpers',
-        'Layout',
+        '$rootScope',
         apiService
     ]);
 
-    function apiService($q, $http, $ionicLoading, Helpers, Layout) {
+    function apiService($q, $http, $ionicLoading, Helpers, $rootScope) {
         //Layout.check();
         var scope;
         scope = {
@@ -65,6 +65,8 @@
                 .then(
                     function (response) {
                         //if (response) {
+                        $ionicLoading.hide();
+                        $rootScope.closeLoading();
                             var responseData = (response.data && typeof response.data.Data !== 'undefined') ? response.data.Data : response.data;
                             return params.customCallback ? responseData : Helpers.handleHttpResponse(response);
                         //}
