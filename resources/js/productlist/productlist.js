@@ -39,6 +39,16 @@
             $scope.somaTotal();
         };
 
+        $rootScope.removeTodosItens = function () {
+            $rootScope.quantidade.forEach(function(valor, chave) {
+                if ($rootScope.quantidade[chave] > 0) {
+                    $rootScope.quantidade[chave]=0;
+                }
+            });
+            $rootScope.cartItems = [];
+            $scope.somaTotal();
+        };
+
         $scope.updateCartItem = function (id) {
             var cartItemSelected = $scope.searchCartItemById(id);
             if (cartItemSelected===false) {
@@ -81,8 +91,8 @@
             }else if ($rootScope.quantidade[id] == 0) {
                 $scope.removeItem(id);
             }
-        };
-
+        }
+;
         $scope.somaTotal = function () {
             $rootScope.valorTotal = 0;
 
