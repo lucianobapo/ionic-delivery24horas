@@ -30,17 +30,15 @@
         $rootScope.removeItem = function (id) {
             if ($rootScope.quantidade[id] > 0) {
                 $rootScope.quantidade[id]=0;
-                var tempCartItems = [];
-
-                $rootScope.cartItems.forEach(function(item, chave) {
-                    if (item.id!=id) tempCartItems.push(item);
-                });
-
-                $rootScope.cartItems = tempCartItems;
-
-                $scope.somaTotal();
             }
+            var tempCartItems = [];
+            $rootScope.cartItems.forEach(function(item, chave) {
+                if (item.id!=id) tempCartItems.push(item);
+            });
+            $rootScope.cartItems = tempCartItems;
+            $scope.somaTotal();
         };
+
         $rootScope.removeTodosItens = function () {
             $rootScope.quantidade.forEach(function(valor, chave) {
                 if ($rootScope.quantidade[chave] > 0) {
@@ -51,35 +49,40 @@
         };
 
         $scope.updateCartItem = function (id) {
-            var cartItemSelected = $scope.searchCartItemById(id);
-            if (cartItemSelected===false) {
-                var productSelected = $scope.searchProductById(id);
-                if (productSelected !==false ) {
-                    $rootScope.cartItems.push({
-                        id: productSelected.id,
-                        nome: productSelected.nome,
-                        quantidade: $rootScope.quantidade[id],
-                        valor: productSelected.valor
+            if ($rootScope.quantidade[id] == 0) {
+                $scope.removeItem(id);
+            } else {
+                var cartItemSelected = $scope.searchCartItemById(id);
+                if (cartItemSelected===false) {
+                    var productSelected = $scope.searchProductById(id);
+                    if (productSelected !==false ) {
+                        $rootScope.cartItems.push({
+                            id: productSelected.id,
+                            nome: productSelected.nome,
+                            quantidade: $rootScope.quantidade[id],
+                            valor: productSelected.valor
+                        });
+                    }
+                } else {
+                    $rootScope.cartItems.forEach(function(item, chave) {
+                        item.quantidade = $rootScope.quantidade[id];
                     });
                 }
-            } else {
-                $rootScope.cartItems.forEach(function(item, chave) {
-                    item.quantidade = $rootScope.quantidade[id];
-                });
             }
+
+            $scope.somaTotal();
         };
         $scope.incrementa = function (id) {
             if ($rootScope.quantidade[id] < $rootScope.max[id]) {
                 $rootScope.quantidade[id]++;
                 $scope.updateCartItem(id);
-                $scope.somaTotal();
+                //$scope.somaTotal();
             }
         };
         $scope.decrementa = function (id) {
             if ($rootScope.quantidade[id] > 1) {
                 $rootScope.quantidade[id]--;
                 $scope.updateCartItem(id);
-                $scope.somaTotal();
             }else if ($rootScope.quantidade[id] == 1) {
                 $scope.removeItem(id);
             }
