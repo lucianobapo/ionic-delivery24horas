@@ -39,35 +39,23 @@
             $scope.somaTotal();
         };
 
-        $rootScope.removeTodosItens = function () {
-            $rootScope.quantidade.forEach(function(valor, chave) {
-                if ($rootScope.quantidade[chave] > 0) {
-                    $rootScope.quantidade[chave]=0;
-                }
-            });
-            $scope.somaTotal();
-        };
-
         $scope.updateCartItem = function (id) {
-            if ($rootScope.quantidade[id] == 0) {
-                $scope.removeItem(id);
-            } else {
-                var cartItemSelected = $scope.searchCartItemById(id);
-                if (cartItemSelected===false) {
-                    var productSelected = $scope.searchProductById(id);
-                    if (productSelected !==false ) {
-                        $rootScope.cartItems.push({
-                            id: productSelected.id,
-                            nome: productSelected.nome,
-                            quantidade: $rootScope.quantidade[id],
-                            valor: productSelected.valor
-                        });
-                    }
-                } else {
-                    $rootScope.cartItems.forEach(function(item, chave) {
-                        item.quantidade = $rootScope.quantidade[id];
+            var cartItemSelected = $scope.searchCartItemById(id);
+            if (cartItemSelected===false) {
+                var productSelected = $scope.searchProductById(id);
+                if (productSelected !==false ) {
+                    $rootScope.cartItems.push({
+                        id: productSelected.id,
+                        nome: productSelected.nome,
+                        quantidade: $rootScope.quantidade[id],
+                        valor: productSelected.valor
                     });
                 }
+            } else {
+                $rootScope.cartItems.forEach(function(item, chave) {
+                    if (item.id==id)
+                        item.quantidade = $rootScope.quantidade[id];
+                });
             }
 
             $scope.somaTotal();
@@ -76,7 +64,6 @@
             if ($rootScope.quantidade[id] < $rootScope.max[id]) {
                 $rootScope.quantidade[id]++;
                 $scope.updateCartItem(id);
-                //$scope.somaTotal();
             }
         };
         $scope.decrementa = function (id) {
@@ -84,6 +71,14 @@
                 $rootScope.quantidade[id]--;
                 $scope.updateCartItem(id);
             }else if ($rootScope.quantidade[id] == 1) {
+                $scope.removeItem(id);
+            }
+        };
+
+        $scope.rangeChange = function (id) {
+            if ($rootScope.quantidade[id] > 0) {
+                $scope.updateCartItem(id);
+            }else if ($rootScope.quantidade[id] == 0) {
                 $scope.removeItem(id);
             }
         };

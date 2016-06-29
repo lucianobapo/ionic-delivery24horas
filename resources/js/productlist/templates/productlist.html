@@ -74,7 +74,7 @@
 
                     <div class="range" ng-show="produto.max>0">
                         <button ng-click="decrementa(produto.id)" class="button button-light"><i class="icon ion-chevron-left"></i></button>
-                        <input type="range" ng-change="updateCartItem(produto.id)" id="quantidade[{{ produto.id }}]"
+                        <input type="range" ng-change="rangeChange(produto.id)" id="quantidade[{{ produto.id }}]"
                                name="quantidade[{{ produto.id }}]" ng-model="quantidade[produto.id]"
                                min="0" max="{{ produto.max }}">
                         <button ng-click="incrementa(produto.id)" class="button button-light"><i class="icon ion-chevron-right"></i></button>
