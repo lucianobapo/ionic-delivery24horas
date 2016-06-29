@@ -31,20 +31,27 @@
         </ion-header-bar>
         <ion-content>
             <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
-            <div class="list list-inset">
+
+            <div class="card text-center" ng-hide="categorias.length>0">
+                <div class="item item-text-wrap">
+                    <p ng-hide="loadingMessage===true">{{ loadingMessage }}</p>
+                    <p ng-show="loadingMessage===true">Carregando...</p><ion-spinner ng-show="loadingMessage===true"></ion-spinner>
+                </div>
+            </div>
+            <div class="list list-inset" ng-show="categorias.length>0">
                 <div class="item item-divider">Categorias</div>
 
-                <a href="#/app/productlist" class="item item-icon-left"
-                   menu-close ng-click="loadCategoria('Todas');loadProducts()">
-                    <i class="icon ion-beer"></i>
-                    Todas
-                </a>
                 <a ng-repeat="item in categorias" href="#/app/productlist" class="item item-icon-left"
                    menu-close ng-click="loadCategoria(item.nome);loadProducts(item.id)">
                     <i class="{{ item.icon }}"></i>
                     {{ item.nome }}
                 </a>
 
+                <a href="#/app/productlist" class="item item-icon-left"
+                   menu-close ng-click="loadCategoria('Todas');loadProducts()">
+                    <i class="icon ion-beer"></i>
+                    Todas
+                </a>
                 <!--<div class="item item-divider">Relatórios</div>-->
                 <!--<a href="#/app/report" class="item item-icon-left" menu-close>-->
                     <!--<i class="ion-document-text"></i>-->

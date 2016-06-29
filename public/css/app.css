@@ -12112,6 +12112,20 @@ body {
     float: right;
     font-size: smaller; }
 
+.indisponivel {
+  color: red !important;
+  font-style: italic; }
+
+.delivery-toggle-small {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 55px; }
+  .delivery-toggle-small > div {
+    white-space: normal; }
+  .delivery-toggle-small > label {
+    top: 5px !important; }
+
 @media only screen and (max-width: 425px) {
   .delivery-menu-left {
     position: fixed;

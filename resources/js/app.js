@@ -11,7 +11,9 @@
     angular.module('App.CartService', []);
     angular.module('App.FacebookService', []);
     angular.module('App.UserService', []);
+    angular.module('App.ProductService', []);
     angular.module('App.VersionService', []);
+    angular.module('App.AdviceService', []);
     angular.module('App.Alerts', []);
 
     angular.module('App.Common', []);
@@ -31,7 +33,9 @@
     require('./services/cart');
     require('./services/facebook');
     require('./services/user');
+    require('./services/product');
     require('./services/version');
+    require('./services/advice');
     require('./utility/alerts');
 
     require('./common/common');
@@ -61,7 +65,9 @@
         'App.CartService',
         'App.FacebookService',
         'App.UserService',
+        'App.ProductService',
         'App.VersionService',
+        'App.AdviceService',
         'App.Alerts',
         //'App.Playlist',
         'App.ProductList',
@@ -98,6 +104,10 @@
                 .state('version', {
                     url: '/version',
                     templateUrl: 'version/templates/version.html'
+                })
+                .state('advice', {
+                    url: '/advice',
+                    templateUrl: 'advice/templates/advice.html'
                 })
 
                 .state('tab.cart', {
@@ -217,10 +227,10 @@
         'Facebook',
         'AppConfig',
         'UserService',
-        'VersionService',
         bodyController
     ]);
-    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias, Layout, Facebook, AppConfig, UserService, VersionService) {
+    function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias,
+                            Layout, Facebook, AppConfig, UserService) {
         $rootScope.CartService = CartService;
         $rootScope.CartService.initCart();
         Categorias.loadItems();
@@ -230,7 +240,6 @@
         if (AppConfig.cordova) {
             $rootScope.cordova = AppConfig.cordova;
             Facebook.initCordova();
-            //VersionService.check();
         } else {
             $rootScope.cordova = AppConfig.cordova;
             Facebook.init();
@@ -254,6 +263,8 @@
 
         $rootScope.rootCategoriaSelecionada = 'Todas';
         $rootScope.loadCategoria = function ($nome) {
+            $rootScope.productLastItemLoaded=undefined;
+            $rootScope.lastCategory=undefined;
             $rootScope.rootCategoriaSelecionada = $nome;
         };
     }
@@ -264,10 +275,12 @@
         '$ionicLoading',
         'ReportSystem',
         'VersionService',
+        'AdviceService',
         appMain
     ]);
 
-    function appMain($ionicPlatform, $rootScope, $ionicLoading, ReportSystem, VersionService) {
+    function appMain($ionicPlatform, $rootScope, $ionicLoading,
+                     ReportSystem, VersionService, AdviceService) {
         $rootScope.c = ReportSystem;
 
         $rootScope.$on('loading:show', function() {
@@ -294,9 +307,11 @@
                 cordova.getAppVersion.getVersionNumber().then(
                     function (version) {
                         VersionService.check(version);
+
                     }
                 );
             }
+            AdviceService.check();
         });
     }
 

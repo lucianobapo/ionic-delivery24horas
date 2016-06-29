@@ -157,6 +157,24 @@ body {
 
 }
 
+.indisponivel{
+  color: red !important;
+  font-style: italic;
+}
+
+.delivery-toggle-small{
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 55px;
+  > div {
+    white-space: normal;
+  }
+  >label{
+    top: 5px !important;
+  }
+}
+
 @mixin respond-to($media) {
   @if $media == mini-handhelds {
     @media only screen and (max-width: $break-mini) {

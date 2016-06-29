@@ -61,6 +61,7 @@
 
             //$rootScope.c.debug(params);
             Helpers.handleHttpParams(params);
+            $rootScope.loadingMessage = true;
             return $http(params)
                 .then(
                     function (response) {
@@ -73,6 +74,7 @@
                     },
                     function(response) {
                         $ionicLoading.hide();
+                        $rootScope.closeLoading();
                         return Helpers.handleHttpErrorResponse(response);
                     });
         }

@@ -75,6 +75,7 @@
             $rootScope.c.debug('StatusText: ', response.statusText);
             $rootScope.c.debug('Url: ', response.config.url);
             $rootScope.c.debug('Headers: ', JSON.stringify(response.config.headers));
+            $rootScope.loadingMessage = "Ops! Ocorreu um erro ao carregar os dados.";
             response.data = {
                 data: []
             };

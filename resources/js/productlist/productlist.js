@@ -15,19 +15,29 @@
     function productListCtrl($scope, $rootScope, AppConfig, Produtos) {
         $rootScope.c.debug('ProductList Controller: ', $scope.commonArray);
 
-
         $scope.logoUrl = AppConfig.logoUrl;
         $scope.imagesUrl = AppConfig.imagesUrl;
 
         $rootScope.cartItems = [];
         $rootScope.quantidade = [];
+        $rootScope.max = [];
+        $rootScope.valor = [];
         $rootScope.valorTotal = 0;
         $rootScope.products = [];
 
+        $scope.noMoreItemsAvailable = false;
 
         $rootScope.removeItem = function (id) {
             if ($rootScope.quantidade[id] > 0) {
                 $rootScope.quantidade[id]=0;
+                var tempCartItems = [];
+
+                $rootScope.cartItems.forEach(function(item, chave) {
+                    if (item.id!=id) tempCartItems.push(item);
+                });
+
+                $rootScope.cartItems = tempCartItems;
+
                 $scope.somaTotal();
             }
         };
@@ -40,25 +50,61 @@
             $scope.somaTotal();
         };
 
+        $scope.updateCartItem = function (id) {
+            var cartItemSelected = $scope.searchCartItemById(id);
+            if (cartItemSelected===false) {
+                var productSelected = $scope.searchProductById(id);
+                if (productSelected !==false ) {
+                    $rootScope.cartItems.push({
+                        id: productSelected.id,
+                        nome: productSelected.nome,
+                        quantidade: $rootScope.quantidade[id],
+                        valor: productSelected.valor
+                    });
+                }
+            } else {
+                $rootScope.cartItems.forEach(function(item, chave) {
+                    item.quantidade = $rootScope.quantidade[id];
+                });
+            }
+        };
         $scope.incrementa = function (id) {
-            var max = document.getElementById('quantidade['+id+']').attributes['max'].value;
-            if ($rootScope.quantidade[id] < max) {
+            if ($rootScope.quantidade[id] < $rootScope.max[id]) {
                 $rootScope.quantidade[id]++;
+                $scope.updateCartItem(id);
                 $scope.somaTotal();
             }
-
         };
         $scope.decrementa = function (id) {
-            var min = document.getElementById('quantidade['+id+']').attributes['min'].value;
-            if ($rootScope.quantidade[id] > min) {
+            if ($rootScope.quantidade[id] > 1) {
                 $rootScope.quantidade[id]--;
+                $scope.updateCartItem(id);
                 $scope.somaTotal();
+            }else if ($rootScope.quantidade[id] == 1) {
+                $scope.removeItem(id);
             }
+        };
+
+        $scope.somaTotal = function () {
+            $rootScope.valorTotal = 0;
+
+            $rootScope.cartItems.forEach(function(item, chave) {
+                $rootScope.valorTotal = $rootScope.valorTotal +
+                    (item.valor*item.quantidade);
+            });
         };
 
         $scope.searchProductById = function (id) {
             var result = false;
-            $rootScope.allProducts.forEach(function(item) {
+            $rootScope.products.forEach(function(item) {
+                if (item.id==id) result = item;
+            });
+            return result;
+        };
+
+        $scope.searchCartItemById = function (id) {
+            var result = false;
+            $rootScope.cartItems.forEach(function(item) {
                 if (item.id==id) result = item;
             });
             return result;
@@ -66,11 +112,14 @@
 
         $rootScope.clearSearch = function () {
             $scope.query='';
+            $scope.noMoreItemsAvailable = false;
         };
+
         $scope.$watch(function(){
             return $scope.query;
         }, function(value) {
             if ($scope.query && $scope.query.length>0){
+                $scope.noMoreItemsAvailable = true;
                 if ($rootScope.rootCategoriaAntiga==undefined)
                     $rootScope.rootCategoriaAntiga = $rootScope.rootCategoriaSelecionada;
                 $rootScope.loadCategoria("Resultados de '"+$scope.query+"'");
@@ -82,38 +131,21 @@
             }
         });
 
-        $scope.somaTotal = function () {
-            $rootScope.valorTotal = 0;
-            $rootScope.cartItems = [];
-            $rootScope.quantidade.forEach(function(valor, chave) {
-                if ($rootScope.quantidade[chave]>0){
-                    var productSelected = $scope.searchProductById(chave);
-                    if (productSelected !==false ) {
-                        $rootScope.cartItems.push({
-                            id: productSelected.id,
-                            nome: productSelected.nome,
-                            quantidade: $rootScope.quantidade[chave],
-                            valor: productSelected.valor
-                        });
-                        $rootScope.valorTotal = $rootScope.valorTotal + (productSelected.valor*$rootScope.quantidade[chave]);
-                    }
-                }
-            });
-            //console.log($rootScope.cartItems);
+        $rootScope.noMoreItemsAvailable = function () {
+            $scope.noMoreItemsAvailable = true;
+        };
+        $rootScope.loadProducts = function (idCategory) {
+            $scope.noMoreItemsAvailable = false;
+            Produtos.loadMoreItems(true, idCategory);
         };
 
-        $scope.$watch(function(){
-            return $rootScope.allProducts;
-        }, function(value) {
-            if ($rootScope.quantidade.length == 0 && $rootScope.allProducts !== undefined){
-                $rootScope.allProducts.forEach(function(item) {
-                    $rootScope.quantidade[item.id] = 0;
-                });
-            }
-        });
-
-        $rootScope.loadProducts = function (idCategory) {
-            Produtos.loadItems(idCategory);
+        $scope.loadMoreData = function () {
+            if ($rootScope.lastCategory!=undefined)
+                Produtos.loadMoreItems(false, $rootScope.lastCategory);
+            else
+                Produtos.loadMoreItems();
+            if ($rootScope.products.length>=$rootScope.totalProducts)
+                $scope.noMoreItemsAvailable = true;
         };
 
         $scope.doRefresh = function () {
@@ -123,7 +155,7 @@
             $scope.$broadcast('scroll.refreshComplete');
             $scope.$apply();
         };
-        Produtos.loadItems();
+        //Produtos.loadItems();
 
         $scope.prepareImage = function (img) {
             if (img==null || AppConfig.debug) return 'http://placehold.it/80x80';

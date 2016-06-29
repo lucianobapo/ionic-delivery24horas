@@ -31,6 +31,19 @@
         var fbLogout;
 
         //$rootScope.user = undefined;
+        $rootScope.facebookLoginButtonText = 'Login Facebook';
+        $rootScope.facebookLoginButtonDisabled = false;
+        $rootScope.facebookLogoutButtonText = 'Sair';
+        $rootScope.facebookLogoutButtonDisabled = false;
+
+        function endLoginProcess(){
+            Layout.goHome();
+            $ionicLoading.hide();
+            $rootScope.facebookLoginButtonText = 'Login Facebook';
+            $rootScope.facebookLoginButtonDisabled = false;
+            $rootScope.facebookLogoutButtonText = 'Sair';
+            $rootScope.facebookLogoutButtonDisabled = false;
+        }
 
         function setUserFields(apiResponse, authResponse){
             var fields = {
@@ -43,6 +56,7 @@
             if (apiResponse.age_range!=undefined) fields.minAge = apiResponse.age_range.min;
             if (apiResponse.birthday!=undefined) fields.birthday = apiResponse.birthday;
             UserService.processUserFieldsFromFacebook(fields);
+
         }
 
         function _initCordova() {
@@ -54,7 +68,6 @@
                         // and signed request each expire
                         $rootScope.c.debug('getLoginStatus', success.status);
                         fbLoginSuccess(success);
-                        $ionicLoading.hide();
                     } else if(success.status === 'not_authorized'){
                         $rootScope.c.debug('getLoginStatus', success.status);
                     } else {
@@ -80,11 +93,11 @@
                 // Facebook logout
                 facebookConnectPlugin.logout(function(response){
                         $rootScope.c.debug('facebookConnectPlugin logout', response);
-                        $ionicLoading.hide();
+                        endLoginProcess();
                     },
                     function(fail){
                         $rootScope.c.debug('facebookConnectPlugin logout failed', fail);
-                        $ionicLoading.hide();
+                        endLoginProcess();
                     });
             };
 
@@ -102,20 +115,18 @@
                     .then(function(profileInfo) {
                         // For the purpose of this example I will store user data on local storage
                         setUserFields(profileInfo, authResponse);
-                        Layout.goHome();
-                        $ionicLoading.hide();
+                        endLoginProcess();
                     }, function(fail){
                         // Fail get profile info
                         $rootScope.c.debug('profile info fail', fail);
-                        Layout.goHome();
-                        $ionicLoading.hide();
+                        endLoginProcess();
                     });
             };
 
             // This is the fail callback from the login method
             var fbLoginError = function(error){
                 $rootScope.c.debug('fbLoginError', error);
-                $ionicLoading.hide();
+                endLoginProcess();
             };
 
             // This method is to get the user profile info from the facebook api
@@ -150,6 +161,7 @@
                     $rootScope.c.debug('FB.getLoginStatus', response);
                     if (response.status === 'connected') {
                         $rootScope.c.debug('Logged in.');
+                        statusChangeCallback(response);
                     }
                     else {
                         $ionicLoading.show({
@@ -158,7 +170,7 @@
                         FB.login(function(response) {
                             // user is now logged in
                             $rootScope.c.debug('FB.login', response);
-                            $ionicLoading.hide();
+                            endLoginProcess();
                         });
                     }
                 });
@@ -174,7 +186,7 @@
                         FB.logout(function(response) {
                             // user is now logged out
                             $rootScope.c.debug('FB.logout', response);
-                            $ionicLoading.hide();
+                            endLoginProcess();
                         });
                     }
                 });
@@ -198,11 +210,7 @@
                     $rootScope.c.debug('Welcome!  Fetching your information.... ');
                     FB.api('/me?fields=birthday,email,name,age_range&access_token=' + authResponse.accessToken, function(apiResponse) {
                         setUserFields(apiResponse, authResponse);
-                        Layout.goHome();
-                        $ionicLoading.hide();
-                        //console.log('Successful login for: ' + response.name);
-                        //document.getElementById('status').innerHTML =
-                        //    'Thanks for logging in, ' + response.name + '!';
+                        endLoginProcess();
                     });
                 } else if (response.status === 'not_authorized') {
                     // The person is logged into Facebook, but not your app.
@@ -215,8 +223,7 @@
                     $rootScope.c.debug('status else',response.status);
                     UserService.setUser();
                     $rootScope.user = null;
-                    Layout.goHome();
-                    $ionicLoading.hide();
+                    endLoginProcess();
 
                     //document.getElementById('status').innerHTML = 'Please log ' +
                     //    'into Facebook.';
@@ -266,29 +273,38 @@
 
         //This method is executed when the user press the "Login with facebook" button
         $rootScope.facebookLogIn = function() {
+            $rootScope.facebookLoginButtonText = 'Processando...';
+            $rootScope.facebookLoginButtonDisabled = true;
             $rootScope.c.debug('clicked facebookLogIn');
             fbLogin();
         };
 
         //This method is executed when the user press the "Logout" button
         $rootScope.facebookLogOut = function() {
+            $rootScope.facebookLogoutButtonText = 'Processando...';
+            $rootScope.facebookLogoutButtonDisabled = true;
             $rootScope.c.debug('clicked facebookLogOut');
             var hideSheet = $ionicActionSheet.show({
+                titleText: 'Deseja fazer Logout com Facebook?',
                 buttons: [
                     { text: 'Cancelar' }
                 ],
-                destructiveText: 'Logout',
-                titleText: 'Deseja fazer Logout com Facebook?',
                 buttonClicked: function(index) {
+                    endLoginProcess();
                     return true;
                 },
+                cancelText: 'Cancelar',
+                cancel: function() {
+                    endLoginProcess();
+                },
+                destructiveText: 'Logout',
                 destructiveButtonClicked: function(){
                     $rootScope.c.debug('destructiveButtonClicked');
-                    fbLogout();
+                    //fbLogout();
                     CartService.loadInitialData();
                     UserService.resetUser();
                     hideSheet();
-                    Layout.goHome();
+                    endLoginProcess();
                 }
             });
         };

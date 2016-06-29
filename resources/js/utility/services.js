@@ -57,66 +57,6 @@
         return returnObj;
     }
 
-    angularModule.service('Produtos', [
-        '$rootScope',
-        'AppConfig',
-        'Api',
-        Produtos
-    ]);
-
-    /*!
-     * Constructor function for all kinds of helper methods used through whole project.
-     *
-     * @return {object} this
-     */
-    function Produtos($rootScope, AppConfig, Api) {
-
-        var returnObj;
-        returnObj = {
-            loadItems: _loadItems
-        };
-
-        /*
-         * ### *Public methods* ###
-         */
-
-        /*
-         * Handles all kinds of http responses if it's not required to be hendled inside the controller.
-         * This implementation really depends of how you construct your backend logic but in general
-         * you should have one place for handling API requests.
-         *
-         * @param   {object} response
-         * @return  {object}
-         */
-        function _loadItems(idCategory) {
-            if (idCategory===undefined) idCategory='todas';
-            $rootScope.rootCategoriaAntiga = undefined;
-            $rootScope.clearSearch();
-
-            $rootScope.c.debug('Loading Produtos...');
-            Api.sendRequest({
-                    method: "GET",
-                    url: AppConfig.apiEndpoint + '/produtosDelivery/'+idCategory
-                })
-                .then(function(response){
-                    $rootScope.products = response.data.data;
-                    if (idCategory=='todas')
-                        $rootScope.allProducts = response.data.data;
-                    else if ($rootScope.allProducts===undefined) {
-                        Api.sendRequest({
-                                method: "GET",
-                                url: AppConfig.apiEndpoint + '/produtosDelivery/todas'
-                            })
-                            .then(function(response){
-                                    $rootScope.allProducts = response.data.data;
-                            });
-                    }
-                });
-        }
-
-        return returnObj;
-    }
-
     angularModule.service('loadingMarker', [
         '$rootScope',
         loadingMarker
@@ -198,6 +138,7 @@
         var returnObj;
         returnObj = {
             goHome: _goHome,
+            goAdvice: _goAdvice,
             goVersion: _goVersion,
             check: _check
         };
@@ -209,6 +150,9 @@
                 $location.path($rootScope.minMediumScreensUrl);
         }
 
+        function _goAdvice() {
+            $location.path('/advice');
+        }
         function _goVersion() {
             $location.path('/version');
         }

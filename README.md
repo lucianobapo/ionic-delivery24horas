@@ -34,8 +34,8 @@ $ ionic platform add android/ios
 ```
 
 ***Build application***
-```javascript
-$ ionic build android/ios [--production]
+```shell
+ionic build android/ios [--release] [--production]
 ```
 
 *--production* flag means that application will be shipped with minified and uglified javascript/css assets and optimized for production. Unnecessary files will be deleted and excluded from executable file (.apk/.ipa) so the application will be smaller size when uploading on Google play and Apple store. Also, the app version will be automatically increased by one (only the patch number e.g. 0.0.1 --> 0.0.2).

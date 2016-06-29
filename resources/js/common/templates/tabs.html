@@ -15,12 +15,12 @@ navigation history that also transitions its views in and out.
     </ion-tab>
 
     <!-- Chats Tab -->
-    <ion-tab title="Ajuda" icon-off="ion-ios-chatboxes-outline" icon-on="ion-ios-chatboxes" href="#/tab/chats">
+    <ion-tab ng-if="false" title="Ajuda" icon-off="ion-ios-chatboxes-outline" icon-on="ion-ios-chatboxes" href="#/tab/chats">
         <ion-nav-view name="tab-chats"></ion-nav-view>
     </ion-tab>
 
     <!-- Account Tab -->
-    <ion-tab title="Minha Conta" icon-off="ion-ios-gear-outline" icon-on="ion-ios-gear" href="#/tab/account">
+    <ion-tab ng-if="user.userID" title="Minha Conta" icon-off="ion-ios-gear-outline" icon-on="ion-ios-gear" href="#/tab/account">
         <ion-nav-view name="tab-account"></ion-nav-view>
     </ion-tab>
 </ion-tabs>
