@@ -11,3 +11,4 @@ logs/
 /vendor/
 npm-debug.log
 release/
+public
