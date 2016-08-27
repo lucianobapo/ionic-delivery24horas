@@ -26,11 +26,16 @@
     </ion-side-menu-content>
 
     <ion-side-menu expose-aside-when="large">
-        <ion-header-bar class="bar-stable">
-            <h1 class="title">Menu</h1>
-        </ion-header-bar>
+        <!--<ion-header-bar class="bar-stable">-->
+            <!--<h1 class="title">Menu</h1>-->
+        <!--</ion-header-bar>-->
         <ion-content>
             <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
+            <div class="list">
+                <div class="item">
+                    <img style="max-width: 100%" src="http://s3.amazonaws.com/delivery-images/campanhas/campanha-face4-compressed.png">
+                </div>
+            </div>
 
             <div class="card text-center" ng-hide="categorias.length>0">
                 <div class="item item-text-wrap">
@@ -38,7 +43,7 @@
                     <p ng-show="loadingMessage===true">Carregando...</p><ion-spinner ng-show="loadingMessage===true"></ion-spinner>
                 </div>
             </div>
-            <div class="list list-inset" ng-show="categorias.length>0">
+            <div class="list" ng-show="categorias.length>0">
                 <div class="item item-divider">Categorias</div>
 
                 <a ng-repeat="item in categorias" href="#/app/productlist" class="item item-icon-left"
