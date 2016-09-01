@@ -12,6 +12,7 @@
     var configModule = angular.module('App.Config');
 
     configModule.constant('AppConfig', {
+        production: true,
         debug: false,
         cordova: false,
         facebookID: '1581785262035600',

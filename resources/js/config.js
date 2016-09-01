@@ -13,6 +13,7 @@
 
     // @if (ENVIRONMENT == 'production' && CORDOVA)
     configModule.constant('AppConfig', {
+        production: true,
         debug: false,
         cordova: true,
         facebookID: '1581785262035600',
@@ -26,6 +27,7 @@
 
     // @if (ENVIRONMENT == 'production' && !CORDOVA)
     configModule.constant('AppConfig', {
+        production: true,
         debug: false,
         cordova: false,
         facebookID: '1581785262035600',
@@ -39,6 +41,7 @@
 
     // @if (ENVIRONMENT == 'development' && !CORDOVA)
     configModule.constant('AppConfig', {
+        production: false,
         debug: true,
         cordova: false,
         facebookID: '1630647053816087',
@@ -52,6 +55,7 @@
 
     // @if (ENVIRONMENT == 'development' && CORDOVA)
     configModule.constant('AppConfig', {
+        production: false,
         debug: true,
         cordova: true,
         facebookID: '1630647053816087',

@@ -35,6 +35,7 @@
     require('./services/user');
     require('./services/product');
     require('./services/version');
+    require('./services/virtualPage');
     require('./services/advice');
     require('./utility/alerts');
 
@@ -46,8 +47,7 @@
 
     //require('./playlist/playlist');
 
-    var appModule = angular.module('App', [
-
+    var modules = [
         // Ionic and angular modules
         'ionic',
         'ngStorage',
@@ -67,6 +67,7 @@
         'App.UserService',
         'App.ProductService',
         'App.VersionService',
+        'App.VirtualPage',
         'App.AdviceService',
         'App.Alerts',
         //'App.Playlist',
@@ -75,7 +76,9 @@
         'App.Chat',
         'App.Report',
         'templates'
-    ]);
+    ];
+
+    var appModule = angular.module('App', modules);
 
     appModule.config([
         '$stateProvider',

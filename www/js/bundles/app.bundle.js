@@ -36,6 +36,7 @@
     require('./services/user');
     require('./services/product');
     require('./services/version');
+    require('./services/virtualPage');
     require('./services/advice');
     require('./utility/alerts');
 
@@ -47,8 +48,7 @@
 
     //require('./playlist/playlist');
 
-    var appModule = angular.module('App', [
-
+    var modules = [
         // Ionic and angular modules
         'ionic',
         'ngStorage',
@@ -68,6 +68,7 @@
         'App.UserService',
         'App.ProductService',
         'App.VersionService',
+        'App.VirtualPage',
         'App.AdviceService',
         'App.Alerts',
         //'App.Playlist',
@@ -76,7 +77,9 @@
         'App.Chat',
         'App.Report',
         'templates'
-    ]);
+    ];
+
+    var appModule = angular.module('App', modules);
 
     appModule.config([
         '$stateProvider',
@@ -318,7 +321,7 @@
 
     module.exports = appModule;
 })();
-},{"./cart/cart":2,"./chat/chat":3,"./common/common":4,"./config-build":5,"./productlist/productlist":6,"./report/report":7,"./services/advice":8,"./services/cart":9,"./services/facebook":10,"./services/product":11,"./services/user":12,"./services/version":13,"./templates-build":14,"./utility/alerts":15,"./utility/api":16,"./utility/directives":17,"./utility/helpers":18,"./utility/postfix":19,"./utility/services":20}],2:[function(require,module,exports){
+},{"./cart/cart":2,"./chat/chat":3,"./common/common":4,"./config-build":5,"./productlist/productlist":6,"./report/report":7,"./services/advice":8,"./services/cart":9,"./services/facebook":10,"./services/product":11,"./services/user":12,"./services/version":13,"./services/virtualPage":14,"./templates-build":15,"./utility/alerts":16,"./utility/api":17,"./utility/directives":18,"./utility/helpers":19,"./utility/postfix":20,"./utility/services":21}],2:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -422,6 +425,7 @@
     var configModule = angular.module('App.Config');
 
     configModule.constant('AppConfig', {
+        production: true,
         debug: false,
         cordova: false,
         facebookID: '1581785262035600',
@@ -1632,6 +1636,29 @@
     module.exports = angularModule;
 })();
 },{}],14:[function(require,module,exports){
+(function () {
+    'use strict';
+    /* ***************************************************************************
+     * ### Service module ###
+     *
+     * Contains the utility and helper functions used through whole application.
+     */
+
+    var angularModule = angular.module('App.VirtualPage');
+
+    angularModule.run(function ($rootScope, AppConfig) {
+        if (AppConfig.production) {
+            $rootScope.$on("$routeChangeStart",function(event, next, current){
+                if(next.templateUrl) {
+                    ga('send', 'pageview', { page: next.templateUrl });
+                }
+            });
+        }
+    });
+
+    module.exports = angularModule;
+})();
+},{}],15:[function(require,module,exports){
 angular.module("templates").run(["$templateCache", function($templateCache) {$templateCache.put("account/templates/tab-account.html","<ion-view view-title=\"Minha Conta\">\n  <ion-content>\n    <ion-list>\n      <ion-toggle ng-model=\"settings.enableFriends\">\n        E-mail de Confirmação\n      </ion-toggle>\n    </ion-list>\n  </ion-content>\n</ion-view>\n");
 $templateCache.put("advice/templates/advice.html","<ion-pane>\n    <ion-nav-bar class=\"bar-stable\">\n        <ion-nav-back-button></ion-nav-back-button>\n        <ion-nav-buttons side=\"left\">\n            <div class=\"delivery-bar-title title\">delivery24horas.com</div>\n        </ion-nav-buttons>\n    </ion-nav-bar>\n\n    <ion-content class=\"has-header\">\n        <div class=\"card\">\n            <div class=\"item item-divider\">\n                Aviso\n            </div>\n            <div class=\"item item-text-wrap\">\n                <p>{{ adviceMessage }}</p>\n            </div>\n        </div>\n    </ion-content>\n</ion-pane>");
 $templateCache.put("cart/templates/cart.html","<ion-modal-view>\n    <ion-header-bar>\n        <h1 class=\"title\">Carrinho de Compras</h1>\n\n        <div class=\"buttons\" ng-if=\"minMediumScreens\">\n            <button class=\"button button-light\" ng-click=\"CartService.closeCart()\">Fechar</button>\n        </div>\n    </ion-header-bar>\n    <ion-content>\n        <div class=\"text-center\" ng-hide=\"CartService.existeItens()\">\n            <button class=\"button button-large button-full button-dark\" ng-click=\"CartService.closeCart()\">\n                Nenhum item selecionado\n            </button>\n        </div>\n\n        <div class=\"list list-inset\" ng-show=\"CartService.existeItens()\">\n            <div class=\"item item-divider\">Itens</div>\n            <div class=\"item item-button-right\" ng-repeat=\"item in cartItems\">\n                <p>{{ item.nome }}</p>\n                <span class=\"quantity\">{{ item.quantidade }} <small>x</small> </span><span class=\"price\">{{ item.valor | currency }}</span>\n                <button class=\"button button-light\" ng-click=\"removeItem(item.id)\">\n                    <i class=\"icon ion-close-circled\"></i>\n                </button>\n            </div>\n        </div>\n\n        <form class=\"cancelEnter\" ng-submit=\"CartService.doDelivery()\" ng-show=\"CartService.existeItens()\">\n            <div class=\"list\">\n                <div class=\"item item-divider\">Forma de Pagamento</div>\n\n                <div class=\"item text-center\">\n                    Valor Total: <span class=\"price\">{{ valorTotal | currency }}</span>\n                    <ion-list class=\"text-left\">\n                        <ion-radio name=\"pagamento\" ng-model=\"cartData.pagamento\" ng-value=\"\'dinheiro\'\">Dinheiro</ion-radio>\n                        <ion-radio name=\"pagamento\" ng-model=\"cartData.pagamento\" ng-value=\"\'debito\'\">\n                            <div class=\"pull-left\">Cartão Debito</div>\n                            <div class=\"pull-right\">\n                                <i class=\"fa fa-cc-visa fa-2x\"></i>\n                                <i class=\"fa fa-cc-mastercard fa-2x\"></i>\n                                <i class=\"fa fa-cc-diners-club fa-2x\"></i>\n                            </div>\n\n                        </ion-radio>\n                        <ion-radio name=\"pagamento\" ng-model=\"cartData.pagamento\" ng-value=\"\'credito\'\">\n                            <div class=\"pull-left\">Cartão Crédito</div>\n                            <div class=\"pull-right\">\n                                <i class=\"fa fa-cc-visa fa-2x\"></i>\n                                <i class=\"fa fa-cc-mastercard fa-2x\"></i>\n                                <i class=\"fa fa-cc-diners-club fa-2x\"></i>\n                            </div>\n                        </ion-radio>\n                    </ion-list>\n                </div>\n\n                <div class=\"item item-divider\">Dados da Entrega</div>\n\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Nome:</span>\n                    <label class=\"block\" ng-hide=\"cartData.showNameInput\">{{user.partner_nome}}</label>\n                    <input type=\"text\" autocomplete=\"off\" name=\"nome\" ng-show=\"cartData.showNameInput\" ng-model=\"cartData.nome\" placeholder=\"Ex.: João da Silva\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Nascimento: <small>(opcional)</small></span>\n                    <label class=\"block\" ng-hide=\"cartData.showDateInput\">{{user.partner_data_nascimento}}</label>\n                    <input type=\"date\" autocomplete=\"off\" ng-show=\"cartData.showDateInput\" name=\"data_nascimento\"\n                           ng-model=\"cartData.data_nascimento\"\n                           ng-value=\"cartData.data_nascimento\" placeholder=\"dd/mm/aaaa\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-class=\"{\'item-button-right\':(user.partner_emails.length>0)}\">\n                    <span class=\"input-label\">E-mail:</span>\n                    <!--<button type=\"button\" class=\"button button-light ion-edit\"-->\n                            <!--ng-show=\"user.partner_emails.length>0 && !cartData.emailChanged\" ng-click=\"cartData.emailChanged=true\"></button>-->\n                    <label class=\"block\" ng-hide=\"cartData.showEmailInput\">{{user.partner_emails[0]}}</label>\n                    <input type=\"email\" name=\"email\" ng-show=\"cartData.showEmailInput\" ng-model=\"cartData.email\" placeholder=\"Ex.: exemplo@gmail.com\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Telefone:</span>\n                    <label class=\"block\" ng-hide=\"cartData.showTelefoneInput\">{{user.partner_telefones[0]}}</label>\n                    <input type=\"tel\" name=\"telefone\" ng-show=\"cartData.showTelefoneInput\"\n                           ng-model=\"cartData.telefone\" placeholder=\"Ex.: (22)999 999 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Whatsapp:</span>\n                    <label class=\"block\" ng-hide=\"cartData.showWhatsappInput\">{{user.partner_whatsapps[0]}}</label>\n                    <input type=\"tel\" name=\"whatsapp\" ng-show=\"cartData.showWhatsappInput\"\n                           ng-model=\"cartData.whatsapp\" placeholder=\"Ex.: (22)999 999 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.showAddressList\">\n                    <div class=\"margin-left-off list list-inset\">\n                        <div class=\"item item-divider\">Endereços utilizados:</div>\n                        <ion-list class=\"text-left\">\n                            <ion-radio name=\"address\" ng-model=\"cartData.address_id\" ng-value=\"address.id\" class=\"address-item\"\n                                       ng-repeat=\"address in user.partner_addresses\">\n                                {{address.logradouro}} {{address.numero}} {{address.complemento}} - CEP: {{address.cep}} - Bairro: {{address.bairro}}\n                            </ion-radio>\n                            <ion-radio name=\"address\" ng-model=\"cartData.address_id\" ng-value=\"false\">Criar Novo Endereço</ion-radio>\n                        </ion-list>\n                    </div>\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">CEP:</span>\n                    <input type=\"tel\"\n                           class=\"numbersOnly cancelEnter cepKeyUp\"\n                           autocomplete=\"off\"\n                           ng-model=\"cartData.cep\" placeholder=\"Ex.: 28893818\"\n                           maxlength=\"8\">\n                </label>\n                <label class=\"item item-input item-stacked-label item-button-right\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Endereço:</span>\n                    <input type=\"text\"\n                           class=\"cancelEnter enderecoKeyUp\"\n                           autocomplete=\"off\"\n                           ng-model=\"cartData.endereco\" placeholder=\"Ex.: Av. Brasil\">\n                    <div class=\"list list-inset\" ng-show=\"cartData.matches.length>0\">\n                        <div class=\"item item-divider\">Endereços encontrados:</div>\n                        <label class=\"item address-item\" ng-repeat=\"address in cartData.matches\">\n                            <button class=\"button button-small button-light\" type=\"button\"\n                                    ng-click=\"CartService.selecionaEndereco(address)\">\n                                {{address.logradouro}} {{address.complemento}} - CEP: {{address.cep}} - Bairro: {{address.bairro}}\n                            </button>\n                        </label>\n                    </div>\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Bairro:</span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"bairro\" ng-model=\"cartData.bairro\" placeholder=\"Ex.: Centro\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Número:</span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"numero\" ng-model=\"cartData.numero\" placeholder=\"Ex.: 999\">\n                </label>\n                <label class=\"item item-input item-stacked-label\" ng-show=\"cartData.address_id===false\">\n                    <span class=\"input-label\">Complemento: <small>(opcional)</small></span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"complemento\" ng-model=\"cartData.complemento\" placeholder=\"Ex.: apartamento 109\">\n                </label>\n\n                <label class=\"item item-input item-stacked-label\">\n                    <span class=\"input-label\">Observação: <small>(opcional)</small></span>\n                    <input type=\"text\" autocomplete=\"off\" name=\"observacao\" ng-model=\"cartData.observacao\" placeholder=\"Ex.: enviar mensagem ao chegar\">\n                </label>\n\n                <label class=\"item\">\n                    <button class=\"button button-block button-positive\" type=\"submit\" ng-disabled=\"disableButton\">Solicitar Entrega</button>\n                </label>\n            </div>\n        </form>\n    </ion-content>\n</ion-modal-view>\n");
@@ -1646,7 +1673,7 @@ $templateCache.put("browse.html","<ion-view view-title=\"Browse\">\n  <ion-conte
 $templateCache.put("loading.html","<div class=\"loading-container visible active\">\n    <div class=\"loading\">\n        <p>Carregando...</p><ion-spinner></ion-spinner>\n    </div>\n</div>");
 $templateCache.put("login.html","<ion-modal-view>\n  <ion-header-bar>\n    <h1 class=\"title\">Login</h1>\n    <div class=\"buttons\">\n      <button class=\"button button-clear\" ng-click=\"closeLogin()\">Close</button>\n    </div>\n  </ion-header-bar>\n  <ion-content>\n    <form ng-submit=\"doLogin()\">\n      <div class=\"list\">\n        <label class=\"item item-input\">\n          <span class=\"input-label\">Username</span>\n          <input type=\"text\" ng-model=\"loginData.username\">\n        </label>\n        <label class=\"item item-input\">\n          <span class=\"input-label\">Password</span>\n          <input type=\"password\" ng-model=\"loginData.password\">\n        </label>\n        <label class=\"item\">\n          <button class=\"button button-block button-positive\" type=\"submit\">Log in</button>\n        </label>\n      </div>\n    </form>\n  </ion-content>\n</ion-modal-view>\n");
 $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-content>\n    <h1>Search</h1>\n  </ion-content>\n</ion-view>\n");}]);
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -1712,7 +1739,7 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
 
     module.exports = moduleApp;
 })();
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -1798,7 +1825,7 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
 
     module.exports = apiModule;
 })();
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -2037,7 +2064,7 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
 
     module.exports = moduleApp;
 })();
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -2192,7 +2219,7 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
     }
     module.exports = helperModule;
 })();
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -2266,7 +2293,7 @@ $templateCache.put("search.html","<ion-view view-title=\"Search\">\n  <ion-conte
 
     module.exports = angularModule;
 })();
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function () {
     'use strict';
 
