@@ -14,6 +14,7 @@
     angular.module('App.UserService', []);
     angular.module('App.ProductService', []);
     angular.module('App.VersionService', []);
+    angular.module('App.VirtualPage', []);
     angular.module('App.AdviceService', []);
     angular.module('App.Alerts', []);
 
