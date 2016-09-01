@@ -1657,6 +1657,8 @@
         if (AppConfig.production) {
             $rootScope.$on("$routeChangeStart",function(event, next, current){
                 if(next.templateUrl) {
+                    console.log(next.templateUrl);
+                    console.log(ga);
                     ga('send', 'pageview', { page: next.templateUrl });
                 }
             });
