@@ -5,7 +5,7 @@
     document,'script','//connect.facebook.net/en_US/fbevents.js');
 
 fbq('init', '1982894748602312');
-fbq('track', "PageView");
+//fbq('track', "PageView");
 // ViewContent
 // Track key page views (ex: product page, landing page or article)
 fbq('track', 'ViewContent');

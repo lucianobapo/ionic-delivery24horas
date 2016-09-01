@@ -23,6 +23,7 @@ var paths = {
         //'./resources/lib/ion-affix/ion-affix.js',
         './resources/lib/angulartics/dist/angulartics.min.js',
         './resources/lib/angulartics-google-analytics/dist/angulartics-ga.min.js',
+        './resources/lib/angulartics-facebook-pixel/dist/angulartics-facebook-pixel.min.js',
         './resources/lib/angular-locale-pt-br/angular-locale_pt-br.js'
     ],
     jsBundleDest: './www/js/bundles/'

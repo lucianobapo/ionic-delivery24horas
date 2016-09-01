@@ -52,6 +52,7 @@
         'ngStorage',
         'angulartics',
         'angulartics.google.analytics',
+        'angulartics.facebook.pixel',
         //'ion-affix',
         //'httpPostFix',
 
