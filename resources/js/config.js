@@ -17,7 +17,7 @@
         cordova: true,
         facebookID: '1581785262035600',
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
-        apiEndpoint: 'http://api.ilhanet.com/json',
+        apiEndpoint: 'https://api.ilhanet.com/json',
         imagesUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/thumbnails/',
         logoUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/logo/'
     });
@@ -29,7 +29,7 @@
         cordova: false,
         facebookID: '1581785262035600',
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
-        apiEndpoint: 'http://api.ilhanet.com/json',
+        apiEndpoint: 'https://api.ilhanet.com/json',
         imagesUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/thumbnails/',
         logoUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/logo/'
     });
