@@ -6,7 +6,7 @@ var gulp = require('gulp');
 var gutil = require('gulp-util');
 
 var sass = require('gulp-sass');
-var minifyCss = require('gulp-minify-css');
+var minifyCss = require('gulp-clean-css');
 var gulpif = require('gulp-if');
 var argv = require('yargs').argv;
 var rename = require('gulp-rename');
@@ -25,7 +25,7 @@ gulp.task('build-css', function() {
     gutil.log('build-css STARTED Production:'+argv.production);
     return gulp.src(paths.sass)
         .pipe(sass({errLogToConsole: true}))
-        .pipe(gulpif(argv.production, minifyCss({keepSpecialComments: 0})))
+        .pipe(gulpif(argv.production, minifyCss({keepSpecialComments: 0, compatibility: 'ie8'})))
         .pipe(gulpif(argv.production, rename({extname: '.min.css'})))
         .pipe(gulp.dest(paths.cssDest))
         .on('end', function() {

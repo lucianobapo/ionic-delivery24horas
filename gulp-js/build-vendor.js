@@ -35,7 +35,7 @@ gulp.task('build-vendor', function() {
         .pipe(concat('vendor.js'))
         .pipe(gulpif(argv.production, uglify()))
         .pipe(gulpif(argv.production, rename({suffix: '.min'})))
-        //.pipe(uglify())
+        .pipe(uglify())
         //.pipe(rename({suffix: '.min'}))
         .pipe(gulp.dest(paths.jsBundleDest))
         .on('end', function() {

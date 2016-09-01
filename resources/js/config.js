@@ -18,8 +18,8 @@
         facebookID: '1581785262035600',
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
         apiEndpoint: 'http://api.ilhanet.com/json',
-        imagesUrl: 'https://s3.amazonaws.com/delivery-images/thumbnails/',
-        logoUrl: 'https://s3.amazonaws.com/delivery-images/logo/'
+        imagesUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/thumbnails/',
+        logoUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/logo/'
     });
     // @endif
 
@@ -30,8 +30,8 @@
         facebookID: '1581785262035600',
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
         apiEndpoint: 'http://api.ilhanet.com/json',
-        imagesUrl: 'https://s3.amazonaws.com/delivery-images/thumbnails/',
-        logoUrl: 'https://s3.amazonaws.com/delivery-images/logo/'
+        imagesUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/thumbnails/',
+        logoUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/logo/'
     });
     // @endif
 
@@ -42,8 +42,8 @@
         facebookID: '1630647053816087',
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
         apiEndpoint: 'http://api.localhost.com/json',
-        imagesUrl: 'https://s3.amazonaws.com/delivery-images/thumbnails/',
-        logoUrl: 'https://s3.amazonaws.com/delivery-images/logo/'
+        imagesUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/thumbnails/',
+        logoUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/logo/'
     });
     // @endif
 
@@ -54,8 +54,8 @@
         facebookID: '1630647053816087',
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
         apiEndpoint: '/json',
-        imagesUrl: 'https://s3.amazonaws.com/delivery-images/thumbnails/',
-        logoUrl: 'https://s3.amazonaws.com/delivery-images/logo/'
+        imagesUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/thumbnails/',
+        logoUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/logo/'
     });
     // @endif
 
