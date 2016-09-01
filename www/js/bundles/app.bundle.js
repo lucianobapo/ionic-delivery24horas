@@ -387,12 +387,12 @@
         '$scope',
         '$rootScope',
         '$ionicModal',
-        '$timeout',
+        'AppConfig',
         'Categorias',
         commonCtrl
     ]);
 
-    function commonCtrl($scope, $rootScope, $ionicModal, $timeout, Categorias) {
+    function commonCtrl($scope, $rootScope, $ionicModal, AppConfig, Categorias) {
         $scope.doRefresh = function () {
             Categorias.loadItems();
             $scope.$broadcast('scroll.refreshComplete');
