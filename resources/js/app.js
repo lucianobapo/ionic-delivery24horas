@@ -13,7 +13,6 @@
     angular.module('App.UserService', []);
     angular.module('App.ProductService', []);
     angular.module('App.VersionService', []);
-    angular.module('App.VirtualPage', []);
     angular.module('App.AdviceService', []);
     angular.module('App.Alerts', []);
 
@@ -36,7 +35,6 @@
     require('./services/user');
     require('./services/product');
     require('./services/version');
-    require('./services/virtualPage');
     require('./services/advice');
     require('./utility/alerts');
 
@@ -52,6 +50,8 @@
         // Ionic and angular modules
         'ionic',
         'ngStorage',
+        'angulartics',
+        'angulartics.google.analytics',
         //'ion-affix',
         //'httpPostFix',
 
@@ -68,7 +68,6 @@
         'App.UserService',
         'App.ProductService',
         'App.VersionService',
-        'App.VirtualPage',
         'App.AdviceService',
         'App.Alerts',
         //'App.Playlist',

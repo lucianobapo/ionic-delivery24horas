@@ -7,4 +7,4 @@ ga('create', 'UA-59766919-2', 'auto');
 ga('require', 'linkid', 'linkid.js');
 ga('set', 'userId', '8229583bdefeb51ab7d6f4fcf5161b40'); // Defina o ID de usu&aacute;rio usando o user_id conectado.
 ga('require', 'displayfeatures');
-ga('send', 'pageview');
+//ga('send', 'pageview');

@@ -17,6 +17,7 @@
     function VirtualPage($rootScope, AppConfig) {
         if (AppConfig.production) {
             $rootScope.$on("$routeChangeStart",function(event, next, current){
+                console.log(next);
                 if(next.templateUrl) {
                     console.log(next.templateUrl);
                     console.log(ga);
