@@ -21,6 +21,8 @@
 
         $scope.commonArray = [4, 5, 6];
         $rootScope.c.debug('Common Controller');
+
+        $scope.campanhasUrl = AppConfig.campanhasUrl;
     }
 
     module.exports = commonModule;

@@ -18,6 +18,7 @@
         servicoCep: function(query){ return 'https://viacep.com.br/ws/'+query+'/json/'; },
         apiEndpoint: 'https://api.ilhanet.com/json',
         imagesUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/thumbnails/',
+        campanhasUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/campanhas/',
         logoUrl: 'https://storage.googleapis.com/ilhanet-140808.appspot.com/logo/'
     });
     configModule.value("globals", {});
