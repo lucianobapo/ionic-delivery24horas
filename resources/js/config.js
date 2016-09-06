@@ -13,6 +13,7 @@
 
     // @if (ENVIRONMENT == 'production' && CORDOVA)
     configModule.constant('AppConfig', {
+        enableInfiniteScroll: false,
         production: true,
         debug: false,
         cordova: true,
@@ -27,6 +28,7 @@
 
     // @if (ENVIRONMENT == 'production' && !CORDOVA)
     configModule.constant('AppConfig', {
+        enableInfiniteScroll: false,
         production: true,
         debug: false,
         cordova: false,
@@ -41,6 +43,7 @@
 
     // @if (ENVIRONMENT == 'development' && !CORDOVA)
     configModule.constant('AppConfig', {
+        enableInfiniteScroll: false,
         production: false,
         debug: true,
         cordova: false,
@@ -55,6 +58,7 @@
 
     // @if (ENVIRONMENT == 'development' && CORDOVA)
     configModule.constant('AppConfig', {
+        enableInfiniteScroll: false,
         production: false,
         debug: true,
         cordova: true,

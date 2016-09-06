@@ -27,6 +27,7 @@
         $rootScope.products = [];
 
         $scope.noMoreItemsAvailable = false;
+        $scope.enableInfiniteScroll = AppConfig.enableInfiniteScroll;
 
         $rootScope.removeItem = function (id) {
             if ($rootScope.quantidade[id] > 0) {
@@ -164,7 +165,8 @@
             $scope.$broadcast('scroll.refreshComplete');
             $scope.$apply();
         };
-        //Produtos.loadItems();
+
+        if(!$scope.enableInfiniteScroll) Produtos.loadMoreItems();
 
         $scope.prepareImage = function (img) {
             if (img==null || AppConfig.debug) return 'http://placehold.it/80x80';

@@ -65,9 +65,15 @@
             $rootScope.clearSearch();
 
             $rootScope.c.debug('Loading More Produtos...');
+
+            var urlProducts;
+            if (AppConfig.enableInfiniteScroll)
+                urlProducts = AppConfig.apiEndpoint + '/produtosDelivery/'+idCategory+'/'+begin+'/'+end;
+            else
+                urlProducts = AppConfig.apiEndpoint + '/produtosDelivery/'+idCategory;
             Api.sendRequest({
                     method: "GET",
-                    url: AppConfig.apiEndpoint + '/produtosDelivery/'+idCategory+'/'+begin+'/'+end
+                    url: urlProducts
                 })
                 .then(function(response){
                     processResponse(response.data, clearItems);

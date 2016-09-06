@@ -12,6 +12,7 @@
     var configModule = angular.module('App.Config');
 
     configModule.constant('AppConfig', {
+        enableInfiniteScroll: false,
         production: true,
         debug: false,
         cordova: false,

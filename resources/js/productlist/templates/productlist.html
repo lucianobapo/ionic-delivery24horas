@@ -125,7 +125,7 @@
         </div>
 
         <ion-infinite-scroll
-                ng-if="!noMoreItemsAvailable"
+                ng-if="enableInfiniteScroll && !noMoreItemsAvailable"
                 on-infinite="loadMoreData()"
                 distance="10%">
         </ion-infinite-scroll>
