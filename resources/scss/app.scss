@@ -162,6 +162,13 @@ body {
   font-style: italic;
 }
 
+.cardFull{
+  > span{
+    color: green;
+    font-weight: bold;
+  }
+}
+
 .delivery-toggle-small{
   padding-top: 5px;
   padding-bottom: 5px;

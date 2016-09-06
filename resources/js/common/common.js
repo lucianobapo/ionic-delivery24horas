@@ -23,6 +23,8 @@
         $rootScope.c.debug('Common Controller');
 
         $scope.campanhasUrl = AppConfig.campanhasUrl;
+        $scope.logoUrl = AppConfig.logoUrl;
+
     }
 
     module.exports = commonModule;

@@ -31,8 +31,8 @@
                 <div class="item text-center">
                     Valor Total: <span class="price">{{ valorTotal | currency }}</span>
                     <ion-list class="text-left">
-                        <ion-radio name="pagamento" ng-model="cartData.pagamento" ng-value="'dinheiro'">Dinheiro</ion-radio>
-                        <ion-radio name="pagamento" ng-model="cartData.pagamento" ng-value="'debito'">
+                        <ion-radio name="pagamento" ng-model="cartData.pagamento" ng-value="'vistad'">Dinheiro</ion-radio>
+                        <ion-radio name="pagamento" ng-model="cartData.pagamento" ng-value="'vistacd'">
                             <div class="pull-left">Cartão Debito</div>
                             <div class="pull-right">
                                 <i class="fa fa-cc-visa fa-2x"></i>
@@ -41,7 +41,7 @@
                             </div>
 
                         </ion-radio>
-                        <ion-radio name="pagamento" ng-model="cartData.pagamento" ng-value="'credito'">
+                        <ion-radio name="pagamento" ng-model="cartData.pagamento" ng-value="'vistacc'">
                             <div class="pull-left">Cartão Crédito</div>
                             <div class="pull-right">
                                 <i class="fa fa-cc-visa fa-2x"></i>

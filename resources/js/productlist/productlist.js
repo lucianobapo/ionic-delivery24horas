@@ -15,6 +15,7 @@
     function productListCtrl($scope, $rootScope, AppConfig, Produtos) {
         $rootScope.c.debug('ProductList Controller: ', $scope.commonArray);
 
+        $scope.returnAlert = false;
         $scope.logoUrl = AppConfig.logoUrl;
         $scope.imagesUrl = AppConfig.imagesUrl;
 

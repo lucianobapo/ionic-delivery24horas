@@ -10,7 +10,9 @@ navigation history that also transitions its views in and out.
     </ion-tab>
 
      <!--Dashboard Tab-->
-    <ion-tab title="Carrinho {{ valorTotal | currency }}" icon-off="ion-ios-cart-outline" icon-on="ion-ios-cart" href="#/tab/cart">
+    <ion-tab title="Carrinho {{ valorTotal | currency }}"
+             class="{{ (valorTotal>0)?'cardFull':'' }}"
+             icon-off="ion-ios-cart-outline" icon-on="ion-ios-cart" href="#/tab/cart">
         <ion-nav-view name="tab-cart"></ion-nav-view>
     </ion-tab>
 

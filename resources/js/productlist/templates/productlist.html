@@ -49,9 +49,23 @@
                 <!--</div>-->
             <!--</div>-->
 
+            <div class="item text-center" ng-show="handhelds">
+                <img style="max-width: 100%" ng-src="{{logoUrl+'logo-delivery2-resized-compressed.png'}}">
+            </div>
         </div>
 
         <div class="delivery-list-with-menu">
+
+            <div class="list list-inset padding-right padding-bottom" ng-show="handhelds">
+                <div class="item item-divider text-center">
+                    <div>Aceitamos cartões bandeiras:</div>
+                    <div>
+                        <i class="fa fa-cc-visa fa-lg"></i>
+                        <i class="fa fa-cc-mastercard fa-lg"></i>
+                        <i class="fa fa-cc-diners-club fa-lg"></i>
+                    </div>
+                </div>
+            </div>
 
             <div class="card text-center" ng-hide="products.length>0">
                 <div class="item item-text-wrap">
@@ -83,8 +97,7 @@
                     </div>
                     <div ng-hide="produto.max>0">
                         <p class="indisponivel">Indisponível</p>
-                        <ion-toggle ng-show="user.userID" class="delivery-toggle-small toggle-small" ng-model="settings.enableFriends">
-
+                        <ion-toggle ng-show="returnAlert && user.userID" class="delivery-toggle-small toggle-small" ng-model="settings.enableFriends">
                             <div>Avisar retorno</div>
                         </ion-toggle>
                     </div>
@@ -93,11 +106,11 @@
         </div>
         <div class="delivery-menu-left" ng-show="categorias.length>0">
 
-            <button ng-click="loadProducts();loadCategoria('Favoritos');"
-                    class="delivery-button button button-stable">
-                <i class="icon fa fa-star"></i>
-                <p>Favoritos</p>
-            </button>
+            <!--<button ng-click="loadProducts();loadCategoria('Favoritos');"-->
+                    <!--class="delivery-button button button-stable">-->
+                <!--<i class="icon fa fa-star"></i>-->
+                <!--<p>Favoritos</p>-->
+            <!--</button>-->
             <button ng-click="loadProducts(item.id);loadCategoria(item.nome);"
                     ng-repeat="item in categorias"
                     class="delivery-button button button-stable">
