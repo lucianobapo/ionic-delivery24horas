@@ -756,7 +756,7 @@
             // Form data for the login modal
             $rootScope.cartData = {};
             $rootScope.cartData.mandante = 'ilhanet';
-            $rootScope.cartData.pagamento = 'dinheiro';
+            $rootScope.cartData.pagamento = 'vistad';
             $rootScope.cartData.matches = [];
             $rootScope.cartData.addresses = [];
             $rootScope.cartData.address_id = false;
