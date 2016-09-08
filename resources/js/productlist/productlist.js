@@ -166,7 +166,11 @@
             $scope.$apply();
         };
 
-        if(!$scope.enableInfiniteScroll) Produtos.loadMoreItems();
+        if(!$scope.enableInfiniteScroll) {
+            //Produtos.loadMoreItems();
+            $scope.loadProducts(19);
+            $scope.loadCategoria('Destaques');
+        }
 
         $scope.prepareImage = function (img) {
             if (img==null || AppConfig.debug) return 'http://placehold.it/80x80';
