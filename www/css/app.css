@@ -12154,6 +12154,11 @@ body {
   .delivery-menu-left {
     display: none; } }
 
+.slogan {
+  white-space: normal !important;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 22px !important; }
+
 .range {
   padding: 2px 0px; }
   .range > input {

@@ -8,15 +8,15 @@
                 <div class="delivery-bar-title title">delivery24horas.com</div>
             </ion-nav-buttons>
             <ion-nav-buttons side="right">
-                <button ng-if="cordova" class="delivery-btn-social-header button button-positive btn-social">
-                    <i class="ion-social-facebook"></i>Entrar com Facebook
-                </button>
+                <!--<button ng-if="cordova" class="delivery-btn-social-header button button-positive btn-social">-->
+                <!--<i class="ion-social-facebook"></i>Entrar com Facebook-->
+                <!--</button>-->
 
                 <!--<button class="button marging" ng-class="{'button-clear': (valorTotal=0), 'button-balanced': (valorTotal>0)}">-->
                 <button class="button marging"
                         ng-click="CartService.showCart()"
                         ng-class="(valorTotal>0)?'button-balanced': 'button-clear'">
-                <!--<button class="button button-clear">-->
+                    <!--<button class="button button-clear">-->
                     <i class="ion-android-cart"></i> ({{ valorTotal | currency }})
                 </button>
 
@@ -26,20 +26,21 @@
     </ion-side-menu-content>
 
     <ion-side-menu expose-aside-when="large">
-        <!--<ion-header-bar class="bar-stable">-->
-            <!--<h1 class="title">Menu</h1>-->
-        <!--</ion-header-bar>-->
         <ion-content>
             <ion-refresher pulling-text="Deslize para Atualizar" on-refresh="doRefresh()"></ion-refresher>
             <div class="list">
                 <div class="item text-center" style="padding: 5px">
                     <!--<img style="max-width: 100%" src="http://s3.amazonaws.com/delivery-images/campanhas/campanha-face4-230x121-compressed.png">-->
                     <!--<img style="max-width: 100%" ng-src="{{campanhasUrl+'campanha-face4-230x121-compressed.png'}}">-->
-                    <img style="max-width: 100%" ng-src="{{logoUrl+'logo-delivery2-resized-compressed.png'}}">
+                    <img style="max-width: 100%"
+                         ng-src="{{logoUrl+'logo-delivery-24-horas-rio-das-ostras.png'}}"
+                         alt="Logomarca do Site Delivery Rio das Ostras 24 horas"
+                         title="delivery24horas.com - Delivery Rio das Ostras 24 horas"
+                    >
                 </div>
 
                 <div class="item item-divider text-center">
-                    <div>Aceitamos cartões bandeiras:</div>
+                    <h2>Aceitamos cartões bandeiras:</h2>
                     <div>
                         <i class="fa fa-cc-visa fa-lg"></i>
                         <i class="fa fa-cc-mastercard fa-lg"></i>
