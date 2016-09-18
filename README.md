@@ -3,9 +3,6 @@
 ssh 104.197.251.61
 rsync -rvztPhe ssh /home/luciano/Code/nginx-config/ 104.197.251.61:nginx-config
 
-sudo openssl genrsa -out /etc/ssl/ionic.ilhanet.com.key 2048
-mkdir -p /home/luciano/code/ionic-delivery24horas/www/.well-known/acme-challenge/
-
 [Site do aplicativo](http://ionic.delivery24horas.com)
 
 [Site do GitHub](https://github.com/lucianobapo/ionic-delivery24horas)

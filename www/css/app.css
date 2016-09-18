@@ -12155,7 +12155,7 @@ body {
     display: none; } }
 
 .slogan {
-  white-space: normal !important;
+  white-space: pre-line !important;
   font-family: 'Ubuntu', sans-serif;
   font-size: 22px !important; }
 
