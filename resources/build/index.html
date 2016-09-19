@@ -16,9 +16,9 @@
     <meta name="robots" content="index, follow">
     <meta name="author" content="Luciano Porto - ilhanet.com">
 
-    <meta name="description" content="Delivery em Rio das Ostras 24 horas - Frete Grátis, com entrega de bebidas, cigarros, vinhos e vodka, aberto 24 horas.">
+    <meta name="keywords" content="delivery, cerveja, rio das ostras, bebidas, cigarros, 24 horas"/>
 
-    <meta property="fb:app_id" content="1581785262035600">
+    <meta name="description" content="Delivery em Rio das Ostras 24 horas - Frete Grátis, com entrega de bebidas, cigarros, vinhos e vodka, aberto 24 horas.">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@DeliveryLan">
@@ -41,11 +41,15 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
 
+    <link href=”https://plus.google.com/+Delivery24HorasRiodasOstras” rel=”publisher” />
+
     <!-- @if ENVIRONMENT='development' -->
+    <meta property="fb:app_id" content="1630647053816087">
     <link type="text/css" href="css/app.css" rel="stylesheet">
     <!-- @endif -->
 
     <!-- @if ENVIRONMENT='production' -->
+    <meta property="fb:app_id" content="1581785262035600">
     <link type="text/css" href="css/app.min.css" rel="stylesheet">
     <!-- @endif -->
 
@@ -67,6 +71,18 @@
 </head>
 
 <body ng-app="App" ng-controller="bodyController">
+    <div ng-hide="true" class="list list-inset padding-right padding-bottom" ng-show="true">
+        <div class="item text-center">
+            <img style="max-width: 100%" ng-src="{{logoUrl+'logo-delivery-24-horas-rio-das-ostras.png'}}"
+                 alt="Logomarca do Site Delivery Rio das Ostras 24 horas"
+                 title="delivery24horas.com - Delivery Rio das Ostras 24 horas"
+            >
+        </div>
+
+        <div class="item text-center">
+            <h1 class="slogan">Seu rolé mais simples com Delivery 24H</h1>
+        </div>
+    </div>
     <ion-nav-view></ion-nav-view>
 
     <!-- @if ENVIRONMENT='production' -->
