@@ -71,18 +71,28 @@
 </head>
 
 <body ng-app="App" ng-controller="bodyController">
-    <div ng-hide="true" class="list list-inset padding-right padding-bottom" ng-show="true">
+    <div ng-hide="true" class="list list-inset">
         <div class="item text-center">
-            <img style="max-width: 100%" ng-src="{{logoUrl+'logo-delivery-24-horas-rio-das-ostras.png'}}"
+            <img style="max-width: 100%" src="https://storage.googleapis.com/ilhanet-140808.appspot.com/logo/logo-delivery-24-horas-rio-das-ostras.png"
                  alt="Logomarca do Site Delivery Rio das Ostras 24 horas"
                  title="delivery24horas.com - Delivery Rio das Ostras 24 horas"
             >
         </div>
 
         <div class="item text-center">
-            <h1 class="slogan">Seu rolé mais simples com Delivery 24H</h1>
+            <h1 class="slogan">Seu rolé mais simples com Delivery 24 Horas em Rio das Ostras</h1>
+        </div>
+
+        <div class="item item-divider text-center">
+            <h2>Aceitamos cartões bandeiras:</h2>
+            <div>
+                <i class="fa fa-cc-visa fa-lg"></i>
+                <i class="fa fa-cc-mastercard fa-lg"></i>
+                <i class="fa fa-cc-diners-club fa-lg"></i>
+            </div>
         </div>
     </div>
+
     <ion-nav-view></ion-nav-view>
 
     <!-- @if ENVIRONMENT='production' -->
