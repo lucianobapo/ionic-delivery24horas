@@ -235,6 +235,10 @@
     ]);
     function bodyController($scope, $rootScope, $ionicModal, CartService, Categorias,
                             Layout, Facebook, AppConfig, UserService) {
+
+        $rootScope.logoUrl = AppConfig.logoUrl;
+        $rootScope.imagesUrl = AppConfig.imagesUrl;
+
         $rootScope.CartService = CartService;
         $rootScope.CartService.initCart();
         Categorias.loadItems();

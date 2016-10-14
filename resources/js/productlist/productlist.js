@@ -16,8 +16,8 @@
         $rootScope.c.debug('ProductList Controller: ', $scope.commonArray);
 
         $scope.returnAlert = false;
-        $scope.logoUrl = AppConfig.logoUrl;
-        $scope.imagesUrl = AppConfig.imagesUrl;
+        // $scope.logoUrl = AppConfig.logoUrl;
+        // $scope.imagesUrl = AppConfig.imagesUrl;
 
         $rootScope.cartItems = [];
         $rootScope.quantidade = [];
